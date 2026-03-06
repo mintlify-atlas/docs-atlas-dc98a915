@@ -1,0 +1,418 @@
+---
+title: Knowledge Pipeline
+description: The 8-phase processing pipeline that transforms raw materials into structured knowledge
+---
+
+The Mega Brain pipeline is a semantic processing system that ingests expert materials and transforms them into structured, traceable knowledge across 5 DNA layers.
+
+## Pipeline Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           PIPELINE JARVIS v2.1                               │
+│                                                                              │
+│  8 PHASES                                                                    │
+│  ├─ Phase 1: INITIALIZATION + VALIDATION                                    │
+│  ├─ Phase 2: CHUNKING                                                       │
+│  ├─ Phase 3: ENTITY RESOLUTION                                              │
+│  ├─ Phase 4: INSIGHT EXTRACTION                                             │
+│  ├─ Phase 5: NARRATIVE SYNTHESIS                                            │
+│  ├─ Phase 6: DOSSIER COMPILATION                                            │
+│  ├─ Phase 7: AGENT ENRICHMENT                                               │
+│  └─ Phase 8: FINALIZATION + EXECUTION REPORT                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+<Note>
+  **Core Constraint:** Process 100% of content. No summarization, no omission. Every insight must trace back to source with full lineage.
+</Note>
+
+## Phase 1: Initialization + Validation
+
+<Accordion title="Purpose">
+  Validate input files, extract metadata from paths, load state files, and check for duplicate processing.
+</Accordion>
+
+<Steps>
+  <Step title="Validate Input">
+    ```
+    ⛔ CHECKPOINT PRE-1.1
+    [ ] File exists in $ARGUMENTS
+    [ ] File has content (> 100 chars)
+    [ ] Metadata identifiable (source person/company)
+    ```
+  </Step>
+  
+  <Step title="Extract Path Metadata">
+    Parse file path to extract:
+    - `SOURCE_PERSON` - Folder after inbox/
+    - `SOURCE_COMPANY` - Content in parentheses
+    - `SOURCE_TYPE` - Material type (MASTERMINDS, COURSES, etc.)
+    - `SOURCE_ID` - Unique hash (e.g., "CG003")
+    - `SCOPE` - course | company | personal
+    - `CORPUS` - Derived from SOURCE_COMPANY
+  </Step>
+  
+  <Step title="Load State Files">
+    Load or create:
+    - `CHUNKS-STATE.json`
+    - `CANONICAL-MAP.json`
+    - `INSIGHTS-STATE.json`
+    - `NARRATIVES-STATE.json`
+  </Step>
+  
+  <Step title="Check Already Processed">
+    Search existing chunks for `SOURCE_ID`. If found, ask user whether to reprocess.
+  </Step>
+</Steps>
+
+**Output:** Validated input, metadata extracted, state files loaded
+
+## Phase 2: Chunking
+
+<Accordion title="Purpose">
+  Segment content into semantic chunks (~300 words) while preserving context, timestamps, and speaker labels.
+</Accordion>
+
+**Protocol:** `core/templates/PIPELINE/PROMPT-1.1-CHUNKING.md`
+
+### Chunking Rules
+
+- **Chunk size:** ~300 words (~1000 tokens)
+- **Preserve:** Timestamps, speaker labels, formatting
+- **Extract:** People (raw mentions), themes (raw topics)
+- **Generate:** Sequential `chunk_id` like `chunk_CG003_001`
+
+### Process
+
+<Steps>
+  <Step title="Read Full Content">
+    Load entire source file, count words
+  </Step>
+  
+  <Step title="Execute Chunking">
+    Apply semantic segmentation while maintaining context boundaries
+  </Step>
+  
+  <Step title="Merge and Save">
+    ```json
+    {
+      "chunk_id": "CG003-001",
+      "content": "[chunk text]",
+      "meta": {
+        "source_id": "CG003",
+        "source_person": "Cole Gordon",
+        "timestamp": "00:05:23",
+        "word_count": 287
+      },
+      "entities": {
+        "pessoas": ["Cole Gordon", "Alex Hormozi"],
+        "temas": ["Sales", "Closing Techniques"]
+      }
+    }
+    ```
+    
+    Merge new chunks into `CHUNKS-STATE.json`, deduplicate by `chunk_id`
+  </Step>
+</Steps>
+
+**Checkpoint:** `count(new_chunks) > 0`, each chunk has unique ID, state file saved
+
+## Phase 3: Entity Resolution
+
+<Accordion title="Purpose">
+  Normalize entity names (people, companies, themes) to canonical forms to prevent duplication.
+</Accordion>
+
+**Protocol:** `core/templates/PIPELINE/PROMPT-1.2-ENTITY-RESOLUTION.md`
+
+### Resolution Rules
+
+- **Threshold:** 0.85 confidence for merging
+- **Prefer:** Longest/most explicit form as canonical
+- **NEVER merge:** Across different corpus
+- **Flag collisions:** For human review
+
+### Examples
+
+| Raw Mentions | Canonical Form |
+|--------------|----------------|
+| "Cole", "Cole G", "Cole Gordon" | **Cole Gordon** |
+| "Hormozi", "Alex H", "Alex Hormozi" | **Alex Hormozi** |
+| "TSC", "The Scalable Company" | **The Scalable Company** |
+
+**Output:** Canonicalized chunks, updated `CANONICAL-MAP.json`, review queue for ambiguous cases
+
+## Phase 4: Insight Extraction
+
+<Accordion title="Purpose">
+  Extract actionable insights from chunks, classify by priority, and detect contradictions.
+</Accordion>
+
+**Protocol:** `core/templates/PIPELINE/PROMPT-2.1-INSIGHT-EXTRACTION.md`
+
+### Insight Structure
+
+```json
+{
+  "chunk_id": "CG003-042",
+  "insight": "Respond to leads within 5 minutes to capture 80% higher conversion rate",
+  "priority": "high",
+  "scope": "company",
+  "corpus": "Sales Training",
+  "confidence": 0.92,
+  "status": "new",
+  "source": {
+    "source_id": "CG003",
+    "source_title": "NEPQ Masterclass Session 3",
+    "source_type": "MASTERMINDS"
+  }
+}
+```
+
+### Priority Levels
+
+<CardGroup cols={3}>
+  <Card title="High" icon="exclamation">
+    Immediately actionable, high-impact insights
+  </Card>
+  <Card title="Medium" icon="circle-dot">
+    Important context, strategic guidance
+  </Card>
+  <Card title="Low" icon="circle">
+    Supporting details, background information
+  </Card>
+</CardGroup>
+
+**Output:** Insights organized by person and theme in `INSIGHTS-STATE.json`
+
+## Phase 5: Narrative Synthesis
+
+<Accordion title="Purpose">
+  Synthesize insights into coherent narratives for each person and theme, tracking tensions and open questions.
+</Accordion>
+
+**Protocol:** `core/templates/PIPELINE/PROMPT-3.1-NARRATIVE-SYNTHESIS.md`
+
+### Narrative Structure
+
+```json
+{
+  "person": "Cole Gordon",
+  "narrative": "Cole Gordon's approach to sales centers on...",
+  "insights_included": ["CG003-042", "CG003-067"],
+  "tensions": [
+    {
+      "description": "Balance between speed and qualification",
+      "insights": ["CG003-042", "CG005-023"]
+    }
+  ],
+  "open_loops": [
+    {
+      "question": "What's the ideal team size for scaling?",
+      "status": "OPEN",
+      "chunk_ids": ["CG003-089"]
+    }
+  ],
+  "next_questions": [
+    "How does this scale beyond 10 salespeople?"
+  ]
+}
+```
+
+### Merge Rules (CRITICAL)
+
+- **narrative:** CONCATENATE with update separator
+- **insights_included[]:** APPEND (never replace)
+- **tensions[]:** APPEND new ones
+- **open_loops[]:** APPEND new, mark RESOLVED when answered
+- **next_questions[]:** REPLACE (only exception)
+
+**Output:** Updated `NARRATIVES-STATE.json` with synthesized narratives
+
+## Phase 6: Dossier Compilation
+
+<Accordion title="Purpose">
+  Compile comprehensive dossiers for persons and themes with full source traceability.
+</Accordion>
+
+**Protocol:** `core/templates/PIPELINE/DOSSIER-COMPILATION-PROTOCOL.md`
+
+### Dossier Types
+
+<Tabs>
+  <Tab title="Person Dossiers">
+    ```markdown
+    # DOSSIER: Cole Gordon
+    
+    ## Overview
+    Expert in high-ticket sales, NEPQ methodology, sales team scaling
+    
+    ## Core Philosophy
+    - L1: Philosophies extracted from sources
+    - L2: Mental models
+    - L3: Heuristics
+    - L4: Frameworks
+    - L5: Methodologies
+    
+    ## Key Insights
+    [HIGH] Respond to leads in <5 min (Source: CG003)
+    [HIGH] Use NEPQ framework for qualification (Source: CG001)
+    
+    ## Sources
+    - CG001: NEPQ Masterclass Session 1
+    - CG003: NEPQ Masterclass Session 3
+    ```
+  </Tab>
+  
+  <Tab title="Theme Dossiers">
+    ```markdown
+    # DOSSIER: Sales - Closing Techniques
+    
+    ## Overview
+    Cross-expert synthesis on closing methodologies
+    
+    ## Consensus
+    - All experts agree: qualification beats persuasion
+    - Price anchoring is universal
+    
+    ## Divergences
+    - Cole Gordon: 5-minute response rule
+    - Alex Hormozi: Focus on volume first
+    
+    ## Contributors
+    - Cole Gordon (8 insights)
+    - Alex Hormozi (12 insights)
+    ```
+  </Tab>
+</Tabs>
+
+**Output:** Markdown dossiers in `knowledge/dossiers/persons/` and `knowledge/dossiers/themes/`
+
+## Phase 7: Agent Enrichment
+
+<Accordion title="Purpose">
+  Update agent knowledge and memory files with new insights, respecting agent boundaries.
+</Accordion>
+
+### Process
+
+<Steps>
+  <Step title="Compile Knowledge Payload">
+    Extract frameworks, techniques, metrics, and high-priority insights discovered
+  </Step>
+  
+  <Step title="Check Role Threshold">
+    - **>=10 mentions:** Flag "Create New Agent"
+    - **>=5 mentions:** Flag "Monitor Role"
+  </Step>
+  
+  <Step title="Present Options">
+    ```
+    1. ✅ SIM - Update AGENT-*.md + MEMORY-*.md
+    2. 📝 APENAS MEMORY - Update memory only
+    3. ⏭️ PULAR - Skip for now
+    ```
+  </Step>
+  
+  <Step title="Execute Updates">
+    Update relevant agent files with new knowledge, maintaining agent voice and structure
+  </Step>
+  
+  <Step title="Template Evolution Check">
+    If new knowledge doesn't fit existing template structure, trigger evolution protocol
+  </Step>
+</Steps>
+
+**Output:** Updated agent memories, optionally updated agent definitions
+
+## Phase 8: Finalization
+
+<Accordion title="Purpose">
+  Execute automatic cleanup, generate execution report, and verify pipeline integrity.
+</Accordion>
+
+### Automatic Actions
+
+<Steps>
+  <Step title="RAG Index">
+    `python scripts/rag_index.py --knowledge --force`
+  </Step>
+  
+  <Step title="File Registry">
+    `python scripts/file_registry.py --scan`
+  </Step>
+  
+  <Step title="Session State">
+    Update `SESSION-STATE.md` with processed file
+  </Step>
+  
+  <Step title="Role Tracking">
+    Update `agents/DISCOVERY/role-tracking.md`
+  </Step>
+  
+  <Step title="Audit Log">
+    Append to `logs/AUDIT/audit.jsonl`
+  </Step>
+</Steps>
+
+### Final Verification (9 Items)
+
+```
+[ ] CHUNKS-STATE.json contains chunks from SOURCE_ID
+[ ] CANONICAL-MAP.json updated with entities
+[ ] INSIGHTS-STATE.json contains insights from SOURCE_ID
+[ ] NARRATIVES-STATE.json contains narrative for SOURCE_PERSON
+[ ] At least 1 dossier in /knowledge/dossiers/
+[ ] RAG index includes new files
+[ ] file-registry.json has entry for source file
+[ ] SESSION-STATE.md updated
+[ ] audit.jsonl contains session entry
+```
+
+### Execution Report
+
+```
+═══════════════════════════════════════════════════════════════════════════
+                         EXECUTION REPORT
+                         Pipeline Jarvis v2.1
+═══════════════════════════════════════════════════════════════════════════
+
+📅 Date: 2026-03-06
+📁 Source: Cole Gordon (CG003)
+📄 File: nepq-masterclass-session-3.txt
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ METRICS                                                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Chunks created:      87                                                 │
+│ Entities resolved:   23                                                 │
+│ Insights extracted:  156 (42 HIGH, 89 MED, 25 LOW)                     │
+│ Narratives generated:  3 persons, 5 themes                             │
+│ Dossiers compiled:  2 created, 1 updated                               │
+│ Agents enriched: [Sales-Lead, NEPQ-Specialist]                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+✅ PIPELINE JARVIS v2.1 COMPLETE
+```
+
+## Pipeline Commands
+
+| Command | Description |
+|---------|-------------|
+| `/process-jarvis` | Run full pipeline on specified file |
+| `/ingest` | Add new material to inbox |
+| `/save` | Save current pipeline state |
+| `/resume` | Resume interrupted pipeline |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="DNA Schema" icon="dna" href="/concepts/dna-schema">
+    Learn about the 5-layer knowledge extraction
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the system architecture
+  </Card>
+</CardGroup>

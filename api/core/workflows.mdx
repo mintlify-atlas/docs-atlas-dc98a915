@@ -1,0 +1,542 @@
+---
+title: 'Workflows'
+description: 'YAML-based workflow orchestration and task composition'
+---
+
+# Workflows
+
+Workflows orchestrate tasks into complete processing pipelines. All workflows are defined in YAML and executed by JARVIS.
+
+## Workflow Structure
+
+```yaml
+workflow:
+  id: wf-example
+  name: Example Workflow
+  version: 1.0.0
+  description: Short description
+
+metadata:
+  created: 2026-03-01
+  updated: 2026-03-05
+  author: @jarvis
+  status: active
+
+stages:
+  - id: stage-1
+    name: Stage Name
+    tasks:
+      - task_id: TSK-001
+        inputs:
+          param1: value1
+        outputs:
+          result: ${stage-1.result}
+    on_success: stage-2
+    on_failure: error-handler
+
+  - id: stage-2
+    name: Next Stage
+    tasks:
+      - task_id: TSK-002
+        inputs:
+          data: ${stage-1.result}
+```
+
+---
+
+## Available Workflows
+
+### wf-pipeline-full
+
+Complete 5-phase processing pipeline.
+
+**ID:** `wf-pipeline-full`
+
+**Purpose:** Transform raw content into structured knowledge, dossiers, and agent memories.
+
+**Stages:**
+
+<Expandable title="Stage 1: Chunking">
+  **Tasks:**
+  - `TSK-001`: Split content into semantic chunks (500-1500 words)
+  - `TSK-002`: Generate chunk embeddings (Voyage)
+  - `TSK-003`: Write `CHUNKS-STATE.json`
+  
+  **Output:** `/processing/chunks/{source-id}.json`
+  
+  **Quality Gate:** QG-001
+  - Minimum 1 chunk
+  - No chunk > 2000 words
+  - Valid JSON schema
+</Expandable>
+
+<Expandable title="Stage 2: Entity Resolution">
+  **Tasks:**
+  - `TSK-008`: Normalize persons
+  - `TSK-012`: Detect roles
+  - `TSK-015`: Analyze themes
+  - `TSK-009`: Update `CANONICAL-MAP.json`
+  
+  **Output:** `/processing/canonical/CANONICAL-MAP.json`
+  
+  **Quality Gate:** QG-002
+  - All entities canonicalized
+  - No unresolved aliases
+  - Registry updated
+</Expandable>
+
+<Expandable title="Stage 3: Insight Extraction">
+  **Tasks:**
+  - `TSK-018`: Extract DNA layers (L1-L5)
+  - `TSK-019`: Classify by priority (HIGH/MEDIUM/LOW)
+  - `TSK-020`: Write `INSIGHTS-STATE.json`
+  
+  **Output:** `/processing/insights/INSIGHTS-STATE.json`
+  
+  **Quality Gate:** QG-003
+  - Minimum 5 insights per person
+  - All insights have priority
+  - Source attribution complete
+</Expandable>
+
+<Expandable title="Stage 4: Narrative Synthesis">
+  **Tasks:**
+  - `TSK-022`: Synthesize person narratives
+  - `TSK-023`: Synthesize theme narratives
+  - `TSK-024`: Identify tensions and open loops
+  - `TSK-025`: Write `NARRATIVES-STATE.json`
+  
+  **Output:** `/processing/narratives/NARRATIVES-STATE.json`
+  
+  **Quality Gate:** QG-004
+  - Coherent narrative per person
+  - Patterns identified
+  - Tensions documented
+</Expandable>
+
+<Expandable title="Stage 5: Cascade">
+  **Tasks:**
+  - `TSK-028`: Update agent memories
+  - `TSK-029`: Create/update dossiers
+  - `TSK-030`: Populate knowledge base
+  - `TSK-031`: Update entity registry
+  - `TSK-032`: Validate cascade completeness
+  
+  **Outputs:**
+  - `/knowledge/dossiers/persons/{person}.md`
+  - `/knowledge/dossiers/themes/{theme}.md`
+  - `/knowledge/SOURCES/{source}/{category}/{topic}.md`
+  - `/agents/{category}/{agent}/MEMORY.md`
+  
+  **Quality Gate:** QG-005
+  - All artifacts created
+  - Cross-references valid
+  - No orphaned data
+</Expandable>
+
+**Checkpoints:**
+- Created after each stage
+- Stored in `/.claude/jarvis/CHECKPOINTS/`
+- Format: `CP-{timestamp}-{workflow-id}-{stage-id}.json`
+
+**Resume:**
+```bash
+/jarvis resume
+# Auto-detects last checkpoint
+```
+
+**Rollback:**
+```bash
+/jarvis rollback CP-20260305120000-wf-pipeline-full-stage-3
+```
+
+**Source:** `core/workflows/wf-pipeline-full.yaml:1-xxx`
+
+---
+
+### wf-ingest
+
+Ingest new material into inbox.
+
+**ID:** `wf-ingest`
+
+**Purpose:** Download, transcribe, and organize external content.
+
+**Stages:**
+
+<Expandable title="Stage 1: Acquisition">
+  **Tasks:**
+  - `TSK-101`: Download from URL (YouTube, Drive, etc.)
+  - `TSK-102`: Copy local files to inbox
+  - `TSK-103`: Generate source hash
+  
+  **Supported Sources:**
+  - YouTube (video/audio)
+  - Google Drive (docs/folders)
+  - Local files (.txt, .md, .pdf, .docx, .mp3, .wav)
+</Expandable>
+
+<Expandable title="Stage 2: Transcription">
+  **Tasks:**
+  - `TSK-110`: Transcribe audio (Whisper)
+  - `TSK-111`: Extract text from PDF/DOCX
+  - `TSK-112`: Save as .txt in inbox
+  
+  **Requirements:**
+  - `OPENAI_API_KEY` for Whisper
+</Expandable>
+
+<Expandable title="Stage 3: Organization">
+  **Tasks:**
+  - `TSK-120`: Detect person from filename/content
+  - `TSK-121`: Classify content type
+  - `TSK-122`: Standardize filename (UPPERCASE)
+  - `TSK-123`: Move to `{PERSON}/{TYPE}/`
+  - `TSK-124`: Register in `INBOX-REGISTRY.md`
+  
+  **Filename Pattern:** `TOPIC-NAME [youtube-id].txt`
+</Expandable>
+
+**Output:** Organized file in `inbox/{PERSON}/{TYPE}/{filename}.txt`
+
+**Source:** `core/workflows/wf-ingest.yaml:1-xxx`
+
+---
+
+### wf-extract-dna
+
+Extract DNA from narratives and assign to agent.
+
+**ID:** `wf-extract-dna`
+
+**Purpose:** Create cognitive DNA structure (5 layers) for mind clones.
+
+**Stages:**
+
+<Expandable title="Stage 1: DNA Extraction">
+  **Task:** `TSK-020` (extract-dna)
+  
+  **Input:** `NARRATIVES-STATE.json` for specific person
+  
+  **Output:** `DNA-CONFIG.yaml` with 5 layers
+</Expandable>
+
+<Expandable title="Stage 2: Agent Assignment">
+  **Task:** `TSK-140` (trigger-agent)
+  
+  **Checks:**
+  - Does agent exist for this person?
+  - If yes: Update DNA reference
+  - If no: Check creation threshold
+  
+  **Threshold:**
+  - `weighted_score >= 10`
+  - `sources >= 2`
+</Expandable>
+
+<Expandable title="Stage 3: Agent Creation (if triggered)">
+  **Task:** `TSK-141` (create-agent)
+  
+  **Creates:**
+  - `agents/minds/{person}/AGENT.md`
+  - `agents/minds/{person}/SOUL.md`
+  - `agents/minds/{person}/MEMORY.md`
+  - `agents/minds/{person}/DNA-CONFIG.yaml`
+  
+  **Updates:**
+  - `agents/AGENT-INDEX.yaml`
+  - `ENTITY-REGISTRY.json` (`has_agent: true`)
+</Expandable>
+
+**Source:** `core/workflows/wf-extract-dna.yaml:1-xxx`
+
+---
+
+### wf-conclave
+
+Multi-agent deliberation workflow.
+
+**ID:** `wf-conclave`
+
+**Purpose:** Constitutional decision-making with critic, advocate, and synthesizer.
+
+**Stages:**
+
+<Expandable title="Stage 0: Constitutional Foundation">
+  **Task:** `TSK-200` (invoke-constitution)
+  
+  **Principles:**
+  1. Empiricism (data over opinions)
+  2. Pareto (80/20 leverage)
+  3. Inversion (what causes failure?)
+  4. Antifragility (benefit from volatility)
+</Expandable>
+
+<Expandable title="Stage 1: Debate">
+  **Task:** `TSK-201` (run-debate)
+  
+  **Agents:** Auto-selected by query relevance
+  - Financial question → CFO, CRO
+  - Sales question → CRO, CMO, Sales-Lead
+  - Operations → COO, CTO
+  
+  **Output:** Structured debate log with positions
+</Expandable>
+
+<Expandable title="Stage 2: Critique">
+  **Task:** `TSK-202` (apply-critic)
+  
+  **Agent:** `critico-metodologico`
+  
+  **Scoring (0-100):**
+  - Premissas declaradas: /20
+  - Evidencias rastreaveis: /20
+  - Logica consistente: /20
+  - Cenarios alternativos: /20
+  - Conflitos resolvidos: /20
+  
+  **Output:** Quality score + gaps identified
+</Expandable>
+
+<Expandable title="Stage 3: Devil's Advocate">
+  **Task:** `TSK-203` (apply-advocate)
+  
+  **Agent:** `advogado-do-diabo`
+  
+  **Outputs:**
+  - Weakest premise identified
+  - Undiscussed risk
+  - Regret scenario (12 months)
+  - Ignored alternative
+</Expandable>
+
+<Expandable title="Stage 4: Synthesis">
+  **Task:** `TSK-204` (synthesize-decision)
+  
+  **Agent:** `sintetizador`
+  
+  **Outputs:**
+  - Unified recommendation
+  - Confidence score (0-100%)
+  - Residual risks + mitigations
+  - Next steps with owners
+  - Reversal criteria
+  
+  **Decision Logic:**
+  - Confidence ≥ 60%: Recommend action
+  - Confidence < 60%: Escalate to human
+</Expandable>
+
+**Anti-loop Rule:** Council runs once per query. No recursive re-runs.
+
+**Source:** `core/workflows/wf-conclave.yaml:1-xxx`
+
+---
+
+## Workflow Execution
+
+### Via JARVIS
+
+```bash
+# Execute workflow
+/jarvis run wf-pipeline-full --input source_file="inbox/..."
+
+# Resume from checkpoint
+/jarvis resume
+
+# Rollback to checkpoint
+/jarvis rollback CP-{id}
+```
+
+### Via Slash Command
+
+```bash
+# Workflows mapped to commands
+/process-jarvis "file.txt"  # → wf-pipeline-full
+/ingest "https://..."        # → wf-ingest
+/conclave "question"         # → wf-conclave
+```
+
+### Programmatic
+
+```python
+from core.workflows import execute_workflow
+
+result = execute_workflow(
+    workflow_id="wf-pipeline-full",
+    inputs={"source_file": "inbox/source.txt"},
+    checkpoint_dir=".claude/jarvis/CHECKPOINTS"
+)
+```
+
+---
+
+## Checkpointing
+
+### Automatic Checkpoints
+
+Created after each stage:
+
+```json
+{
+  "checkpoint_id": "CP-20260305120000-wf-pipeline-full-stage-2",
+  "workflow_id": "wf-pipeline-full",
+  "stage_id": "stage-2",
+  "timestamp": "2026-03-05T12:00:00Z",
+  "state": {
+    "inputs": {...},
+    "outputs": {...},
+    "context": {...}
+  },
+  "artifacts": [
+    "/processing/chunks/source-001.json",
+    "/processing/canonical/CANONICAL-MAP.json"
+  ]
+}
+```
+
+### Manual Checkpoints
+
+```bash
+/jarvis checkpoint "before-risky-operation"
+```
+
+### Checkpoint Retention
+
+- Last 10 checkpoints per workflow kept
+- Older checkpoints archived to `.claude/jarvis/CHECKPOINTS/archive/`
+- Critical checkpoints (marked) never deleted
+
+---
+
+## Error Handling
+
+### Retry Strategy
+
+```yaml
+stages:
+  - id: stage-1
+    retry:
+      max_attempts: 3
+      backoff: exponential
+      delay_seconds: 5
+```
+
+### Failure Handlers
+
+```yaml
+stages:
+  - id: stage-1
+    on_failure: error-handler
+
+error_handlers:
+  - id: error-handler
+    tasks:
+      - task_id: TSK-999
+        inputs:
+          error: ${stage-1.error}
+```
+
+### Rollback on Failure
+
+```yaml
+workflow:
+  rollback_on_failure: true
+  rollback_to: last_checkpoint
+```
+
+---
+
+## Quality Gates
+
+Each stage can define quality gates:
+
+```yaml
+stages:
+  - id: stage-1
+    quality_gate:
+      id: QG-001
+      checks:
+        - condition: ${output.chunk_count} > 0
+          message: "Must have at least 1 chunk"
+        - condition: ${output.schema_valid} == true
+          message: "Must pass schema validation"
+      on_fail: rollback
+```
+
+**Failure Actions:**
+- `rollback`: Restore from last checkpoint
+- `retry`: Retry stage up to max_attempts
+- `skip`: Skip stage and continue
+- `abort`: Abort entire workflow
+
+---
+
+## Creating Workflows
+
+### Workflow Template
+
+```yaml
+workflow:
+  id: wf-custom
+  name: Custom Workflow
+  version: 1.0.0
+  description: Purpose and scope
+
+metadata:
+  created: 2026-03-01
+  author: @human
+  status: active
+  tags: [category1, category2]
+
+inputs:
+  - name: param1
+    type: string
+    required: true
+    description: What this param does
+
+outputs:
+  - name: result
+    type: object
+    location: /path/to/output
+
+stages:
+  - id: stage-1
+    name: Stage Name
+    tasks:
+      - task_id: TSK-001
+        inputs:
+          param: ${workflow.inputs.param1}
+    on_success: stage-2
+
+  - id: stage-2
+    name: Next Stage
+    tasks:
+      - task_id: TSK-002
+    on_success: complete
+```
+
+### Validation
+
+```bash
+# Validate workflow YAML
+python core/intelligence/validate_workflow.py wf-custom.yaml
+```
+
+### Registration
+
+Add to `core/workflows/README.md`:
+
+```markdown
+| ID | Name | Stages | Purpose |
+|----|------|--------|--------|
+| wf-custom | Custom Workflow | 2 | Brief description |
+```
+
+---
+
+## See Also
+
+- [Tasks](/api/core/tasks) - Atomic building blocks
+- [Intelligence Layer](/api/core/intelligence) - Python execution scripts
+- [JARVIS Agent](/api/agents/jarvis) - Workflow orchestrator

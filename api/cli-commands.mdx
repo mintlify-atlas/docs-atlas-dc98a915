@@ -1,0 +1,253 @@
+---
+title: 'CLI Commands'
+description: 'Complete reference for Mega Brain CLI commands'
+---
+
+# CLI Commands
+
+Mega Brain provides a comprehensive CLI for installation, setup, and system management.
+
+## Installation
+
+```bash
+npx mega-brain-ai <command> [options]
+```
+
+---
+
+## Commands
+
+### install
+
+Install Mega Brain into a new or existing project.
+
+<ParamField path="name" type="string" optional>
+  Optional project name. If omitted, uses current directory name.
+</ParamField>
+
+**Usage:**
+```bash
+npx mega-brain-ai install
+npx mega-brain-ai install my-project
+```
+
+**Behavior:**
+- Creates directory structure (`core/`, `agents/`, `.claude/`, etc.)
+- Copies templates and hooks
+- Initializes `.env` file
+- Sets up git repository with layer system
+
+**Location:** `bin/mega-brain.js:65-67`
+
+---
+
+### setup
+
+Interactive setup wizard for API keys and dependencies.
+
+**Usage:**
+```bash
+npx mega-brain-ai setup
+```
+
+**Behavior:**
+- Prompts for API keys (OpenAI, Voyage, Google)
+- Validates credentials
+- Writes to `.env` file
+- Installs Python dependencies
+- Runs system health check
+
+**Auto-trigger:** Runs automatically on first use if `.env` is missing
+
+**Location:** `bin/mega-brain.js:95-97`
+
+---
+
+### validate
+
+Validate MoneyClub email for Premium access.
+
+<ParamField path="email" type="string" required>
+  Email address to validate
+</ParamField>
+
+**Usage:**
+```bash
+npx mega-brain-ai validate user@moneyclub.com
+```
+
+**Returns:**
+- Exit code `0`: Email valid
+- Exit code `1`: Email invalid
+
+**Location:** `bin/mega-brain.js:68-77`
+
+---
+
+### push
+
+Push changes to Layer 1/2/3 remote repositories.
+
+<ParamField path="--layer" type="number" optional>
+  Specific layer to push (1, 2, or 3). If omitted, pushes current layer.
+</ParamField>
+
+**Usage:**
+```bash
+npx mega-brain-ai push
+npx mega-brain-ai push --layer 1
+npx mega-brain-ai push --layer 2
+```
+
+**Layers:**
+- **Layer 1 (Community):** Public shell - core templates, hooks, and CLI
+- **Layer 2 (Premium):** Shell + brain - includes agents and knowledge base
+- **Layer 3 (Personal):** Full backup - includes sensitive data and personal agents
+
+**Location:** `bin/mega-brain.js:78-80`
+
+---
+
+### upgrade
+
+Upgrade from Community to Premium version.
+
+**Usage:**
+```bash
+npx mega-brain-ai upgrade
+```
+
+**Behavior:**
+- Validates MoneyClub membership
+- Downloads Premium assets
+- Updates agent registry
+- Enables Pro features
+
+**Location:** `bin/mega-brain.js:81-88`
+
+---
+
+### status
+
+Show Pro license status and feature availability.
+
+**Usage:**
+```bash
+npx mega-brain-ai status
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+MEGA BRAIN PRO STATUS
+═══════════════════════════════════════
+Version: Premium
+License: MoneyClub (user@example.com)
+Expires: 2026-12-31
+
+Features Enabled:
+✓ Mind Clone Agents (5/5)
+✓ Pipeline Processing
+✓ Council/Conclave
+✓ Knowledge Base
+```
+
+**Location:** `bin/mega-brain.js:89-91`
+
+---
+
+### features
+
+List available vs locked features.
+
+**Usage:**
+```bash
+npx mega-brain-ai features
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+FEATURE COMPARISON
+═══════════════════════════════════════
+
+COMMUNITY (Current):
+✓ CLI & Templates
+✓ Skills & Hooks
+✓ Agent Templates
+✗ Knowledge Base (populated)
+✗ Mind Clone Agents
+✗ Pipeline Processing
+✗ Council/Conclave
+
+PREMIUM:
+✓ All Community features
+✓ Populated knowledge base
+✓ 5 Mind clone agents
+✓ Full pipeline processing
+✓ Multi-agent deliberation
+```
+
+**Location:** `bin/mega-brain.js:92-94`
+
+---
+
+### --help
+
+Show help message with all available commands.
+
+**Usage:**
+```bash
+npx mega-brain-ai --help
+npx mega-brain-ai -h
+```
+
+**Location:** `bin/mega-brain.js:105-131`
+
+---
+
+## Environment Variables
+
+All configuration is managed through `.env` file:
+
+<ResponseField name="OPENAI_API_KEY" type="string" required>
+  OpenAI API key for Whisper transcription. **Required** for pipeline processing.
+</ResponseField>
+
+<ResponseField name="VOYAGE_API_KEY" type="string">
+  Voyage AI API key for semantic embeddings and RAG search. Recommended for knowledge retrieval.
+</ResponseField>
+
+<ResponseField name="GOOGLE_CLIENT_ID" type="string">
+  Google OAuth client ID for Drive import functionality. Optional.
+</ResponseField>
+
+<ResponseField name="GOOGLE_CLIENT_SECRET" type="string">
+  Google OAuth client secret for Drive import. Optional.
+</ResponseField>
+
+<ResponseField name="ANTHROPIC_API_KEY" type="string">
+  Not required when using Claude Code. Only needed for direct API usage.
+</ResponseField>
+
+---
+
+## Exit Codes
+
+| Code | Meaning |
+|------|--------|
+| `0` | Success |
+| `1` | General error |
+| `100` | Timeout (2 minutes) |
+
+---
+
+## Notes
+
+<Note>
+  The CLI uses Node.js 21+ native `.env` loading. No external dependencies required.
+</Note>
+
+<Warning>
+  Never commit `.env` file to version control. It's automatically gitignored.
+</Warning>

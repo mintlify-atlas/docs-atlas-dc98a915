@@ -1,0 +1,673 @@
+---
+title: /conclave Command
+description: Multi-agent deliberation system for strategic decisions with evidence-based debate, critical review, and synthesis
+---
+
+# /conclave - Council Deliberation
+
+Executes a complete council session: multi-agent debate followed by meta-evaluation by Critic, Devil's Advocate, and Synthesizer agents.
+
+## Syntax
+
+```bash
+/conclave [QUESTION]
+```
+
+<ParamField path="QUESTION" type="string" required>
+  Strategic decision or question requiring multi-perspective analysis
+  
+  **Example:** "Should we increase closer commission from 10% to 15%?"
+</ParamField>
+
+## What It Does
+
+Conclave orchestrates a 4-phase deliberation:
+
+```
+┌───────────────────────────────────────────────────────────────────────────
+│                          CONCLAVE FLOW                                     │
+├───────────────────────────────────────────────────────────────────────────┤
+│  Phase 0: Constitutional Principles     [Foundation]                       │
+│  Phase 1: Multi-Agent Debate            [Cargo agents deliberate]         │
+│  Phase 2: Methodological Critic         [Process evaluation]              │
+│  Phase 3: Devil's Advocate              [Challenge assumptions]           │
+│  Phase 4: Synthesis                     [Final recommendation]            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+<Warning>
+**Anti-Loop Rule:** Conclave runs ONCE per query. If confidence < 60%, escalates to human decision (does NOT re-run).
+</Warning>
+
+## Phase Breakdown
+
+### Phase 0: Constitutional Foundation
+
+**Purpose:** Establish governing principles for deliberation
+
+<Tabs>
+  <Tab title="Principle 1: Empiricism">
+    ```yaml
+    Mandate:
+      "Decisions based on DATA, not opinions or intuitions"
+    
+    Requirements:
+      - All claims must cite sources
+      - Use concrete numbers
+      - Reference chunk_ids for evidence
+    
+    Example:
+      Good: "Close rate drops 40% ^[CG003_089]"
+      Bad: "Close rate probably drops significantly"
+    ```
+  </Tab>
+  
+  <Tab title="Principle 2: Pareto (80/20)">
+    ```yaml
+    Mandate:
+      "Seek 20% of actions that generate 80% of results"
+    
+    Focus:
+      - What has highest leverage?
+      - Which option requires least effort for most gain?
+      - Avoid "busy work" solutions
+    
+    Example:
+      Question: "Should we hire 5 or 10 closers?"
+      Pareto lens: "Which number hits 80% of revenue goal?"
+    ```
+  </Tab>
+  
+  <Tab title="Principle 3: Inversion">
+    ```yaml
+    Mandate:
+      "Before asking 'what to do', ask 'what would cause failure'"
+    
+    Process:
+      1. Identify ways decision could fail
+      2. Design around failure modes
+      3. Build in safeguards
+    
+    Example:
+      Decision: "Launch new product"
+      Inversion: "What would make this product fail?"
+      - No market demand
+      - Wrong pricing
+      - Poor onboarding
+      → Address each before launch
+    ```
+  </Tab>
+  
+  <Tab title="Principle 4: Antifragility">
+    ```yaml
+    Mandate:
+      "Prefer options that benefit from volatility and stress"
+    
+    Evaluation:
+      - Which option gets stronger under pressure?
+      - What improves with chaos?
+      - Where is optionality preserved?
+    
+    Example:
+      Option A: Fixed-price contract
+      Option B: Performance-based pricing
+      
+      Under stress:
+      A: No benefit from volatility
+      B: Aligns incentives, benefits from success
+      
+      → Choose B (antifragile)
+    ```
+  </Tab>
+</Tabs>
+
+**Hierarchy:**
+
+```
+CONSTITUTION
+  ↓
+PROTOCOLS
+  ↓
+AGENT INSTRUCTIONS
+```
+
+<Note>
+If any agent violates constitutional principles, the Critic will flag it in Phase 2.
+</Note>
+
+### Phase 1: Multi-Agent Debate
+
+**Purpose:** Gather perspectives from relevant cargo agents
+
+```yaml
+Agent Selection:
+  Based on question domain:
+  
+  Commission question → [CRO, CFO, SALES-MANAGER, CLOSER]
+  Hiring decision → [CRO, SALES-MANAGER, COO]
+  Pricing change → [CRO, CFO, CLOSER]
+  Process improvement → [COO, relevant role]
+
+Debate Format:
+  1. Each agent presents position
+  2. Cites evidence (chunk_ids)
+  3. Identifies risks and trade-offs
+  4. States confidence level
+```
+
+**Example Debate Output:**
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+PHASE 1: CARGO AGENT DEBATE
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+QUESTION: "Should we increase closer commission from 10% to 15%?"
+
+┌─ CRO (Chief Revenue Officer) ───────────────────────────────────────────────────────
+│                                                                            │
+│  POSITION: YES, with conditions                                           │
+│                                                                            │
+│  REASONING:                                                                │
+│  Higher commission attracts A-players. Industry standard is 12-15%        │
+│  ^[AH002_045]. Our current 10% makes us uncompetitive for top talent.      │
+│                                                                            │
+│  EVIDENCE:                                                                 │
+│  • Cole Gordon data: 15% commission → 30% better retention [CG001_089]  │
+│  • Cost per acquisition drops when closers stay longer [AH003_023]       │
+│                                                                            │
+│  CONDITIONS:                                                               │
+│  • Tie to performance: 12% base + 3% accelerator at 80% quota           │
+│  • Phase in over 2 quarters to test impact                               │
+│                                                                            │
+│  CONFIDENCE: 75%                                                           │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CFO (Chief Financial Officer) ────────────────────────────────────────────────────
+│                                                                            │
+│  POSITION: CONDITIONAL YES                                                │
+│                                                                            │
+│  REASONING:                                                                │
+│  5% increase = ~$250k/year additional cost at current volume. Need to     │
+│  ensure ROI justifies expense.                                            │
+│                                                                            │
+│  FINANCIAL MODEL:                                                          │
+│  Current:  10% commission on $5M ARR = $500k                              │
+│  Proposed: 15% commission on $5M ARR = $750k (+$250k)                     │
+│                                                                            │
+│  BREAK-EVEN:                                                               │
+│  Need 5% revenue increase to justify cost ($250k)                         │
+│  = $5.25M ARR (easily achievable if retention improves)                   │
+│                                                                            │
+│  CONDITIONS:                                                               │
+│  • Monthly KPI tracking: retention, close rate, pipeline velocity        │
+│  • Revert if ROI negative after 6 months                                  │
+│                                                                            │
+│  CONFIDENCE: 70%                                                           │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ SALES-MANAGER ────────────────────────────────────────────────────────────────
+│                                                                            │
+│  POSITION: STRONG YES                                                     │
+│                                                                            │
+│  REASONING:                                                                │
+│  Recruiting is brutal right now. Lost 3 candidates last month to          │
+│  competitors offering 15%. Current team morale suffering.                 │
+│                                                                            │
+│  OPERATIONAL IMPACT:                                                       │
+│  • Recruiting cycle: 45 days → ~25 days (based on market intel)        │
+│  • Churn: Current 40% annually, expect drop to ~25% [CG002_034]          │
+│  • Training ROI improves when closers stay longer                         │
+│                                                                            │
+│  TEAM FEEDBACK:                                                            │
+│  Asked top 3 closers: all said they'd consider external offers           │
+│  without increase. Risk of losing A-players.                              │
+│                                                                            │
+│  CONFIDENCE: 85%                                                           │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CLOSER ──────────────────────────────────────────────────────────────────────────
+│                                                                            │
+│  POSITION: YES (obviously)                                                │
+│                                                                            │
+│  REASONING:                                                                │
+│  Every closer I know in our niche is making 15%+. We're leaving money     │
+│  on the table and it affects motivation.                                  │
+│                                                                            │
+│  REALITY CHECK:                                                            │
+│  • Our close rate is 65% (above industry 45% ^[CG001_023])              │
+│  • We EARN the higher commission through performance                      │
+│  • Better closers = less sales cycle friction = happier customers        │
+│                                                                            │
+│  PREFERENCE:                                                               │
+│  Accelerator model > flat 15%. Rewards performance, not just showing up.  │
+│                                                                            │
+│  CONFIDENCE: 90%                                                           │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Phase 2: Methodological Critic
+
+**Purpose:** Evaluate the quality of the debate process (not the merit of positions)
+
+```yaml
+Critic Evaluates:
+  ✓ Were premises clearly stated?
+  ✓ Is evidence traceable (chunk_ids)?
+  ✓ Is logic consistent?
+  ✓ Were alternative scenarios considered?
+  ✓ Were conflicts/tensions resolved?
+
+Score: 0-100
+  - Premises declared: 0-20 pts
+  - Evidence traceable: 0-20 pts
+  - Logic consistent: 0-20 pts
+  - Alternatives considered: 0-20 pts
+  - Conflicts resolved: 0-20 pts
+```
+
+**Example Output:**
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+PHASE 2: METHODOLOGICAL CRITIC
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+QUALITY SCORE: 82/100
+
+Breakdown:
+  • Premises declared:      18/20  (Clear problem statement, context)
+  • Evidence traceable:      16/20  (Most claims cited, 2 missing chunk_ids)
+  • Logic consistent:        20/20  (No contradictions)
+  • Alternatives considered:  15/20  (Missed "status quo" scenario)
+  • Conflicts resolved:       13/20  (CRO/CFO tension not fully addressed)
+
+GAPS IDENTIFIED:
+  • Missing: What if we do nothing? (status quo scenario)
+  • Missing: Sales-Manager claim "lost 3 candidates" - no chunk_id
+  • Tension: CRO wants immediate, CFO wants phased - needs resolution
+
+RECOMMENDATION: APPROVE with minor revisions
+  Address identified gaps before final decision.
+```
+
+### Phase 3: Devil's Advocate
+
+**Purpose:** Challenge assumptions and identify hidden risks
+
+```yaml
+Advocate Identifies:
+  • Most fragile premise
+  • Main risk NOT discussed
+  • 12-month regret scenario (what could go wrong)
+  • Ignored alternative
+```
+
+**Example Output:**
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+PHASE 3: DEVIL'S ADVOCATE
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+MOST FRAGILE PREMISE:
+  "Higher commission attracts A-players"
+  
+  Challenge:
+  Assumes commission is PRIMARY motivator. What if A-players care more
+  about:
+    • Product quality (do they believe in what they're selling?)
+    • Career growth (path to leadership?)
+    • Work environment (team culture, autonomy?)
+  
+  Risk:
+  We spend $250k/year and still lose top talent because compensation
+  wasn't the real problem.
+
+MAIN RISK NOT DISCUSSED:
+  ADVERSE SELECTION
+  
+  What if:
+  15% commission attracts MERCENARIES who optimize for short-term
+  commissions over customer success.
+  
+  Impact:
+    • Close rate goes up (good)
+    • Churn goes up (bad)
+    • LTV drops (very bad)
+  
+  This is a 12-24 month delayed consequence. By the time we notice,
+  damage is done.
+
+12-MONTH REGRET SCENARIO:
+  It's March 2027. We increased commission to 15%.
+  
+  What happened:
+  • Hired 5 new closers attracted by high commission
+  • 3 of them hit quota... by overselling and setting wrong expectations
+  • Customer churn spiked from 15% to 28%
+  • NPS dropped from 45 to 28
+  • Now spending more on acquisition AND dealing with reputation damage
+  
+  CFO's nightmare: "We optimized for top-line, destroyed bottom-line."
+
+ALTERNATIVE IGNORED:
+  NON-MONETARY COMP
+  
+  What if we:
+  • Keep 10% commission
+  • Add equity/profit-sharing for top performers
+  • Create clear path to VP Sales (career track)
+  • Invest $100k in training/coaching instead of $250k in commission
+  
+  Benefits:
+  • Attracts long-term thinkers, not mercenaries
+  • Aligns with company success (equity)
+  • Costs less
+  
+  This wasn't even mentioned in debate.
+```
+
+### Phase 4: Synthesis
+
+**Purpose:** Integrate feedback and produce final recommendation
+
+```yaml
+Synthesizer Produces:
+  • Clear decision
+  • Confidence score (0-100%)
+  • Modifications from feedback
+  • Residual risks + mitigations
+  • Next steps (who, what, when)
+  • Reversal criteria
+```
+
+**Example Output:**
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+PHASE 4: FINAL SYNTHESIS
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+DECISION: YES - Increase commission with safeguards
+
+CONFIDENCE: 78%
+
+Justification:
+  Consensus among 3/4 agents (CRO, CFO, Sales-Manager, Closer).
+  Financial model shows break-even is achievable.
+  Recruiting/retention pain is real and urgent.
+  Devil's Advocate concerns are valid but addressable.
+
+MODIFICATIONS (based on Critic + Advocate feedback):
+
+  FROM (initial proposal):
+    Flat 15% commission immediately
+  
+  TO (revised):
+    TIER 1: 12% base commission
+    TIER 2: +3% accelerator at 80% quota
+    TIER 3: +2% additional at 100% quota with NPS > 40
+    
+    → Top performers earn 17% (better than market)
+    → Addresses adverse selection (NPS gate)
+    → Costs less upfront ($150k vs $250k)
+
+  PHASE-IN:
+    Q1: Announce change, set expectations
+    Q2: Implement Tier 1 (12%)
+    Q3: Add Tier 2 (accelerator)
+    Q4: Full structure (with NPS gate)
+
+RESIDUAL RISKS + MITIGATIONS:
+
+  RISK 1: Adverse selection (mercenaries)
+    Mitigation:
+      • NPS gate on top tier (customer success must stay high)
+      • 6-month probation period
+      • Monthly churn monitoring
+    Owner: Sales-Manager + CFO
+  
+  RISK 2: Cost overrun if volume spikes
+    Mitigation:
+      • Cap total commission pool at 18% of revenue
+      • Quarterly review with CFO
+    Owner: CFO
+  
+  RISK 3: Existing team feels "baited" if accelerator is hard to hit
+    Mitigation:
+      • 80% quota threshold is achievable (current avg: 85%)
+      • Transparent communication about tiers
+    Owner: Sales-Manager
+
+NEXT STEPS:
+
+  1. Draft compensation policy document
+     Owner: CRO + CFO
+     Deadline: End of week
+  
+  2. Model 3 scenarios (conservative, base, aggressive revenue)
+     Owner: CFO
+     Deadline: 5 days
+  
+  3. Socialize with top 3 closers (get feedback)
+     Owner: Sales-Manager
+     Deadline: 1 week
+  
+  4. Board approval (if needed for budget)
+     Owner: CEO
+     Deadline: 2 weeks
+  
+  5. Company-wide announcement
+     Owner: CRO
+     Deadline: 3 weeks
+
+REVERSAL CRITERIA:
+
+  Pause or revert if ANY of:
+    • Churn rate increases > 5% absolute within 6 months
+    • NPS drops below 35
+    • Cost as % of revenue exceeds 18%
+    • Customer complaints about "overselling" spike (>10/month)
+  
+  Review: Monthly for 6 months, then quarterly
+
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+CONSENSUS ACHIEVED
+Decision ready for executive approval.
+```
+
+## Low Confidence Outcome
+
+If confidence < 60%, escalates to human:
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+[COUNCIL: DECISION INCONCLUSIVE]
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+⚠️  CONFIDENCE: 52% - BELOW THRESHOLD OF 60%
+
+TYPE OF UNCERTAINTY:
+  [✓] Insufficient data
+  [ ] Irresolvable conflict between roles
+  [ ] Outside scope of available knowledge
+
+OPTIONS FOR HUMAN DECISION:
+
+OPTION A: Increase to 15% immediately
+  Trade-off: Speed vs risk
+  Defendedby: CRO, Sales-Manager, Closer
+  Evidence: [CG001_089, AH002_045]
+
+OPTION B: Phased approach (12% → 15% over 2 quarters)
+  Trade-off: Safety vs market competitiveness
+  Defended by: CFO
+  Evidence: [Financial model]
+
+OPTION C: Non-monetary comp (equity, career path)
+  Trade-off: Long-term alignment vs immediate fix
+  Suggested by: Devil's Advocate
+  Evidence: [No direct evidence, hypothesis]
+
+OPTION D: Gather more data
+  What's needed:
+    • Survey top 10 closers: what would make them stay?
+    • Benchmark 5 competitors: actual comp packages
+    • Model churn impact with real numbers
+  How to obtain: 2-week research sprint
+
+⚠️  This case requires HUMAN DECISION.
+The Council is NOT recommending any option.
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+## Examples
+
+<CodeGroup>
+```bash Commission Change
+/conclave "Should we increase closer commission from 10% to 15%?"
+```
+
+```bash Hiring Decision
+/conclave "Hire 5 or 10 new closers in Q1?"
+```
+
+```bash Pricing Strategy
+/conclave "Drop price from $10k to $7k to increase volume?"
+```
+
+```bash Process Change
+/conclave "Move from 2-call to 1-call close process?"
+```
+</CodeGroup>
+
+## When to Use
+
+### Good Use Cases
+
+✓ **Strategic decisions** - Affects money, structure, risk
+✓ **Multiple stakeholders** - Different roles have valid perspectives
+✓ **Evidence exists** - Knowledge base has relevant data
+✓ **Reversible** - Can undo if wrong
+
+### Poor Use Cases
+
+✗ **Tactical execution** - "Which CRM should we use?"
+✗ **No evidence** - Knowledge base lacks relevant data
+✗ **Urgent** - Need decision in < 1 hour
+✗ **Highly subjective** - "Should logo be blue or green?"
+
+## Agent Roles
+
+<CardGroup cols={2}>
+  <Card title="Methodological Critic" icon="magnifying-glass">
+    Evaluates process quality, not merit of ideas. Ensures rigor.
+  </Card>
+  <Card title="Devil's Advocate" icon="scale-unbalanced">
+    Challenges assumptions, identifies blind spots, surfaces risks.
+  </Card>
+  <Card title="Synthesizer" icon="layer-group">
+    Integrates feedback, resolves tensions, produces final decision.
+  </Card>
+  <Card title="Cargo Agents" icon="briefcase">
+    CRO, CFO, Sales-Manager, etc. Bring domain expertise.
+  </Card>
+</CardGroup>
+
+## Key Principles
+
+### 1. Evidence-Based
+
+All claims must cite sources:
+
+```yaml
+Good:
+  "Close rate drops 40% without qualification ^[CG003_089]"
+
+Bad:
+  "Close rate probably drops without qualification"
+```
+
+### 2. Constitutional Governance
+
+Principles override agent opinions:
+
+```
+CONSTITUTION > PROTOCOLS > AGENT INSTRUCTIONS
+```
+
+### 3. One-Pass Rule
+
+Conclave runs once. No loops. If inconclusive, escalate to human.
+
+### 4. Process vs Merit
+
+Critic evaluates HOW agents deliberated, not WHAT they concluded.
+
+### 5. Adversarial Testing
+
+Devil's Advocate actively seeks to break the conclusion.
+
+## Troubleshooting
+
+### "No relevant agents found"
+
+**Issue:** Question doesn't map to any cargo agents
+
+**Solution:**
+```bash
+# Check available agents
+ls agents/cargo/
+
+# Ensure question matches agent domains
+# Example: Marketing questions need CMO agent
+```
+
+### "Insufficient evidence"
+
+**Issue:** Knowledge base lacks data for question
+
+**Solution:**
+```bash
+# Ingest relevant materials first
+/ingest expert-video.mp4
+/process-jarvis "inbox/EXPERT/video.txt"
+
+# Then retry conclave
+/conclave "your question"
+```
+
+### "Confidence always < 60%"
+
+**Issue:** Agents consistently uncertain
+
+**Solution:**
+This indicates:
+- Genuinely ambiguous decision
+- Missing critical data
+- Question outside agent expertise
+
+Human decision required.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Agent System" icon="users" href="/concepts/agents">
+    Understand cargo agents and mind clones
+  </Card>
+  <Card title="Evidence Tracing" icon="route" href="/concepts/dna-schema">
+    How chunk_ids enable traceability
+  </Card>
+  <Card title="Constitutional Principles" icon="scale-balanced" href="/guides/using-conclave">
+    Deep dive into governing principles
+  </Card>
+  <Card title="Decision Framework" icon="sitemap" href="/guides/using-conclave">
+    When to use Conclave vs other tools
+  </Card>
+</CardGroup>

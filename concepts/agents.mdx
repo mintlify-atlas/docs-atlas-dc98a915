@@ -1,0 +1,429 @@
+---
+title: Agent System
+description: AI agents for mind cloning, operational roles, and multi-agent deliberation
+---
+
+Mega Brain includes a sophisticated agent system with four distinct agent types, each serving different purposes in the knowledge ecosystem.
+
+## Agent Types Overview
+
+<CardGroup cols={2}>
+  <Card title="MINDS" icon="brain" color="#9333ea">
+    **Expert Mind Clones (L3)**
+    
+    AI agents that reason like specific experts, grounded in their actual materials (5 active agents)
+  </Card>
+  
+  <Card title="CARGO" icon="briefcase" color="#2563eb">
+    **Functional Roles (L4)**
+    
+    Operational role agents that synthesize knowledge from multiple sources (14 active agents)
+  </Card>
+  
+  <Card title="CONCLAVE" icon="users" color="#dc2626">
+    **Deliberative Agents (L1)**
+    
+    Constitutional deliberation agents for structured debate (3 active agents)
+  </Card>
+  
+  <Card title="SYSTEM" icon="robot" color="#059669">
+    **System Orchestrators (L0)**
+    
+    Core system agents like JARVIS that manage operations
+  </Card>
+</CardGroup>
+
+## MINDS: Expert Mind Clones (L3)
+
+<Accordion title="Overview">
+  Mind clones are AI agents trained on an expert's actual materials. They reason using extracted DNA (5 layers) and can be consulted for advice that mirrors the expert's thinking.
+</Accordion>
+
+### Active Mind Clones (5)
+
+<Tabs>
+  <Tab title="Alex Hormozi">
+    **ID:** `alex-hormozi`  
+    **Path:** `agents/minds/alex-hormozi/`
+    
+    **DNA Layers:**
+    - L1: Price as value consequence, scale before optimize
+    - L2: Value Equation, Product Ladder
+    - L3: Value anchoring, volume focus
+    - L4: Offer Stack Formula, Lead Magnet systems
+    - L5: 30-day onboarding, launch sequences
+    
+    **Expertise:** Business scaling, offer creation, monetization
+  </Tab>
+  
+  <Tab title="Cole Gordon">
+    **ID:** `cole-gordon`  
+    **Path:** `agents/minds/cole-gordon/`
+    
+    **DNA Layers:**
+    - L1: Speed over perfection, qualification over persuasion
+    - L2: NEPQ framework, response velocity
+    - L3: 5-minute lead response, price anchoring
+    - L4: SPIN Selling, NEPQ methodology
+    - L5: Sales team scaling, onboarding sequences
+    
+    **Expertise:** High-ticket sales, NEPQ, team scaling
+  </Tab>
+  
+  <Tab title="Jeremy Haynes">
+    **ID:** `jeremy-haynes`  
+    **Path:** `agents/minds/jeremy-haynes/`
+    
+    **Expertise:** Sales operations, process optimization
+  </Tab>
+  
+  <Tab title="Jeremy Miner">
+    **ID:** `jeremy-miner`  
+    **Path:** `agents/minds/jeremy-miner/`
+    
+    **Expertise:** NEPQ methodology, neuro-emotional selling
+  </Tab>
+  
+  <Tab title="The Scalable Company">
+    **ID:** `the-scalable-company`  
+    **Path:** `agents/minds/the-scalable-company/`
+    
+    **Expertise:** Business systems, operational scaling
+  </Tab>
+</Tabs>
+
+### Mind Clone Structure
+
+Each mind clone has:
+
+```
+agents/minds/{expert}/
+├── AGENT.md           # Agent definition (identity, role, reasoning)
+├── DNA-CONFIG.yaml    # 5-layer DNA extracted from sources
+├── MEMORY.md          # Episodic memory (Team Agreement style)
+└── SOUL.md            # Core personality and voice
+```
+
+### Using Mind Clones
+
+```bash
+# Query a specific mind clone
+/ask alex-hormozi "How should I price my high-ticket offer?"
+
+# Get DNA-grounded reasoning
+/ask cole-gordon "What's the best way to scale a sales team?"
+```
+
+<Note>
+  Mind clones provide **traced reasoning** — every recommendation links back to source material with chunk IDs.
+</Note>
+
+## CARGO: Functional Roles (L4)
+
+<Accordion title="Overview">
+  Cargo agents are operational roles that synthesize knowledge from multiple experts. They're designed for day-to-day business functions.
+</Accordion>
+
+### Active Cargo Agents (14)
+
+<Tabs>
+  <Tab title="Sales Roles (9)">
+    - **SDS** (Sales Development Specialist)
+    - **LNS** (Lead Nurturing Specialist)
+    - **BDR** (Business Development Rep)
+    - **NEPQ Specialist**
+    - **Sales Coordinator**
+    - **Sales Manager**
+    - **Sales Lead**
+    - **Customer Success**
+    - **Closer**
+  </Tab>
+  
+  <Tab title="Marketing (1)">
+    - **Paid Media Specialist**
+  </Tab>
+  
+  <Tab title="C-Level (4)">
+    - **CFO** (Chief Financial Officer)
+    - **COO** (Chief Operating Officer)
+    - **CMO** (Chief Marketing Officer)
+    - **CRO** (Chief Revenue Officer)
+  </Tab>
+</Tabs>
+
+### Cargo Agent Structure
+
+```
+agents/cargo/{department}/{role}/
+├── AGENT.md           # Role definition and responsibilities
+├── MEMORY.md          # Organizational knowledge
+└── DNA-CONFIG.yaml    # Synthesized DNA from multiple experts
+```
+
+### DNA Synthesis
+
+Cargo agents combine DNA from multiple sources:
+
+**Example: Sales-Lead Agent**
+
+Synthesizes knowledge from:
+- Cole Gordon (team scaling)
+- Alex Hormozi (offer optimization)
+- Jeremy Haynes (operations)
+- Jeremy Miner (NEPQ methodology)
+
+### Threshold-Based Creation
+
+Cargo agents are created automatically when role mentions reach thresholds:
+
+- **>=10 mentions:** 🔴 Create new agent
+- **>=5 mentions:** 🟡 Monitor role
+
+## CONCLAVE: Deliberative Agents (L1)
+
+<Accordion title="Overview">
+  Conclave agents engage in structured multi-agent deliberation. They debate, critique, and synthesize ideas following constitutional principles.
+</Accordion>
+
+### Active Conclave Agents (3)
+
+<CardGroup cols={3}>
+  <Card title="Crítico Metodológico" icon="microscope">
+    **ID:** `critico-metodologico`
+    
+    Challenges assumptions, identifies weaknesses, demands evidence.
+  </Card>
+  
+  <Card title="Sintetizador" icon="compress">
+    **ID:** `sintetizador`
+    
+    Synthesizes multiple perspectives into coherent recommendations.
+  </Card>
+  
+  <Card title="Advogado do Diabo" icon="scale-balanced">
+    **ID:** `advogado-do-diabo`
+    
+    Presents counter-arguments, explores alternative perspectives.
+  </Card>
+</CardGroup>
+
+### Conclave Process
+
+<Steps>
+  <Step title="Present Question">
+    User poses a question or decision to the conclave
+  </Step>
+  
+  <Step title="Individual Analysis">
+    Each agent analyzes independently from their perspective
+  </Step>
+  
+  <Step title="Cross-Examination">
+    Agents challenge each other's reasoning
+  </Step>
+  
+  <Step title="Evidence Gathering">
+    Pull from knowledge base with RAG for supporting evidence
+  </Step>
+  
+  <Step title="Synthesis">
+    Sintetizador compiles final recommendation with dissenting views
+  </Step>
+</Steps>
+
+### Running a Conclave
+
+```bash
+# Start deliberation session
+/conclave "Should we prioritize scaling or optimization right now?"
+```
+
+**Output includes:**
+- Individual agent positions
+- Evidence from knowledge base
+- Points of consensus
+- Points of disagreement
+- Final synthesized recommendation
+- Dissenting opinions
+
+## SYSTEM: Orchestrators (L0)
+
+<Accordion title="Overview">
+  System agents manage core operations. JARVIS is the primary orchestrator.
+</Accordion>
+
+### JARVIS
+
+**Path:** `core/jarvis/`
+
+**Responsibilities:**
+- Pipeline orchestration
+- Agent supervision
+- Quality control
+- Session management
+- Knowledge curation
+
+**DNA:** Hand-crafted 5-layer cognitive framework (see `core/jarvis/03-JARVIS-DNA.yaml`)
+
+**Key Philosophies:**
+- "The master is always right, except when wrong — and it's my duty to say when"
+- "Anticipate needs rather than react to requests"
+- "Knowledge without action is waste. Action without knowledge is danger."
+
+## Agent Architecture
+
+### Standard Agent Template (V3)
+
+All agents follow the template in `agents/_templates/TEMPLATE-AGENT-MD-ULTRA-ROBUSTO-V3.md` with 11 mandatory parts:
+
+<Accordion title="11 Mandatory Parts">
+  1. **COMPOSIÇÃO ATÔMICA** - Architecture, DNA integration
+  2. **GRÁFICO DE IDENTIDADE** - Radar chart of capabilities
+  3. **MAPA NEURAL** - Top insights and mental models
+  4. **NÚCLEO OPERACIONAL** - Mission, triggers, boundaries
+  5. **SISTEMA DE VOZ** - Tone, phrases, communication style
+  6. **MOTOR DE DECISÃO** - Heuristics and decision trees
+  7. **INTERFACES DE CONEXÃO** - Related agents and interactions
+  8. **PROTOCOLO DE DEBATE** - Council participation rules
+  9. **MEMÓRIA EXPERIENCIAL** - Cases, calibration, evolution
+  10. **EXPANSÕES E REFERÊNCIAS** - Knowledge base links
+  11. **METADATA** - Version, sources, hash
+</Accordion>
+
+### Agent Components
+
+<Tabs>
+  <Tab title="AGENT.md">
+    **Agent Definition**
+    
+    - Identity and role
+    - DNA integration
+    - Reasoning protocols
+    - Decision frameworks
+    - Communication style
+  </Tab>
+  
+  <Tab title="SOUL.md">
+    **Personality Core**
+    
+    - Voice and tone
+    - Core values
+    - Behavioral patterns
+    - Communication preferences
+  </Tab>
+  
+  <Tab title="MEMORY.md">
+    **Episodic Memory**
+    
+    - Team Agreement format
+    - Past decisions
+    - Learned lessons
+    - Calibration history
+  </Tab>
+  
+  <Tab title="DNA-CONFIG.yaml">
+    **Cognitive DNA**
+    
+    - 5-layer framework
+    - Source traceability
+    - Confidence scores
+    - Cross-references
+  </Tab>
+</Tabs>
+
+## Agent Registry
+
+**File:** `agents/AGENT-INDEX.yaml`
+
+Auto-updated registry of all agents:
+
+```yaml
+version: "4.1.0"
+updated: "2026-02-27"
+
+totals:
+  minds: 5
+  cargo: 14
+  conclave: 3
+  total: 22
+
+minds:
+  - id: alex-hormozi
+    path: agents/minds/alex-hormozi/
+    has_soul: true
+    has_memory: true
+    status: active
+
+cargo:
+  sales:
+    - id: sales-lead
+      path: agents/cargo/sales/sales-lead/
+      status: active
+```
+
+## Agent Operations
+
+### Creating New Agents
+
+```bash
+# Create new agent with template
+/create-agent --layer L4 --id sales-trainer --name "Sales Trainer" --role "Training and development"
+```
+
+### Updating Agent Memory
+
+Memories are updated automatically during pipeline Phase 7 when new knowledge is discovered.
+
+**Approval options:**
+- **SIM** - Update AGENT.md + MEMORY.md
+- **APENAS MEMORY** - Update memory only
+- **PULAR** - Skip for now
+
+### Querying Agents
+
+```bash
+# Query specific agent
+/ask [agent-id] "[question]"
+
+# Examples
+/ask alex-hormozi "How do I structure a value ladder?"
+/ask sales-lead "What's the best onboarding sequence for new closers?"
+```
+
+## Agent Commands
+
+| Command | Action |
+|---------|--------|
+| `/create-agent` | Create new agent |
+| `/ask [id]` | Query specific agent |
+| `/conclave` | Start council deliberation |
+| `/agents` | Show agent status |
+
+## Agent Hooks
+
+Automatic agent maintenance via hooks:
+
+- `agent_index_updater.py` - Auto-update AGENT-INDEX.yaml
+- `agent_memory_persister.py` - Persist memory changes
+- `agent_creation_trigger.py` - Trigger creation at thresholds
+- `claude_md_agent_sync.py` - Sync agent files
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="DNA Schema" icon="dna" href="/concepts/dna-schema">
+    Learn how agent DNA is extracted
+  </Card>
+  
+  <Card title="Knowledge Pipeline" icon="arrows-spin" href="/concepts/knowledge-pipeline">
+    See how agents are enriched in Phase 7
+  </Card>
+  
+  <Card title="Layer System" icon="layer-group" href="/concepts/layer-system">
+    Understand L1/L2/L3 agent distribution
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Explore the complete system architecture
+  </Card>
+</CardGroup>

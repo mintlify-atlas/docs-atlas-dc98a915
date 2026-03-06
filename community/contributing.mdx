@@ -1,0 +1,185 @@
+---
+title: Contributing to Mega Brain
+description: Guidelines for contributing to the Mega Brain project, including branch workflow, commit conventions, and pull request process.
+---
+
+## Maintainer
+
+This project is maintained exclusively by **@thiagofinch**. All official updates and releases are published by the maintainer only.
+
+## Branch Workflow
+
+<Note>
+**IMPORTANT**: Push direto em `main` = PROIBIDO. Always create a branch and open a Pull Request.
+</Note>
+
+### Branch Naming Convention
+
+Use the following prefixes for your branch names:
+
+| Prefix | Use Case |
+|--------|----------|
+| `feat/` | New features |
+| `fix/` | Bug fixes |
+| `docs/` | Documentation changes |
+| `refactor/` | Code refactoring |
+| `test/` | Adding or updating tests |
+
+**Format**: `{prefix}{short-description}`
+
+<Card title="Examples" icon="code-branch">
+  - `feat/add-pipeline-v2`
+  - `fix/batch-log-format`
+  - `docs/update-readme`
+  - `refactor/simplify-session-logic`
+</Card>
+
+## Commit Conventions
+
+Mega Brain uses [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages:
+
+```bash
+feat: add new pipeline processor
+fix: correct batch numbering in logs
+docs: update CLAUDE.md with new rules
+refactor: simplify session autosave logic
+test: add unit tests for source-sync
+chore: update dependencies
+```
+
+<Tip>
+Reference related issues when applicable: `feat: add login form refs #42`
+</Tip>
+
+### Commit Message Structure
+
+```
+<type>: <short description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `refactor`: Code refactoring
+- `test`: Test additions or updates
+- `chore`: Maintenance tasks
+- `perf`: Performance improvements
+- `ci`: CI/CD changes
+
+## Pull Requests
+
+### PR Workflow
+
+1. **Create a branch** from `main` following the naming convention above
+2. **Make your changes** with conventional commits
+3. **Open a PR** using the provided template
+4. **Get approval** - All PRs require approval from **@thiagofinch** before merge
+5. **Address checklist** - Ensure all checklist items in the PR template are addressed
+6. **Link issues** - Use `Fixes #XX` in the PR body to auto-close related issues
+
+<CardGroup cols={2}>
+  <Card title="Before Opening PR" icon="check">
+    - Branch follows naming convention
+    - Commits follow conventional format
+    - All tests pass locally
+    - Documentation updated if needed
+  </Card>
+  <Card title="In PR Description" icon="file-lines">
+    - Clear description of changes
+    - Link to related issues
+    - Screenshots/examples if UI changes
+    - Checklist items addressed
+  </Card>
+</CardGroup>
+
+## What NOT to Do
+
+<Warning>
+**Prohibited Actions**:
+- Do NOT push directly to `main`
+- Do NOT merge without PR approval
+- Do NOT commit secrets, API keys, or `.env` files
+- Do NOT skip the PR template checklist
+</Warning>
+
+## Security Guidelines
+
+<Note>
+**Security Best Practices**:
+- Never hardcode credentials in code
+- Use `.env` for all secrets (already in `.gitignore`)
+- If a key is accidentally exposed, rotate it immediately
+- Review code for sensitive information before committing
+</Note>
+
+### Secret Management
+
+All sensitive configuration belongs in `.env`:
+
+```bash
+# .env (gitignored)
+OPENAI_API_KEY=sk-...
+VOYAGE_API_KEY=pa-...
+GOOGLE_CLIENT_ID=...
+```
+
+Never commit:
+- API keys or tokens
+- Password or credentials
+- `.env` files
+- Private configuration data
+
+## Code Style
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|----------|
+| Folders | lowercase | `inbox`, `system` |
+| Config files | SCREAMING-CASE | `STATE.json`, `MEMORY.md` |
+| Python scripts | snake_case | `session_start.py` |
+| Skills | kebab-case | `knowledge-extraction/` |
+
+### Python Guidelines
+
+- Use `pathlib.Path` for cross-platform file paths
+- Python 3.10+ required
+- Stdlib + PyYAML only for hooks
+- Follow PEP 8 style guide
+
+### File Structure
+
+```python
+from pathlib import Path
+
+# Good - cross-platform
+path = Path("inbox") / "file.txt"
+
+# Bad - platform-specific
+path = "inbox/file.txt"
+```
+
+## Testing
+
+Before submitting your PR:
+
+```bash
+# Validate layer distribution
+npm run validate:layers
+
+# Run full pre-publish checks
+node bin/pre-publish-gate.js
+```
+
+## Questions?
+
+Open an issue or reach out to **@thiagofinch** on the project repository.
+
+<Card title="Need Help?" icon="question">
+  If you're unsure about any contribution guidelines or have questions about implementation details, don't hesitate to ask by opening an issue or contacting the maintainer.
+</Card>

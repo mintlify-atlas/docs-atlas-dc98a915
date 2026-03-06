@@ -1,0 +1,657 @@
+---
+title: 'Schemas'
+description: 'JSON schemas for data validation and state management'
+---
+
+# Schemas
+
+All Mega Brain state and artifacts use JSON Schema validation for data integrity.
+
+## Schema Index
+
+| Schema | State File | Purpose |
+|--------|------------|----------|
+| `chunks-state.schema.json` | `CHUNKS-STATE.json` | Semantic chunks with embeddings |
+| `canonical-map.schema.json` | `CANONICAL-MAP.json` | Entity canonicalization mappings |
+| `insights-state.schema.json` | `INSIGHTS-STATE.json` | Extracted insights by priority |
+| `narratives-state.schema.json` | `NARRATIVES-STATE.json` | Synthesized narratives |
+| `file-registry.schema.json` | `file-registry.json` | Processed file tracking |
+| `decisions-registry.schema.json` | `decisions-registry.json` | Council decisions and precedents |
+
+**Location:** `core/schemas/`
+
+---
+
+## State File Locations
+
+```
+processing/
+├── chunks/
+│   ├── CHUNKS-STATE.json           # Master chunk index
+│   └── {source-id}.json            # Per-source chunks
+├── canonical/
+│   ├── CANONICAL-MAP.json          # Entity mappings
+│   ├── ENTITY-REGISTRY.json        # Entity tracking
+│   └── review_queue.jsonl          # Merge candidates
+├── insights/
+│   └── INSIGHTS-STATE.json         # Extracted insights
+└── narratives/
+    └── NARRATIVES-STATE.json       # Synthesized narratives
+
+system/REGISTRY/
+└── file-registry.json              # File tracking
+
+logs/SYSTEM/
+└── decisions-registry.json         # Council decisions
+```
+
+---
+
+## chunks-state.schema.json
+
+Validates chunk state with embeddings and metadata.
+
+**Schema Version:** 1.0.0
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 1,
+    "created_at": "2026-03-05T12:00:00Z",
+    "updated_at": "2026-03-05T14:30:00Z",
+    "total_sources": 15,
+    "total_chunks": 342
+  },
+  "chunks_by_source": {
+    "CG001": {
+      "source_id": "CG001",
+      "source_name": "Cole Gordon",
+      "source_file": "inbox/COLE-GORDON/PODCASTS/farm-system.txt",
+      "source_hash": "sha256:...",
+      "chunk_count": 23,
+      "processed_at": "2026-03-05T12:00:00Z",
+      "chunks": [
+        {
+          "chunk_id": "CG001-001",
+          "content": "The farm system is...",
+          "word_count": 847,
+          "embedding": [0.123, -0.456, ...],  // 1024-dim vector
+          "persons_mentioned": ["Cole Gordon"],
+          "roles_mentioned": ["CLOSER", "BDR"],
+          "themes": ["02-PROCESSO-VENDAS"],
+          "priority": "HIGH",
+          "metadata": {
+            "chunk_index": 0,
+            "start_char": 0,
+            "end_char": 5234
+          }
+        }
+      ]
+    }
+  },
+  "change_log": [
+    {
+      "timestamp": "2026-03-05T12:00:00Z",
+      "action": "source_added",
+      "source_id": "CG001",
+      "chunk_count": 23
+    }
+  ]
+}
+```
+
+### Field Definitions
+
+<ResponseField name="metadata" type="object" required>
+  Schema metadata and statistics
+  
+  <Expandable title="Properties">
+    <ResponseField name="version" type="integer" required>
+      Schema version (increments on changes)
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string" required>
+      ISO 8601 timestamp of creation
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string" required>
+      ISO 8601 timestamp of last update
+    </ResponseField>
+    
+    <ResponseField name="total_sources" type="integer" required>
+      Count of unique sources
+    </ResponseField>
+    
+    <ResponseField name="total_chunks" type="integer" required>
+      Count of all chunks across sources
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="chunks_by_source" type="object" required>
+  Dictionary mapping source_id to chunk data
+  
+  <Expandable title="Source Object">
+    <ResponseField name="source_id" type="string" required>
+      Unique source identifier (e.g., "CG001")
+    </ResponseField>
+    
+    <ResponseField name="source_name" type="string" required>
+      Human-readable source name
+    </ResponseField>
+    
+    <ResponseField name="source_file" type="string" required>
+      Original file path
+    </ResponseField>
+    
+    <ResponseField name="source_hash" type="string" required>
+      SHA-256 hash of source content
+    </ResponseField>
+    
+    <ResponseField name="chunk_count" type="integer" required>
+      Number of chunks for this source
+    </ResponseField>
+    
+    <ResponseField name="chunks" type="array" required>
+      Array of chunk objects
+      
+      <Expandable title="Chunk Object">
+        <ResponseField name="chunk_id" type="string" required>
+          Unique chunk ID: `{source_id}-{NNN}`
+        </ResponseField>
+        
+        <ResponseField name="content" type="string" required>
+          Chunk text content (500-1500 words)
+        </ResponseField>
+        
+        <ResponseField name="word_count" type="integer" required>
+          Word count of content
+        </ResponseField>
+        
+        <ResponseField name="embedding" type="array">
+          1024-dimensional embedding vector (Voyage)
+        </ResponseField>
+        
+        <ResponseField name="persons_mentioned" type="array">
+          List of canonical person names
+        </ResponseField>
+        
+        <ResponseField name="roles_mentioned" type="array">
+          List of canonical role names
+        </ResponseField>
+        
+        <ResponseField name="themes" type="array">
+          List of theme codes (e.g., ["02-PROCESSO-VENDAS"])
+        </ResponseField>
+        
+        <ResponseField name="priority" type="string">
+          Priority level: `HIGH`, `MEDIUM`, `LOW`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="change_log" type="array" required>
+  Audit trail of all changes to this state file
+</ResponseField>
+
+### Validation
+
+```python
+import json
+import jsonschema
+
+# Load schema
+with open('core/schemas/chunks-state.schema.json') as f:
+    schema = json.load(f)
+
+# Load data
+with open('processing/chunks/CHUNKS-STATE.json') as f:
+    data = json.load(f)
+
+# Validate
+jsonschema.validate(data, schema)
+```
+
+**Source:** `core/schemas/chunks-state.schema.json:1-xxx`
+
+---
+
+## canonical-map.schema.json
+
+Entity canonicalization mappings and aliases.
+
+**Schema Version:** 1.0.0
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 15,
+    "updated_at": "2026-03-05T14:30:00Z"
+  },
+  "persons": {
+    "Alex Hormozi": {
+      "canonical": "Alex Hormozi",
+      "aliases": ["alex hormozi", "hormozi", "Alex H"],
+      "sources": ["HR001", "HR002", "CG005"],
+      "mention_count": 147,
+      "has_agent": true,
+      "has_dna": true
+    }
+  },
+  "roles": {
+    "CLOSER": {
+      "canonical": "CLOSER",
+      "aliases": ["closer", "sales closer", "closers"],
+      "mention_count": 89,
+      "mention_breakdown": {
+        "direct": 75,
+        "inferred": 10,
+        "emergent": 4
+      },
+      "weighted_score": 85.5,
+      "sources": ["CG001", "CG002", "JM001"],
+      "has_agent": true,
+      "domain_ids": ["SALES"]
+    }
+  },
+  "themes": {
+    "processo-vendas": {
+      "canonical": "processo-vendas",
+      "theme_code": "02-PROCESSO-VENDAS",
+      "aliases": ["sales process", "processo de vendas"],
+      "occurrence_count": 234,
+      "sources": ["CG001", "JM001", "HR003"],
+      "has_dossier": true,
+      "domain_ids": ["SALES"]
+    }
+  },
+  "concepts": {
+    "Farm System": {
+      "canonical": "Farm System",
+      "aliases": ["farm system", "the farm"],
+      "layer": "L4",  // DNA layer
+      "occurrence_count": 42,
+      "sources": ["CG001", "CG002"]
+    }
+  }
+}
+```
+
+### Usage
+
+```python
+from core.intelligence.entity_normalizer import normalize_entity
+
+result = normalize_entity("alex hormozi", "person")
+# Returns: {"canonical": "Alex Hormozi", "match_type": "alias", ...}
+```
+
+**Source:** `core/schemas/canonical-map.schema.json:1-xxx`
+
+---
+
+## insights-state.schema.json
+
+Extracted insights with DNA layer classification.
+
+**Schema Version:** 1.0.0
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 8,
+    "updated_at": "2026-03-05T14:30:00Z"
+  },
+  "insights_state": {
+    "persons": {
+      "Cole Gordon": {
+        "HIGH": [
+          {
+            "insight_id": "INS-CG001-001",
+            "chunk_id": "CG001-005",
+            "content": "The farm system requires 3 closers per setter to maintain balance.",
+            "dna_layer": "L4",  // FRAMEWORKS
+            "priority": "HIGH",
+            "confidence": 0.95,
+            "themes": ["01-ESTRUTURA-TIME", "02-PROCESSO-VENDAS"],
+            "extracted_at": "2026-03-05T12:30:00Z"
+          }
+        ],
+        "MEDIUM": [...],
+        "LOW": [...]
+      }
+    },
+    "themes": {
+      "processo-vendas": {
+        "HIGH": [...],
+        "MEDIUM": [...],
+        "LOW": [...]
+      }
+    }
+  }
+}
+```
+
+### DNA Layer Mapping
+
+| Layer | Name | Example Insight |
+|-------|------|----------------|
+| L1 | PHILOSOPHIES | "Sales is a transfer of belief" |
+| L2 | MENTAL-MODELS | "Think in systems, not tactics" |
+| L3 | HEURISTICS | "If close rate < 20%, problem is qualification" |
+| L4 | FRAMEWORKS | "CLOSER framework: C-L-O-S-E-R steps" |
+| L5 | METHODOLOGIES | "Step 1: Clarify problem. Step 2: Label pain..." |
+
+**Source:** `core/schemas/insights-state.schema.json:1-xxx`
+
+---
+
+## narratives-state.schema.json
+
+Synthesized narratives with patterns and tensions.
+
+**Schema Version:** 1.0.0
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 3,
+    "updated_at": "2026-03-05T14:30:00Z"
+  },
+  "narratives_state": {
+    "persons": {
+      "Cole Gordon": {
+        "narrative": "Cole Gordon's sales philosophy centers on...",
+        "last_updated": "2026-03-05T14:00:00Z",
+        "scope": "sales_methodology",
+        "corpus": ["CG001", "CG002", "CG003"],
+        "insights_included": ["INS-CG001-001", "INS-CG001-005", ...],
+        "patterns_identified": [
+          {
+            "pattern": "Emphasis on team structure over individual performance",
+            "evidence": ["CG001-005", "CG001-012"],
+            "frequency": "recurring"
+          }
+        ],
+        "tensions": [
+          {
+            "tension": "Balance between setter autonomy and farm system structure",
+            "manifestation": "Wants setters to be creative but follow farm ratios",
+            "evidence": ["CG001-008", "CG002-003"]
+          }
+        ],
+        "open_loops": [
+          {
+            "question": "How to scale farm system beyond 50 closers?",
+            "context": "CG001-015",
+            "importance": "HIGH"
+          }
+        ],
+        "next_questions": [
+          "What's the maximum setter-to-closer ratio before quality drops?",
+          "How does farm system adapt for different price points?"
+        ]
+      }
+    },
+    "themes": {
+      "processo-vendas": {
+        "narrative": "...",
+        "perspectives": [
+          {
+            "person": "Cole Gordon",
+            "viewpoint": "Farm system with 1:3 setter-closer ratio",
+            "evidence": ["CG001-005"]
+          },
+          {
+            "person": "Jeremy Miner",
+            "viewpoint": "NEPQ methodology for consultative selling",
+            "evidence": ["JM001-003"]
+          }
+        ],
+        "consensus_points": [
+          "Qualification is more important than closing skills"
+        ],
+        "tensions": [
+          "Farm system (Cole) vs solo closer model (Jeremy)"
+        ]
+      }
+    }
+  }
+}
+```
+
+### Usage
+
+```bash
+# Use narratives for knowledge extraction
+/extract-knowledge "auto"  # Reads NARRATIVES-STATE.json
+```
+
+**Source:** `core/schemas/narratives-state.schema.json:1-xxx`
+
+---
+
+## file-registry.schema.json
+
+Processed file tracking with checksums.
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 42,
+    "updated_at": "2026-03-05T14:30:00Z"
+  },
+  "files": [
+    {
+      "source_id": "CG001",
+      "source_file": "inbox/COLE-GORDON/PODCASTS/farm-system.txt",
+      "source_hash": "sha256:...",
+      "source_name": "Cole Gordon",
+      "source_company": "Cole Gordon",
+      "processed_at": "2026-03-05T12:00:00Z",
+      "chunk_count": 23,
+      "status": "complete",
+      "artifacts": [
+        "/processing/chunks/CG001.json",
+        "/knowledge/dossiers/persons/COLE-GORDON.md"
+      ]
+    }
+  ]
+}
+```
+
+**Source:** `core/schemas/file-registry.schema.json:1-xxx`
+
+---
+
+## decisions-registry.schema.json
+
+Council decisions and precedents.
+
+### Structure
+
+```json
+{
+  "metadata": {
+    "version": 7,
+    "updated_at": "2026-03-05T14:30:00Z"
+  },
+  "decisions": [
+    {
+      "decision_id": "20260305130249-CRO-CFO",
+      "query": "Should we increase closer commission from 10% to 15%?",
+      "date": "2026-03-05T13:02:49Z",
+      "participants": ["CRO", "CFO", "CMO"],
+      "council": ["critico-metodologico", "advogado-do-diabo", "sintetizador"],
+      "recommendation": "Pilot 15% with top 20% performers for Q2",
+      "confidence": 72,
+      "chunk_ids": ["CG001-005", "HR003-012"],
+      "sources": [
+        "/knowledge/SOURCES/COLE-GORDON/04-COMISSIONAMENTO/closer-comp.md"
+      ],
+      "residual_risks": [
+        "May increase CAC if close rate doesn't improve"
+      ],
+      "next_steps": [
+        {
+          "action": "Design pilot program criteria",
+          "owner": "CRO",
+          "deadline": "2026-03-15"
+        }
+      ]
+    }
+  ],
+  "precedents": [
+    {
+      "precedent_id": "PREC-2026-001",
+      "pattern": "Commission increase decisions",
+      "guideline": "Always pilot with top performers first",
+      "based_on": ["20260305130249-CRO-CFO", "20260201142035-CRO-CFO"]
+    }
+  ]
+}
+```
+
+**Source:** `core/schemas/decisions-registry.schema.json:1-xxx`
+
+---
+
+## ID System
+
+### Source IDs
+
+**Format:** `PREFIX` + `NNN`
+
+**Examples:** `CG001`, `JL003`, `HR005`
+
+**Registered Prefixes:**
+
+| Prefix | Person/Channel | Company |
+|--------|----------------|--------|
+| JL | Jordan Lee | AI Business |
+| CJ | Charlie Johnson Show | - |
+| MT | Max Tornow | Max Tornow Podcast |
+| HR | Alex Hormozi | - |
+| CG | Cole Gordon | - |
+| SS | Sam Oven | Setterlun University |
+| JM | Jeremy Miner | 7th Level |
+
+### Chunk IDs
+
+**Format:** `{SOURCE_ID}-{NNN}`
+
+**Examples:** `CG001-001`, `JL003-015`
+
+### Decision IDs
+
+**Format:** `YYYYMMDDHHMMSS-{ORIGIN}-{DEST}`
+
+**Example:** `20260305130249-CRO-CFO`
+
+### Precedent IDs
+
+**Format:** `PREC-YYYY-NNN`
+
+**Example:** `PREC-2026-001`
+
+---
+
+## Foreign Keys
+
+Rastreability graph:
+
+```
+file-registry.json
+  ├─ source_id ───────────────┐
+  └─ chunk_count                  │
+                                 │
+                                 ▼
+CHUNKS-STATE.json ◄──────────────┘
+  ├─ source_id
+  └─ chunks[]
+      └─ chunk_id ──────────────┐
+                                 │
+INSIGHTS-STATE.json ◄────────────├──────────┐
+  └─ chunk_id                    │            │
+      └─ insight_id ─────────────│──────────┤
+                                 │            │
+NARRATIVES-STATE.json ◄───────────┘            │
+  └─ evidence_chain[] (chunk_ids)           │
+                                              │
+decisions-registry.json ◄─────────────────────┘
+  ├─ chunk_ids[]
+  └─ sources[] (knowledge files)
+```
+
+---
+
+## Validation Tools
+
+### Python
+
+```python
+import json
+import jsonschema
+
+def validate_state_file(state_file, schema_file):
+    with open(schema_file) as f:
+        schema = json.load(f)
+    with open(state_file) as f:
+        data = json.load(f)
+    
+    try:
+        jsonschema.validate(data, schema)
+        return True, "Valid"
+    except jsonschema.ValidationError as e:
+        return False, str(e)
+```
+
+### CLI
+
+```bash
+# Validate all state files
+python3 core/intelligence/validate_json_integrity.py
+
+# Validate single file
+python3 -m jsonschema -i CHUNKS-STATE.json core/schemas/chunks-state.schema.json
+```
+
+---
+
+## Schema Evolution
+
+### Version Increment Rules
+
+1. **Never delete fields** - Mark as deprecated
+2. **Always validate before save** - Use jsonschema
+3. **Increment version** on each schema change
+4. **Maintain change_log** for auditability
+
+### Migration
+
+When schema changes:
+
+1. Create migration script: `scripts/migrate_v{N}_to_v{N+1}.py`
+2. Update schema file with new version
+3. Run migration on all state files
+4. Validate with new schema
+
+---
+
+## See Also
+
+- [Intelligence Layer](/api/core/intelligence) - Scripts that use schemas
+- [Workflows](/api/core/workflows) - State file creation
+- [Tasks](/api/core/tasks) - Schema validation in acceptance criteria

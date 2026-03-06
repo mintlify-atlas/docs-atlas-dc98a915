@@ -1,0 +1,591 @@
+---
+title: Frequently Asked Questions
+description: Common questions about Mega Brain AI Knowledge Management System, including setup, usage, capabilities, and troubleshooting.
+---
+
+## Getting Started
+
+<Accordion title="What is Mega Brain?">
+  Mega Brain is an AI-powered knowledge management system that transforms expert materials (videos, PDFs, transcriptions, podcasts, training courses) into structured knowledge. It produces:
+  
+  - **Playbooks** - Actionable frameworks and methodologies
+  - **DNA Schemas** - Cognitive profiles across 5 knowledge layers
+  - **Mind Clone Agents** - AI agents that reason like specific experts
+  
+  Built for solo entrepreneurs and small teams who want to operationalize the expertise they've accumulated across dozens of courses, mentors, and resources.
+  
+  <Tip>
+  Think of it as your personal knowledge compiler - turning raw expert content into executable intelligence.
+  </Tip>
+</Accordion>
+
+<Accordion title="What can I do with Mega Brain?">
+  **Knowledge Management**:
+  - Ingest any format (videos, PDFs, transcriptions, podcasts)
+  - Extract structured DNA across 5 knowledge layers
+  - Build playbooks and dossiers with full source traceability
+  
+  **AI Agents**:
+  - Create mind clones that reason like specific experts
+  - Use functional role agents (Sales, Marketing, Operations, Finance)
+  - Run multi-agent deliberation sessions (Conclave)
+  
+  **Developer Experience**:
+  - 20+ hooks for automated validation and quality control
+  - Slash commands for common operations
+  - Session persistence with auto-save and resume
+  - Skill system with keyword-based auto-routing
+</Accordion>
+
+<Accordion title="Do I need programming experience to use Mega Brain?">
+  **No programming required for basic use**:
+  - Setup wizard guides you through installation
+  - Slash commands provide simple interfaces
+  - Natural language interactions with agents
+  
+  **Programming helpful for**:
+  - Custom hook development
+  - Advanced skill creation
+  - Pipeline customization
+  - Contributing to the project
+  
+  <Note>
+  The CLI and slash commands are designed to be accessible to non-technical users.
+  </Note>
+</Accordion>
+
+<Accordion title="How long does it take to get started?">
+  **5 minutes from zero to first insight**:
+  
+  1. **Install** (1 min):
+     ```bash
+     npm install mega-brain-ai
+     ```
+  
+  2. **Setup** (2 min):
+     ```bash
+     npx mega-brain-ai setup
+     ```
+     Enter your OpenAI API key when prompted.
+  
+  3. **Ingest content** (30 sec):
+     ```
+     /ingest https://youtube.com/watch?v=example
+     ```
+  
+  4. **Process** (2-3 min):
+     ```
+     /process-jarvis
+     ```
+  
+  See the [Quick Start Guide](/quickstart) for detailed walkthrough.
+</Accordion>
+
+## Prerequisites & Setup
+
+<Accordion title="What do I need to install?">
+  **Required**:
+  - [Claude Code](https://claude.ai/claude-code) - Max or Pro plan (core runtime)
+  - [Node.js](https://nodejs.org) - Version 18.0.0 or higher (CLI and tooling)
+  - [Python](https://python.org) - Version 3.10 or higher (intelligence scripts)
+  
+  **API Keys**:
+  - `OPENAI_API_KEY` - **Required** for transcription
+  - `VOYAGE_API_KEY` - Recommended for semantic embeddings
+  - `GOOGLE_CLIENT_ID` - Optional for Google Drive import
+  
+  <Tip>
+  The setup wizard (`/setup`) automatically checks prerequisites and guides you through configuration.
+  </Tip>
+</Accordion>
+
+<Accordion title="Why is Claude Code required?">
+  Claude Code is the runtime environment that:
+  - Executes hooks and automation
+  - Manages agent interactions
+  - Orchestrates the processing pipeline
+  - Provides the LLM capabilities
+  
+  Mega Brain integrates deeply with Claude Code's features:
+  - Hooks system for automation
+  - Skills system for specialized workflows
+  - Slash commands for common operations
+  - Session persistence
+  
+  <Note>
+  You need a Claude Max or Pro subscription to use Claude Code.
+  </Note>
+</Accordion>
+
+<Accordion title="Where do I get API keys?">
+  **OpenAI API Key** (Required):
+  1. Go to [platform.openai.com](https://platform.openai.com)
+  2. Sign up or log in
+  3. Navigate to API Keys section
+  4. Create a new key
+  5. Copy and save securely
+  
+  **Voyage API Key** (Recommended):
+  1. Visit [Voyage AI](https://www.voyageai.com)
+  2. Sign up for an account
+  3. Generate API key
+  4. Use for semantic embeddings (RAG)
+  
+  **Google Client ID** (Optional):
+  - Only needed if importing from Google Drive
+  - Follow Google Cloud Console setup
+  - Configure OAuth credentials
+  
+  <Warning>
+  Never commit API keys to git. Always use `.env` file (already in `.gitignore`).
+  </Warning>
+</Accordion>
+
+<Accordion title="How much do API calls cost?">
+  **OpenAI (Whisper transcription)**:
+  - ~$0.006 per minute of audio
+  - 1-hour video = ~$0.36
+  - 10-hour course = ~$3.60
+  
+  **Voyage (embeddings)**:
+  - Varies by model and usage
+  - Check current pricing at voyageai.com
+  
+  **Claude Code**:
+  - Included in your Max/Pro subscription
+  - No additional API costs
+  
+  <Tip>
+  Most users spend $10-20/month on transcription for moderate use (5-10 hours of content).
+  </Tip>
+</Accordion>
+
+## Features & Capabilities
+
+<Accordion title="What file formats can I ingest?">
+  **Directly supported**:
+  - Videos: `.mp4`, `.mov`, `.avi`
+  - Audio: `.mp3`, `.wav`, `.m4a`
+  - Text: `.txt`, `.md`
+  - Documents: `.pdf`
+  - URLs: YouTube videos, web pages
+  
+  **Processing**:
+  - Audio/video → Transcribed via Whisper API
+  - PDFs → Text extraction
+  - URLs → Content fetching + transcription
+  
+  <Note>
+  Large files (>2GB) may need to be split for optimal processing.
+  </Note>
+</Accordion>
+
+<Accordion title="What are the 5 DNA knowledge layers?">
+  The DNA schema extracts expert knowledge across 5 hierarchical layers:
+  
+  | Layer | Name | Description | Example |
+  |-------|------|-------------|----------|
+  | **L1** | Philosophies | Core beliefs and worldview | "Value creation is the foundation of all business" |
+  | **L2** | Mental Models | Thinking frameworks | Value Equation framework (Hormozi) |
+  | **L3** | Heuristics | Practical rules | "Price should be 10x less than perceived value" |
+  | **L4** | Frameworks | Structured methodologies | Grand Slam Offer framework |
+  | **L5** | Methodologies | Step-by-step implementations | 5-phase offer creation process |
+  
+  Each layer builds on the previous, creating a complete cognitive profile of an expert's thinking.
+  
+  <Tip>
+  More materials from the same expert = richer, more accurate DNA extraction.
+  </Tip>
+</Accordion>
+
+<Accordion title="What's the difference between a Playbook and a Dossier?">
+  **Playbook**:
+  - Theme-based knowledge compilation
+  - Actionable frameworks and processes
+  - Example: "Sales Objection Handling Playbook"
+  - Cross-expert synthesis
+  - Goal: Executable knowledge
+  
+  **Dossier**:
+  - Expert-specific knowledge profile
+  - Complete DNA extraction
+  - Example: "Alex Hormozi Dossier"
+  - Single-source deep dive
+  - Goal: Understanding an expert's complete methodology
+  
+  <Card title="When to Use What">
+    - **Playbook**: "How do I handle objections?" (cross-expert best practices)
+    - **Dossier**: "What does Hormozi teach about offers?" (expert-specific deep dive)
+  </Card>
+</Accordion>
+
+<Accordion title="How do mind clone agents work?">
+  **Mind clones** are AI agents that reason like specific experts:
+  
+  1. **Training**: Process multiple materials from the same expert
+  2. **DNA Extraction**: System extracts cognitive patterns across 5 layers
+  3. **Agent Creation**: Agent file with expert's DNA, thinking style, vocabulary
+  4. **Consultation**: Ask questions, get responses in expert's reasoning style
+  
+  **Example**:
+  ```
+  /ask alex-hormozi "How should I price my coaching program?"
+  ```
+  
+  Response will:
+  - Use Hormozi's frameworks (Value Equation)
+  - Apply his heuristics and mental models
+  - Reference his methodologies
+  - Cite source materials
+  
+  <Warning>
+  Mind clones require at least 3-5 materials from an expert for high-fidelity responses. With only 1-2 sources, responses will be limited.
+  </Warning>
+</Accordion>
+
+<Accordion title="What is the Conclave?">
+  **Conclave** is a multi-agent deliberation system where 3 specialized agents debate your question:
+  
+  **The Council**:
+  1. **Methodological Critic** - Analyzes frameworks and rigor
+  2. **Devil's Advocate** - Identifies risks and challenges
+  3. **Synthesizer** - Builds consensus and recommendations
+  
+  **Process**:
+  1. You ask a strategic question
+  2. Each agent analyzes from their perspective
+  3. Agents cite evidence from your knowledge base
+  4. Synthesizer provides consolidated recommendation
+  5. System shows confidence score based on available data
+  
+  **Example**:
+  ```
+  /conclave "Should I raise prices or increase volume?"
+  ```
+  
+  <Tip>
+  Conclave works best with a populated knowledge base. More expert materials = better deliberations.
+  </Tip>
+</Accordion>
+
+## Processing & Pipeline
+
+<Accordion title="What happens during the 5-phase pipeline?">
+  **Phase 1 - Chunking**:
+  - Breaks content into semantic segments
+  - Preserves context and relationships
+  - Output: `artifacts/chunks/`
+  
+  **Phase 2 - Resolution**:
+  - Identifies people, concepts, entities
+  - Normalizes references
+  - Output: Entity mappings
+  
+  **Phase 3 - Extraction**:
+  - Extracts frameworks, insights, rules
+  - Applies DNA schema
+  - Output: `artifacts/insights/`
+  
+  **Phase 4 - Synthesis**:
+  - Consolidates by theme
+  - Creates narratives
+  - Output: `artifacts/narratives/`
+  
+  **Phase 5 - Compilation**:
+  - Generates dossiers and playbooks
+  - Links to sources
+  - Output: `knowledge/dossiers/`, `knowledge/playbooks/`
+  
+  <Note>
+  Each phase builds on the previous, with full traceability back to source materials.
+  </Note>
+</Accordion>
+
+<Accordion title="How long does processing take?">
+  **Typical times**:
+  - 1-hour video: 2-4 minutes
+  - 50-page PDF: 1-2 minutes
+  - 3-hour course: 5-8 minutes
+  
+  **Factors**:
+  - Content length
+  - Transcription needed (video/audio adds time)
+  - Complexity of material
+  - API response times
+  
+  <Tip>
+  Run `/jarvis-briefing` to monitor processing status and see estimated time remaining.
+  </Tip>
+</Accordion>
+
+<Accordion title="Can I process content in batches?">
+  **Yes**, batch processing is supported:
+  
+  1. Add multiple files to `inbox/`
+  2. Run `/process-jarvis`
+  3. System processes all pending files
+  4. Batch logs in `logs/batches/`
+  
+  **Best practices**:
+  - Group related content together
+  - Don't exceed 10-15 files per batch
+  - Review results before next batch
+  - Monitor disk space and API limits
+  
+  <Warning>
+  Very large batches (50+ files) may hit API rate limits. Process in groups of 10-15 for optimal results.
+  </Warning>
+</Accordion>
+
+## Community vs Pro
+
+<Accordion title="What's the difference between Community and Pro editions?">
+  **Community Edition (L1)**:
+  - ✅ Core engine and templates
+  - ✅ CLI tools and setup wizard
+  - ✅ Hooks and skills system
+  - ✅ Agent framework and templates
+  - ❌ Populated knowledge base
+  - ❌ Pre-built mind clones
+  - ❌ Cargo agents (29 functional roles)
+  - ❌ Full pipeline processing
+  
+  **Pro Edition (L2)**:
+  - ✅ Everything in Community
+  - ✅ Populated knowledge base
+  - ✅ 5 pre-built mind clones
+  - ✅ 29 cargo agents (CRO, CMO, CFO, COO, etc.)
+  - ✅ Full 5-phase pipeline
+  - ✅ Conclave with domain expertise
+  
+  See [Community vs Pro](/community/community-vs-pro) for detailed comparison.
+</Accordion>
+
+<Accordion title="Can I upgrade from Community to Pro later?">
+  **Yes**, upgrading is seamless:
+  
+  - Your personal data (L3) remains intact
+  - Your `.env` configuration carries over
+  - No migration needed
+  - Just enhanced capabilities
+  
+  **What you get**:
+  - Immediate access to pre-built agents
+  - Populated knowledge base
+  - Full pipeline capabilities
+  - Council/Conclave ready to use
+  
+  <Note>
+  Contact @thiagofinch for Pro Edition access and licensing information.
+  </Note>
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Why isn't my skill activating?">
+  **Common issues**:
+  
+  1. **Description too vague**:
+     ```yaml
+     # Too vague
+     description: Helps with files
+     
+     # Better
+     description: Extract DNA from expert materials. Use when processing videos, PDFs, or transcriptions.
+     ```
+  
+  2. **SKILL-INDEX.json missing**:
+     ```bash
+     ls .claude/SKILL-INDEX.json
+     ```
+     Should be generated on SessionStart.
+  
+  3. **Filename wrong**:
+     - Must be exactly `SKILL.md` (case-sensitive)
+  
+  4. **Directory name doesn't match frontmatter**
+  
+  See [Troubleshooting](/community/troubleshooting) for more details.
+</Accordion>
+
+<Accordion title="What if processing fails?">
+  **Check**:
+  
+  1. **API keys configured**:
+     ```bash
+     grep OPENAI_API_KEY .env
+     ```
+  
+  2. **File in inbox**:
+     ```bash
+     ls inbox/
+     ```
+  
+  3. **Python installed**:
+     ```bash
+     python --version  # Should be 3.10+
+     ```
+  
+  4. **Session logs**:
+     ```bash
+     ls -la logs/sessions/
+     # Check latest log
+     ```
+  
+  <Tip>
+  Run `/jarvis-briefing` to see health score and identify issues.
+  </Tip>
+</Accordion>
+
+## Contributing & Community
+
+<Accordion title="Can I contribute to Mega Brain?">
+  **Yes!** Contributions welcome:
+  
+  **Ways to contribute**:
+  - Bug fixes
+  - Documentation improvements
+  - New skills or hooks
+  - Feature enhancements
+  - Testing and feedback
+  
+  **Process**:
+  1. Fork the repository
+  2. Create a feature branch (`feat/my-feature`)
+  3. Follow [Contributing Guidelines](/community/contributing)
+  4. Open a Pull Request
+  5. Get approval from @thiagofinch
+  
+  <Note>
+  All PRs require approval from the maintainer before merge.
+  </Note>
+</Accordion>
+
+<Accordion title="How do I report bugs or request features?">
+  **Bug Reports**:
+  1. Check existing issues on GitHub
+  2. Create new issue with:
+     - Clear description
+     - Steps to reproduce
+     - Expected vs actual behavior
+     - System info (OS, Node version, Python version)
+     - Error messages and logs
+  
+  **Feature Requests**:
+  1. Search existing requests
+  2. Open issue with:
+     - Use case description
+     - Problem you're solving
+     - Proposed solution (optional)
+     - Examples or mockups (helpful)
+  
+  <Tip>
+  Include output from `/jarvis-briefing` in bug reports for faster diagnosis.
+  </Tip>
+</Accordion>
+
+<Accordion title="Where can I get help?">
+  **Resources**:
+  - 📖 Documentation: Read the [full docs](/)
+  - 🐛 GitHub Issues: Report bugs or ask questions
+  - 👤 Maintainer: Contact @thiagofinch
+  - 🔧 Troubleshooting: See [common issues](/community/troubleshooting)
+  
+  **Before asking**:
+  1. Check the [Troubleshooting Guide](/community/troubleshooting)
+  2. Search existing GitHub issues
+  3. Run `/jarvis-briefing` to check system status
+  4. Review relevant documentation sections
+</Accordion>
+
+## Advanced Usage
+
+<Accordion title="Can I create custom hooks?">
+  **Yes**, custom hooks are supported:
+  
+  **Location**: `.claude/hooks/`
+  
+  **Requirements**:
+  - Python 3.10+
+  - Stdlib + PyYAML only
+  - Follow hook naming conventions
+  
+  **Hook events**:
+  - `SessionStart` - When Claude starts
+  - `UserPromptSubmit` - Before each user message
+  - `PreToolUse` - Before tool execution
+  - `PostToolUse` - After tool execution
+  - `Stop` - When session ends
+  
+  **Example**:
+  ```python
+  # .claude/hooks/my_hook.py
+  import sys
+  import json
+  
+  def main():
+      # Hook logic here
+      print(json.dumps({"status": "success"}))
+  
+  if __name__ == "__main__":
+      main()
+  ```
+  
+  Register in `settings.json`:
+  ```json
+  {
+    "hooks": {
+      "SessionStart": [".claude/hooks/my_hook.py"]
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="How do I create custom skills?">
+  **Structure**:
+  ```
+  .claude/skills/my-skill/
+  ├── SKILL.md          # Main file (required)
+  ├── resources/        # Optional resources
+  └── scripts/          # Optional scripts
+  ```
+  
+  **SKILL.md format**:
+  ```yaml
+  ---
+  name: my-skill
+  description: Clear description with trigger words. Use when [scenario].
+  ---
+  
+  # Skill content
+  Instructions and workflows...
+  ```
+  
+  **Best practices**:
+  - Specific descriptions with trigger words
+  - Include "Use when..." context
+  - One capability per skill
+  - Clear instructions
+  
+  See [Troubleshooting Skills](/community/troubleshooting#skills--auto-routing) for common issues.
+</Accordion>
+
+<Accordion title="Can I customize the pipeline?">
+  **Yes**, pipeline is customizable:
+  
+  **What you can modify**:
+  - Task definitions in `core/tasks/`
+  - Workflow YAML in `core/workflows/`
+  - Intelligence scripts in `core/intelligence/`
+  - Templates in `core/templates/`
+  
+  **Caution**:
+  - Understand the task anatomy (HO-TP-001 pattern)
+  - Test changes thoroughly
+  - Follow Pedro pattern conventions
+  - Document custom modifications
+  
+  <Warning>
+  Heavy pipeline customization may complicate upgrades. Consider contributing improvements upstream.
+  </Warning>
+</Accordion>

@@ -1,0 +1,655 @@
+---
+title: 'Minds Agents'
+description: 'Expert mind clone agents with 5-layer DNA structure'
+---
+
+# Minds Agents
+
+Minds are AI replicas of expert knowledge and thinking patterns. Each mind clone has a complete 5-layer DNA structure extracted from source materials.
+
+## Architecture
+
+```
+agents/minds/
+├── alex-hormozi/
+│   ├── AGENT.md              # Agent definition
+│   ├── SOUL.md               # Voice and personality
+│   ├── MEMORY.md             # Knowledge base
+│   └── DNA-CONFIG.yaml       # 5-layer DNA structure
+├── cole-gordon/
+├── jeremy-haynes/
+├── jeremy-miner/
+└── the-scalable-company/
+```
+
+---
+
+## Active Minds
+
+| Mind ID | Expert | Focus | Sources |
+|---------|--------|-------|--------|
+| `alex-hormozi` | Alex Hormozi | Scaling, acquisition, offers | Podcasts, books, courses |
+| `cole-gordon` | Cole Gordon | High-ticket sales, farm system | Podcasts, trainings |
+| `jeremy-haynes` | Jeremy Haynes | Sales funnels, client acquisition | Masterminds, programs |
+| `jeremy-miner` | Jeremy Miner | NEPQ, consultative selling | 7th Level courses |
+| `the-scalable-company` | Composite | Scalable business systems | Multi-source synthesis |
+
+**Total Active Minds:** 5
+
+---
+
+## DNA Structure
+
+Each mind clone has a 5-layer cognitive DNA extracted from source materials:
+
+### DNA Layers (L1-L5)
+
+<Card title="L1: PHILOSOPHIES" icon="book">
+  Core beliefs, worldview, value systems
+  
+  **Example:**
+  - "Sales is a transfer of belief, not a pitch"
+  - "Optimize for lifetime value, not initial sale"
+</Card>
+
+<Card title="L2: MENTAL-MODELS" icon="brain">
+  Thinking frameworks, decision-making patterns
+  
+  **Example:**
+  - "Think in systems, not tactics"
+  - "Inversion: ask what causes failure first"
+</Card>
+
+<Card title="L3: HEURISTICS" icon="gauge">
+  Practical rules, decision shortcuts
+  
+  **Example:**
+  - "If close rate < 20%, fix qualification"
+  - "1 setter : 3 closers (farm system ratio)"
+</Card>
+
+<Card title="L4: FRAMEWORKS" icon="diagram-project">
+  Structured methodologies, named processes
+  
+  **Example:**
+  - "CLOSER framework: C-L-O-S-E-R steps"
+  - "Value Equation: Dream Outcome / (Time Delay * Effort)"
+</Card>
+
+<Card title="L5: METHODOLOGIES" icon="list-check">
+  Step-by-step implementations, tactical procedures
+  
+  **Example:**
+  - "Step 1: Clarify the problem. Step 2: Label the pain..."
+  - "Hiring process: Application → Top-grading → Role-play → Shadow"
+</Card>
+
+---
+
+## DNA-CONFIG.yaml
+
+Structure:
+
+```yaml
+version: "1.0.0"
+person: "Cole Gordon"
+last_updated: "2026-03-05T14:30:00Z"
+sources: ["CG001", "CG002", "CG003"]
+
+# Layer 1: PHILOSOPHIES (Core beliefs)
+L1_PHILOSOPHIES:
+  - id: PHI-001
+    content: "Sales is about serving the prospect, not closing them"
+    source: CG001
+    evidence: ^
+      [CG001-003] "The moment you care more about the prospect than your
+      commission, you become a consultant instead of a salesperson."
+  
+  - id: PHI-002
+    content: "Team structure beats individual talent"
+    source: CG001
+    evidence: ^
+      [CG001-005] "Farm system with average closers beats star closer model
+      because the system is anti-fragile."
+
+# Layer 2: MENTAL-MODELS (Thinking frameworks)
+L2_MENTAL_MODELS:
+  - id: MM-001
+    content: "Optimize for system resilience, not individual performance"
+    source: CG001
+    evidence: ^
+      [CG001-005] "If your revenue depends on one person, you don't have a
+      business, you have a job."
+
+# Layer 3: HEURISTICS (Practical rules)
+L3_HEURISTICS:
+  - id: HEU-001
+    content: "1 setter to 3 closers ratio (farm system)"
+    source: CG001
+    confidence: HIGH
+    context: "High-ticket sales ($5k-$50k)"
+    evidence: ^
+      [CG001-005] "The sweet spot is 1 setter feeding 3 closers. More than
+      that and closers starve. Less and setter becomes bottleneck."
+  
+  - id: HEU-002
+    content: "If close rate < 20%, problem is qualification, not closing"
+    source: CG001
+    confidence: HIGH
+    evidence: ^
+      [CG001-008] "Closer with 15% close rate doesn't need closing training,
+      they need better leads."
+
+# Layer 4: FRAMEWORKS (Structured methodologies)
+L4_FRAMEWORKS:
+  - id: FWK-001
+    name: "Farm System"
+    source: CG001
+    components:
+      - Setters (1x)
+      - Closers (3x per setter)
+      - Sales Manager (per 10 closers)
+    evidence: ^
+      [CG001-005] Detailed explanation of ratios and structure
+  
+  - id: FWK-002
+    name: "CLOSER Framework"
+    source: CG002
+    steps:
+      - "C: Clarify their situation"
+      - "L: Label their pain"
+      - "O: Overview past failures"
+      - "S: Sell the vacation (future state)"
+      - "E: Explain away concerns"
+      - "R: Reinforce decision"
+    evidence: ^
+      [CG002-012] Full framework breakdown with examples
+
+# Layer 5: METHODOLOGIES (Step-by-step procedures)
+L5_METHODOLOGIES:
+  - id: METH-001
+    name: "Objection Handling Process"
+    source: CG002
+    steps:
+      - step: 1
+        action: "Acknowledge the objection without defensiveness"
+        example: "I totally understand..."
+      - step: 2
+        action: "Isolate the objection"
+        example: "If we solve [X], is there anything else?"
+      - step: 3
+        action: "Reframe using prospect's own words"
+        example: "Remember when you said...?"
+      - step: 4
+        action: "Trial close"
+        example: "So if we handle [X], are you ready to move forward?"
+    evidence: ^
+      [CG002-015] Full methodology with real call examples
+
+# Cross-Layer Connections
+connections:
+  - from: PHI-001
+    to: [MM-001, FWK-002]
+    relationship: "Philosophy drives mental model and framework design"
+  
+  - from: HEU-001
+    to: FWK-001
+    relationship: "Heuristic is core ratio within framework"
+
+# Tensions and Open Loops
+tensions:
+  - tension: "Setter autonomy vs farm structure"
+    description: ^
+      Wants setters to be creative but must follow farm ratios
+    sources: ["CG001-008", "CG002-003"]
+
+open_loops:
+  - question: "How to scale farm system beyond 50 closers?"
+    context: "CG001-015"
+    importance: HIGH
+```
+
+---
+
+## Mind Files
+
+### AGENT.md
+
+Mind clone definition.
+
+**Structure:**
+
+```markdown
+---
+title: [Expert Name]
+type: mind
+status: active
+version: 1.0.0
+---
+
+# [EXPERT NAME]
+
+## Overview
+
+**Expertise:** [primary domain]
+
+**Known For:** [signature frameworks/ideas]
+
+**Sources:** [count] sources processed
+
+## DNA Summary
+
+**L1 Philosophies:** [count] core beliefs
+**L2 Mental Models:** [count] thinking frameworks
+**L3 Heuristics:** [count] practical rules
+**L4 Frameworks:** [count] methodologies
+**L5 Methodologies:** [count] step-by-step processes
+
+**Total DNA Items:** [sum]
+
+## Activation
+
+This mind clone is activated for queries involving:
+- Topic 1
+- Topic 2
+- Topic 3
+
+## Signature Frameworks
+
+1. **Framework 1:** [brief description]
+2. **Framework 2:** [brief description]
+
+## Knowledge Domains
+
+**Primary:**
+- Domain 1
+- Domain 2
+
+**Secondary:**
+- Domain 3
+- Domain 4
+```
+
+---
+
+### SOUL.md
+
+Voice, personality, and communication style.
+
+**Example (Cole Gordon):**
+
+```markdown
+# SOUL: Cole Gordon
+
+## Voice
+
+**Tone:** Direct, systems-focused, anti-hype
+
+**Communication Style:**
+- Speaks in terms of systems and structure
+- Values simplicity and repeatability
+- Challenges conventional "guru" wisdom
+- Uses sports/military analogies
+
+**Signature Phrases:**
+- "It's a system, not a superstar"
+- "Show me the data"
+- "What's the failure mode?"
+- "Anti-fragile > optimal"
+
+## Personality Traits
+
+**Core Traits:**
+- **Systematic:** Everything is a process
+- **Empirical:** Data over opinions
+- **Contrarian:** Questions common sales wisdom
+- **Builder:** Focuses on scalability
+
+**Behavioral Patterns:**
+- Pushes back on "best practices" without data
+- Prioritizes team structure over individual talent
+- Values long-term system over short-term wins
+- Skeptical of tactics without strategy
+
+**Decision-Making Style:**
+Systems-first. Asks "how does this scale?" and "what breaks first?" before committing.
+
+## Interaction Patterns
+
+**In Debates:**
+Calm but firm. Uses data and examples. Quick to point out logical inconsistencies.
+
+**Teaching Style:**
+Socratic. Asks questions to lead to insight rather than lecturing.
+
+**With Students:**
+Direct but supportive. No coddling, but deep investment in success.
+```
+
+---
+
+### MEMORY.md
+
+Comprehensive knowledge base with source attribution.
+
+**Structure:**
+
+```markdown
+---
+version: 8
+last_updated: "2026-03-05T14:30:00Z"
+sources_included: ["CG001", "CG002", "CG003"]
+total_insights: 147
+dna_items: 42
+---
+
+# MEMORY: Cole Gordon
+
+## Sources Processed
+
+**Total Sources:** 3
+
+1. **CG001** - Farm System Deep Dive (Podcast)
+   - Processed: 2026-03-01
+   - Chunks: 23
+   - Insights: 67
+
+2. **CG002** - CLOSER Framework Masterclass
+   - Processed: 2026-03-02
+   - Chunks: 18
+   - Insights: 52
+
+3. **CG003** - Building Scalable Sales Teams
+   - Processed: 2026-03-05
+   - Chunks: 15
+   - Insights: 28
+
+## Knowledge Domains
+
+### Sales Structure
+
+#### Farm System
+
+**Core Concept:** ^[CG001-005]
+1 setter feeds 3 closers. System beats superstars. Anti-fragile design.
+
+**Ratios:**
+- 1 Setter : 3 Closers ^[CG001-005]
+- 1 Manager : 10 Closers ^[CG001-012]
+- Minimum team: 1 setter + 3 closers = $1M/year ^[CG001-008]
+
+**Why It Works:** ^[CG001-005]
+- Specialization: Setters set, closers close
+- Load balancing: No closer starves or gets overwhelmed
+- Resilience: No single point of failure
+- Scalability: Add setters to grow predictably
+
+**Failure Modes:** ^[CG001-015]
+- < 3 closers per setter: Closers starve, turnover high
+- > 4 closers per setter: Setter becomes bottleneck
+- No manager past 10 closers: Quality drops, training gaps
+
+### Sales Methodology
+
+#### CLOSER Framework
+
+**Full Breakdown:** ^[CG002-012]
+
+1. **C: Clarify** their situation
+   - Where are you now?
+   - Where do you want to be?
+   - What's stopping you?
+
+2. **L: Label** their pain
+   - "So what I'm hearing is..."
+   - Get them to feel the cost of inaction
+
+3. **O: Overview** past failures
+   - "What have you tried?"
+   - "Why didn't it work?"
+   - (Positions you as different)
+
+4. **S: Sell** the vacation (future state)
+   - Paint vivid picture of transformation
+   - Use their words, not yours
+
+5. **E: Explain** away concerns
+   - Preemptive objection handling
+   - "You might be wondering..."
+
+6. **R: Reinforce** decision
+   - "You made the right choice"
+   - Reduce buyer's remorse
+   - Set expectations for onboarding
+
+**When to Use:** ^[CG002-012]
+- High-ticket sales ($5k+)
+- Consultative sell (not transactional)
+- 45-90 minute call format
+
+## Cross-References
+
+**Related Agents:**
+- CLOSER: Implements CLOSER framework
+- SALES-MANAGER: Manages farm system structure
+- BDR: Feeds leads into farm
+
+**Related Dossiers:**
+- `/knowledge/dossiers/persons/COLE-GORDON.md`
+- `/knowledge/dossiers/themes/processo-vendas.md`
+
+**Related Knowledge:**
+- `/knowledge/SOURCES/COLE-GORDON/01-ESTRUTURA-TIME/farm-system.md`
+- `/knowledge/SOURCES/COLE-GORDON/02-PROCESSO-VENDAS/closer-framework.md`
+
+## Update Log
+
+```
+v8 - 2026-03-05: Added CG003 (building scalable sales teams)
+v7 - 2026-03-02: Added CG002 (CLOSER framework deep dive)
+v6 - 2026-03-01: Added CG001 (farm system foundations)
+```
+```
+
+---
+
+## Mind Creation
+
+### Automatic Trigger
+
+Minds are created when person crosses threshold:
+
+```python
+if person.mention_count >= 50 and len(person.sources) >= 3:
+    if has_sufficient_dna(person):
+        trigger_mind_creation(person)
+```
+
+**Threshold:**
+- **Mention count:** ≥ 50 across all sources
+- **Source diversity:** ≥ 3 unique sources
+- **DNA completeness:** Minimum 3 items per layer (L1-L5)
+
+### Manual Creation
+
+```bash
+/create-mind "Cole Gordon"
+```
+
+**Process:**
+
+<Steps>
+  <Step title="Validate Threshold">
+    Check mention count, sources, and DNA completeness.
+  </Step>
+  
+  <Step title="Extract DNA">
+    Run `wf-extract-dna` workflow on all narratives for this person.
+  </Step>
+  
+  <Step title="Generate Files">
+    Create `AGENT.md`, `SOUL.md`, `MEMORY.md`, `DNA-CONFIG.yaml`.
+  </Step>
+  
+  <Step title="Update Registry">
+    Add to `AGENT-INDEX.yaml` (minds section).
+    
+    Set `has_agent: true` and `has_dna: true` in `ENTITY-REGISTRY.json`.
+  </Step>
+  
+  <Step title="Cross-Link">
+    Update related cargo agents with mind reference.
+    
+    Link dossier to mind clone.
+  </Step>
+</Steps>
+
+---
+
+## Mind Usage
+
+### Direct Query
+
+```bash
+/ask cole-gordon "What's your take on commission structures for closers?"
+```
+
+**Response:**
+```
+🧠 Cole Gordon:
+
+Commission matters less than lead quality. I've seen teams with 10% commission
+outperform teams with 20% because the 10% team had better setters. ^[CG001-008]
+
+That said, standard is 10-15% for high-ticket closers. But focus on the system:
+- Are closers getting enough at-bats? (3 closers per setter)
+- Is lead quality consistent?
+- Do they have proper training?
+
+Fix those first, THEN look at comp. ^[CG001-012]
+```
+
+### In Debates
+
+```bash
+/debate cole-gordon,jeremy-miner "Best sales methodology for high-ticket?"
+```
+
+**Cole Gordon:**
+```
+Farm system with CLOSER framework. Specialization wins. ^[CG001-005]
+```
+
+**Jeremy Miner:**
+```
+NEPQ consultative approach. Solo closer, deep qualification. ^[JM001-003]
+```
+
+### In Conclave
+
+Minds can participate in council sessions:
+
+```bash
+/conclave "Should we restructure our sales team?"
+# May include Cole Gordon if farm system relevance detected
+```
+
+---
+
+## DNA Viewing
+
+### Full DNA
+
+```bash
+/view-dna cole-gordon
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+DNA: Cole Gordon
+═══════════════════════════════════════
+
+L1: PHILOSOPHIES (5 items)
+  • Sales is about serving prospect, not closing them ^[CG001-003]
+  • Team structure beats individual talent ^[CG001-005]
+  • Systems > tactics ^[CG001-012]
+  • Anti-fragile design over optimization ^[CG002-001]
+  • Long-term relationships over transactional wins ^[CG003-004]
+
+L2: MENTAL-MODELS (8 items)
+  • Optimize for system resilience, not performance ^[CG001-005]
+  • Specialization beats generalization at scale ^[CG001-008]
+  • Question conventional wisdom with data ^[CG002-002]
+  ...
+
+L3: HEURISTICS (12 items)
+  • 1 setter : 3 closers (farm ratio) ^[CG001-005]
+  • Close rate < 20% = qualification problem ^[CG001-008]
+  • 1 manager : 10 closers ^[CG001-012]
+  ...
+
+L4: FRAMEWORKS (6 items)
+  • Farm System: 1:3 setter-closer structure ^[CG001-005]
+  • CLOSER Framework: 6-step sales process ^[CG002-012]
+  • Objection Handling Matrix ^[CG002-015]
+  ...
+
+L5: METHODOLOGIES (4 items)
+  • Objection Handling Process (4 steps) ^[CG002-015]
+  • Setter-Closer Handoff Protocol ^[CG001-018]
+  • Weekly Team Review Structure ^[CG003-008]
+  ...
+
+TOTAL DNA ITEMS: 35
+```
+
+### Specific Layer
+
+```bash
+/view-dna cole-gordon --layer L3
+```
+
+**Output:**
+```
+L3: HEURISTICS - Cole Gordon (12 items)
+
+1. 1 setter : 3 closers (farm system ratio)
+   Source: CG001-005
+   Confidence: HIGH
+   Context: High-ticket sales ($5k-$50k)
+
+2. If close rate < 20%, problem is qualification, not closing
+   Source: CG001-008
+   Confidence: HIGH
+   Context: Assumes proper training baseline
+
+3. 1 manager : 10 closers maximum span of control
+   Source: CG001-012
+   Confidence: MEDIUM
+   Context: Can stretch to 12 with experienced closers
+
+...
+```
+
+---
+
+## Mind vs Cargo
+
+| Aspect | Minds | Cargo |
+|--------|-------|-------|
+| **Type** | Expert replicas | Functional roles |
+| **DNA** | Full 5-layer structure | Optional, role-based |
+| **Sources** | 3+ diverse sources | 2+ sources |
+| **Threshold** | 50+ mentions | 10+ weighted score |
+| **Purpose** | Deep expertise query | Debate participation |
+| **Example** | Cole Gordon mind | CLOSER role |
+
+---
+
+## See Also
+
+- [Cargo Agents](/api/agents/cargo) - Functional role agents
+- [DNA Extraction](/api/core/tasks#extract-dna) - DNA creation process
+- [Workflows: wf-extract-dna](/api/core/workflows#wf-extract-dna) - DNA workflow
+- [Slash Commands: /view-dna](/api/slash-commands#view-dna) - View DNA structure

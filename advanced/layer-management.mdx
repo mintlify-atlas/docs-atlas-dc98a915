@@ -1,0 +1,800 @@
+---
+title: "Layer Management"
+description: "Understanding Mega Brain's L1/L2/L3 layer system for distribution, packaging, and privacy control."
+---
+
+# Layer Management
+
+Mega Brain uses a **3-layer classification system** to separate community code (L1), premium content (L2), and personal data (L3). This system controls what gets distributed, packaged, and gitignored.
+
+## Layer Overview
+
+<CardGroup cols={3}>
+  <Card title="L1 - Community" icon="users" color="#10b981">
+    **Open source core**
+    
+    Distributed via npm as `mega-brain-ai`
+    
+    Git: Tracked
+  </Card>
+  
+  <Card title="L2 - Premium" icon="star" color="#f59e0b">
+    **Populated content**
+    
+    Private repo (paying users)
+    
+    Git: Tracked (private)
+  </Card>
+  
+  <Card title="L3 - Personal" icon="lock" color="#ef4444">
+    **User-generated data**
+    
+    Local only / personal backup
+    
+    Git: Ignored
+  </Card>
+</CardGroup>
+
+## Quick Reference
+
+| Layer | Name | Git Status | Distribution | Who Uses It |
+|-------|------|-----------|-------------|-------------|
+| **L1** | Community | Tracked | npm package (public) | Everyone — open source core |
+| **L2** | Premium | Tracked | Private repo (gated) | Paying users |
+| **L3** | Personal | Gitignored | Local only / personal backup | Individual user only |
+| **NEVER** | Secrets | Gitignored | Never shared anywhere | Nobody |
+| **DELETE** | Obsolete | N/A | Remove from repo | N/A |
+| **REVIEW** | Unclear | Varies | Needs human decision | Pending classification |
+
+## Layer Definitions
+
+### L1 - Community (npm package)
+
+<Accordion title="What Belongs in L1">
+  The open-source engine that powers Mega Brain. Distributed via npm as `mega-brain-ai`.
+  
+  **Git status:** Fully tracked
+  
+  **Distribution:** Public — `npm publish`
+  
+  **Contents:**
+  - Core processing engine (`core/`)
+  - CLI binaries (`bin/`)
+  - Claude Code integration templates (`.claude/`)
+  - Conclave (collaborative agent templates) (`agents/conclave/`)
+  - Agent templates (`agents/_templates/`)
+  - Documentation (`docs/`)
+  - Empty structure markers (`.gitkeep` files anywhere)
+  
+  **Real Examples:**
+  ```
+  core/                          → L1 (Core engine)
+  core/tasks/HO-TP-001.md        → L1 (Core engine)
+  bin/validate-package.js        → L1 (Core engine)
+  .claude/hooks/skill_router.py  → L1 (Core engine)
+  agents/conclave/               → L1 (Core engine)
+  docs/LAYERS.md                 → L1 (Core engine)
+  inbox/.gitkeep                 → L1 (Empty structure marker)
+  ```
+  
+  <Note>
+    `.gitkeep` files are **always L1**, regardless of directory, because they contain no personal data.
+  </Note>
+</Accordion>
+
+<Accordion title="L1 Distribution">
+  L1 content is published to npm and available to everyone:
+  
+  ```bash
+  # Install L1 (community edition)
+  npm install -g mega-brain-ai
+  
+  # Setup creates L3 structure locally
+  npx mega-brain-ai setup
+  ```
+  
+  **What's included:**
+  - All core functionality
+  - Skills and hooks system
+  - Agent templates (empty)
+  - Documentation
+  - CLI tools
+  
+  **What's NOT included:**
+  - Populated knowledge base (L2)
+  - User data (L3)
+  - Secrets (NEVER)
+</Accordion>
+
+### L2 - Premium (populated content)
+
+<Accordion title="What Belongs in L2">
+  Content generated through the Mega Brain pipeline — actual knowledge, agent personalities, dossiers, playbooks.
+  
+  **Git status:** Tracked in private repo (gitignored in public L1 repo)
+  
+  **Distribution:** Private — premium repository or direct sync
+  
+  **Contents:**
+  - Populated mind clone agents (`agents/minds/` with content)
+  - Populated cargo agents (`agents/cargo/` with profiles)
+  - Knowledge dossiers (`knowledge/dossiers/`)
+  - Knowledge playbooks (`knowledge/playbooks/`)
+  - DNA knowledge base (`knowledge/dna/`)
+  - Knowledge sources (`knowledge/sources/`)
+  - Pipeline artifacts with extracted knowledge
+  
+  **Real Examples:**
+  ```
+  agents/minds/ALEX-HORMOZI/     → L2 (Premium content)
+  agents/cargo/AGENT-CFO/        → L2 (Premium content)
+  knowledge/dossiers/persons/ALEX.md → L2 (Premium content)
+  knowledge/playbooks/SALES.md   → L2 (Premium content)
+  knowledge/dna/                 → L2 (Premium content)
+  artifacts/insights/            → L2 (Premium content)
+  ```
+  
+  <Tip>
+    L2 is a **superset of L1**. L2 distribution includes all L1 content plus populated knowledge.
+  </Tip>
+</Accordion>
+
+<Accordion title="L2 Distribution">
+  L2 content requires premium access:
+  
+  ```bash
+  # Clone premium repo (requires authentication)
+  git clone https://private-repo/mega-brain-premium.git
+  
+  # Or sync from cloud storage
+  mega-brain sync --from premium
+  ```
+  
+  **Requires:**
+  - Paid subscription OR
+  - Private repository access OR
+  - Running full pipeline to generate content
+</Accordion>
+
+### L3 - Personal (never distributed)
+
+<Accordion title="What Belongs in L3">
+  User-generated content specific to one person's workflow — raw materials, logs, session history, company data.
+  
+  **Git status:** Gitignored (not committed to any shared repo)
+  
+  **Distribution:** Local backup only — never shared
+  
+  **Contents:**
+  - Raw input materials (`inbox/`)
+  - Processing and session logs (`logs/`)
+  - Session history (`.claude/sessions/`)
+  - Mission control state (`.claude/mission-control/`)
+  - Company-specific data (`agents/sua-empresa/`)
+  
+  **Real Examples:**
+  ```
+  inbox/                         → L3 (Personal data)
+  inbox/alex-hormozi/video.txt   → L3 (Personal data)
+  logs/                          → L3 (Personal data)
+  logs/batches/BATCH-001.md      → L3 (Personal data)
+  .claude/sessions/              → L3 (Personal data)
+  .claude/mission-control/       → L3 (Personal data)
+  agents/sua-empresa/            → L3 (Personal data)
+  ```
+  
+  <Warning>
+    L3 content is gitignored and **never leaves your machine** except in personal backups.
+  </Warning>
+</Accordion>
+
+<Accordion title="L3 Backup">
+  L3 content is valuable to you but meaningless to others:
+  
+  ```bash
+  # Personal backup (optional)
+  rsync -av .claude/sessions/ ~/Dropbox/mega-brain-backup/sessions/
+  rsync -av inbox/ ~/Dropbox/mega-brain-backup/inbox/
+  rsync -av logs/ ~/Dropbox/mega-brain-backup/logs/
+  ```
+  
+  <Note>
+    L3 backups are **your responsibility**. They are not included in git or npm distribution.
+  </Note>
+</Accordion>
+
+### NEVER - Secrets and Credentials
+
+<Accordion title="What Belongs in NEVER">
+  Files that must **never be committed** to any git repository, shared, or distributed.
+  
+  **Git status:** Always gitignored
+  
+  **Distribution:** Never — not even in personal backups if avoidable
+  
+  **Contents:**
+  - Environment files (`.env`, `.env.local`, `.env.production`)
+  - API keys and credentials (`credentials.json`, `token.json`)
+  - Certificate files (`*.key`, `*.pem`, `*.secret`)
+  - MCP configuration with embedded tokens (`.mcp.json`)
+  - Local settings overrides (`settings.local.json`)
+  
+  **Real Examples:**
+  ```
+  .env                           → NEVER (Secrets)
+  .env.local                     → NEVER (Secrets)
+  .mcp.json                      → NEVER (Secrets)
+  credentials.json               → NEVER (Secrets)
+  token.json                     → NEVER (Secrets)
+  settings.local.json            → NEVER (Secrets)
+  *.key                          → NEVER (Certificate)
+  *.pem                          → NEVER (Certificate)
+  ```
+  
+  <Warning>
+    If a file contains API keys, tokens, passwords, or private keys — it is **NEVER**. When in doubt, classify as NEVER.
+  </Warning>
+</Accordion>
+
+### DELETE - Obsolete Content
+
+<Accordion title="What Belongs in DELETE">
+  Files/directories that were once useful but are now superseded, abandoned, or replaced.
+  
+  **Git status:** Should be removed via `git rm`
+  
+  **Distribution:** Remove everywhere
+  
+  **Examples from Phase 7 audit:**
+  ```
+  archive/*/finance-agent/       → DELETE (Replaced by agents/cargo/)
+  archive/*/talent-agent/        → DELETE (Replaced by agents/cargo/)
+  ```
+  
+  <Tip>
+    Run `python3 core/intelligence/audit_layers.py` to get current delete candidates.
+  </Tip>
+</Accordion>
+
+### REVIEW - Needs Human Classification
+
+<Accordion title="What Belongs in REVIEW">
+  Files that the automated classifier could not confidently assign to a layer.
+  
+  **Git status:** Varies — depends on final classification
+  
+  **Distribution:** Cannot be determined until classified
+  
+  **Scale:** 12,183 items in Phase 7 audit (58.6% of repo)
+  
+  **Common candidates:**
+  - IDE configuration (`.vscode/`, `.cursor/`, `.windsurf/`)
+  - Root-level project files (`README.md`, `package.json`)
+  - Planning artifacts (`.planning/`)
+  - Unrecognized directory structures
+  
+  **Real Examples:**
+  ```
+  .cursor/                       → REVIEW (IDE config)
+  .planning/                     → REVIEW (Planning docs)
+  README.md                      → REVIEW (Root readme)
+  package.json                   → REVIEW (Project config)
+  .gitignore                     → REVIEW (Already tracked)
+  ```
+  
+  <Note>
+    REVIEW is not a final classification — it signals to **stop and decide manually**.
+  </Note>
+</Accordion>
+
+## Classification Rules
+
+### Decision Flowchart
+
+```
+New file or directory — what layer does it belong in?
+│
+├── Does it contain secrets, API keys, tokens, or credentials?
+│   YES → NEVER
+│   NO  ↓
+│
+├── Is it superseded, abandoned, or explicitly marked obsolete?
+│   YES → DELETE
+│   NO  ↓
+│
+├── Is it user-generated content (inbox, logs, sessions, company data)?
+│   YES → L3
+│   NO  ↓
+│
+├── Is it populated knowledge (dossiers, playbooks, DNA, artifacts)?
+│   YES → L2
+│   NO  ↓
+│
+├── Is it a .gitkeep file?
+│   YES → L1 (Empty structure marker — always L1)
+│   NO  ↓
+│
+├── Is it core engine code, CLI, Claude integration, or documentation?
+│   YES → L1
+│   NO  ↓
+│
+└── Cannot determine → REVIEW (assign human to make the call)
+```
+
+### Classification Criteria
+
+| Criteria | L1 | L2 | L3 | NEVER | DELETE | REVIEW |
+|----------|----|----|----|----|--------|--------|
+| Contains API keys or tokens | | | | ✅ | | |
+| Obsolete/replaced implementation | | | | | ✅ | |
+| User's pipeline output (personal) | | | ✅ | | | |
+| User-specific business content | | | ✅ | | | |
+| Populated knowledge (dossiers, playbooks) | | ✅ | | | | |
+| Core engine code | ✅ | | | | | |
+| Empty structure marker (`.gitkeep`) | ✅ | | | | | |
+| Cannot determine without context | | | | | | ✅ |
+
+## Path Examples
+
+<Tabs>
+  <Tab title="L1 Examples">
+    | Path | Reason |
+    |------|--------|
+    | `core/` | Core engine |
+    | `core/tasks/HO-TP-001.md` | Core engine |
+    | `bin/` | Core engine |
+    | `.claude/hooks/` | Core engine |
+    | `agents/conclave/` | Core engine |
+    | `docs/` | Core engine |
+    | `inbox/.gitkeep` | Empty structure marker |
+    | `knowledge/dna/.gitkeep` | Empty structure marker |
+  </Tab>
+  
+  <Tab title="L2 Examples">
+    | Path | Reason |
+    |------|--------|
+    | `agents/minds/ALEX-HORMOZI/` | Premium content |
+    | `agents/cargo/AGENT-CFO/` | Premium content |
+    | `knowledge/dossiers/persons/ALEX.md` | Premium content |
+    | `knowledge/playbooks/SALES.md` | Premium content |
+    | `knowledge/dna/` | Premium content |
+    | `artifacts/insights/` | Premium content |
+  </Tab>
+  
+  <Tab title="L3 Examples">
+    | Path | Reason |
+    |------|--------|
+    | `inbox/` | Personal data |
+    | `inbox/my-video.txt` | Personal data |
+    | `logs/` | Personal data |
+    | `logs/batches/BATCH-001.md` | Personal data |
+    | `.claude/sessions/` | Personal data |
+    | `.claude/mission-control/` | Personal data |
+    | `agents/sua-empresa/` | Personal data |
+  </Tab>
+  
+  <Tab title="NEVER Examples">
+    | Path | Reason |
+    |------|--------|
+    | `.env` | Secrets |
+    | `.env.local` | Secrets |
+    | `.mcp.json` | Secrets/sensitive config |
+    | `credentials.json` | Secrets |
+    | `token.json` | Secrets |
+    | `settings.local.json` | Secrets |
+    | `*.key` | Certificate |
+    | `*.pem` | Certificate |
+  </Tab>
+</Tabs>
+
+## Programmatic Classification
+
+### Using audit_layers.py
+
+<CodeGroup>
+```bash Run Full Audit
+# Generate complete audit report
+python3 core/intelligence/audit_layers.py
+
+# Output files:
+#   docs/audit/AUDIT-REPORT.json  — Machine-readable, all 20,797+ items
+#   docs/audit/AUDIT-REPORT.md    — Human-readable summary
+```
+
+```bash View Delete Candidates
+python3 -c "
+import json
+with open('docs/audit/AUDIT-REPORT.json') as f:
+    data = json.load(f)
+for item in data['delete_candidates']:
+    print(item['path'])
+"
+```
+
+```python Classify Single File
+from pathlib import Path
+import sys
+sys.path.insert(0, 'core/intelligence')
+from audit_layers import classify_path
+
+repo = Path('.')
+file_path = Path('core/tasks/HO-TP-001.md')
+
+layer, reason = classify_path(file_path, repo, is_file=True)
+print(f"{file_path}: {layer} — {reason}")
+# Output: core/tasks/HO-TP-001.md: L1 — Core engine
+```
+</CodeGroup>
+
+### Classification Patterns
+
+<CodeGroup>
+```python L1 Patterns
+L1_PATTERNS = [
+    "core/",
+    "bin/",
+    ".claude/",
+    "agents/conclave/",
+    "agents/_templates/",
+    "docs/",
+]
+
+# Example:
+if path.startswith("core/"):
+    return ("L1", "Core engine")
+```
+
+```python L2 Patterns
+L2_PATTERNS = [
+    "agents/minds/",
+    "agents/cargo/",
+    "knowledge/dossiers/",
+    "knowledge/playbooks/",
+    "knowledge/dna/",
+    "knowledge/sources/",
+    "artifacts/insights/",
+    "artifacts/chunks/",
+    "artifacts/extractions/",
+]
+
+# Exception: .gitkeep is always L1
+if path.name == ".gitkeep":
+    return ("L1", "Empty structure marker")
+```
+
+```python L3 Patterns
+L3_PATTERNS = [
+    "inbox/",
+    "logs/",
+    ".claude/sessions/",
+    ".claude/mission-control/",
+    "agents/sua-empresa/",
+]
+
+# Exception: .gitkeep is always L1
+if path.name == ".gitkeep":
+    return ("L1", "Empty structure marker")
+```
+
+```python NEVER Patterns
+import re
+
+NEVER_PATTERNS = [
+    re.compile(r"\.env($|\.)"),
+    re.compile(r"credentials\.json$"),
+    re.compile(r"token\.json$"),
+    re.compile(r"\.mcp\.json$"),
+    re.compile(r"settings\.local\.json$"),
+    re.compile(r"\.(key|pem|secret)$"),
+]
+
+for pattern in NEVER_PATTERNS:
+    if pattern.search(str(path)):
+        return ("NEVER", "Secrets/sensitive config")
+```
+</CodeGroup>
+
+**Priority order:** `DELETE > NEVER > L3 > L2 > L1 > REVIEW`
+
+<Note>
+  To add a new classification rule, edit the appropriate `*_PATTERNS` list in `audit_layers.py` and re-run the audit.
+</Note>
+
+## How to Classify a New File
+
+<Steps>
+  <Step title="Check NEVER Patterns">
+    Does the filename match `.env`, `*.key`, `*.pem`, `credentials.json`, etc.?
+    
+    Does the content contain API keys, tokens, or passwords?
+    
+    **If YES → classify as NEVER** and ensure it's in `.gitignore`
+  </Step>
+  
+  <Step title="Check DELETE Patterns">
+    Is this file/directory in `DELETE_PATTERNS` from `audit_layers.py`?
+    
+    Is it explicitly superseded by a newer implementation?
+    
+    **If YES → classify as DELETE** and schedule for `git rm`
+  </Step>
+  
+  <Step title="Check L3 Patterns">
+    Does the path start with `inbox/`, `logs/`, `.claude/sessions/`, or `agents/sua-empresa/`?
+    
+    **If YES → classify as L3** (unless it's a `.gitkeep`, which is L1)
+  </Step>
+  
+  <Step title="Check L2 Patterns">
+    Does the path start with `agents/minds/`, `knowledge/dossiers/`, or `artifacts/insights/`?
+    
+    **If YES → classify as L2** (unless it's a `.gitkeep` or empty directory, which is L1)
+  </Step>
+  
+  <Step title="Check L1 Patterns">
+    Does the path start with `core/`, `bin/`, `.claude/`, `agents/conclave/`, or `docs/`?
+    
+    Is it a `.gitkeep` file anywhere in the repo?
+    
+    **If YES → classify as L1**
+  </Step>
+  
+  <Step title="Apply REVIEW">
+    If none of the above matched, classify as **REVIEW**.
+    
+    Open a discussion or consult the classification criteria table.
+    
+    Document the decision and add it to `audit_layers.py` to prevent future ambiguity.
+  </Step>
+</Steps>
+
+## Gitignore Templates
+
+Mega Brain provides layer-specific `.gitignore` templates:
+
+<Tabs>
+  <Tab title="L1 (Community)">
+    ```gitignore
+    # L1 .gitignore (npm package)
+    # Ignores L2, L3, and NEVER content
+    
+    # L3 - Personal Data
+    inbox/
+    logs/
+    .claude/sessions/
+    .claude/mission-control/
+    agents/sua-empresa/
+    
+    # L2 - Premium Content
+    agents/minds/**
+    !agents/minds/.gitkeep
+    agents/cargo/**
+    !agents/cargo/.gitkeep
+    knowledge/dossiers/**
+    !knowledge/dossiers/**/.gitkeep
+    knowledge/playbooks/**
+    knowledge/dna/**
+    artifacts/insights/**
+    
+    # NEVER - Secrets
+    .env
+    .env.*
+    !.env.example
+    .mcp.json
+    credentials.json
+    token.json
+    settings.local.json
+    *.key
+    *.pem
+    
+    # Standard ignores
+    node_modules/
+    __pycache__/
+    *.pyc
+    .DS_Store
+    ```
+    
+    Location: `docs/audit/L1-GITIGNORE-TEMPLATE.txt`
+  </Tab>
+  
+  <Tab title="L2 (Premium)">
+    ```gitignore
+    # L2 .gitignore (premium repo)
+    # Includes L1 + L2, ignores L3 and NEVER
+    
+    # L3 - Personal Data
+    inbox/
+    logs/
+    .claude/sessions/
+    .claude/mission-control/
+    agents/sua-empresa/
+    
+    # NEVER - Secrets
+    .env
+    .env.*
+    !.env.example
+    .mcp.json
+    credentials.json
+    token.json
+    settings.local.json
+    *.key
+    *.pem
+    
+    # Standard ignores
+    node_modules/
+    __pycache__/
+    *.pyc
+    .DS_Store
+    ```
+    
+    Location: `docs/audit/L2-GITIGNORE-TEMPLATE.txt`
+  </Tab>
+  
+  <Tab title="L3 (Personal Backup)">
+    ```gitignore
+    # L3 .gitignore (personal backup)
+    # Only ignores NEVER content
+    
+    # NEVER - Secrets
+    .env
+    .env.*
+    !.env.example
+    .mcp.json
+    credentials.json
+    token.json
+    settings.local.json
+    *.key
+    *.pem
+    
+    # Standard ignores
+    node_modules/
+    __pycache__/
+    *.pyc
+    .DS_Store
+    ```
+    
+    Location: `docs/audit/L3-GITIGNORE-TEMPLATE.txt`
+  </Tab>
+</Tabs>
+
+## Community vs Pro Features
+
+| Feature | Community (L1) | Pro (L1 + L2) |
+|---------|----------------|---------------|
+| CLI & Templates | ✅ | ✅ |
+| Skills & Hooks | ✅ | ✅ |
+| Agent Templates | ✅ (empty) | ✅ (populated) |
+| Knowledge Base | ❌ | ✅ (populated) |
+| Mind Clone Agents | ❌ | ✅ |
+| Pipeline Processing | ✅ (run locally) | ✅ (pre-processed) |
+| Council / Conclave | ✅ (templates) | ✅ (trained) |
+
+<Tip>
+  Community users can **generate L2 content** by running the pipeline on their own materials. L2 distribution just provides pre-built content.
+</Tip>
+
+## Validation
+
+Mega Brain enforces layer compliance through validation tools:
+
+<Steps>
+  <Step title="Package Validation">
+    `validate-package.js` ensures only L1 files are in npm package:
+    ```bash
+    node bin/validate-package.js
+    # Output: PASSED: All 247 pack files are L1
+    ```
+  </Step>
+  
+  <Step title="Pre-Publish Gate">
+    `pre-publish-gate.js` blocks publish if non-L1 or secrets detected:
+    ```bash
+    node bin/pre-publish-gate.js
+    # Runs automatically via prepublishOnly
+    ```
+  </Step>
+  
+  <Step title="Full Audit">
+    `audit_layers.py` generates complete classification report:
+    ```bash
+    python3 core/intelligence/audit_layers.py
+    cat docs/audit/AUDIT-REPORT.md
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  See [Validation](/advanced/validation) for complete validation system documentation.
+</Note>
+
+## Troubleshooting
+
+<Accordion title="File in Wrong Layer">
+  **Problem:** File is classified incorrectly
+  
+  **Solutions:**
+  1. Check if path matches any pattern in `audit_layers.py`
+  2. Verify `.gitkeep` files are not being treated as content
+  3. Update layer patterns if needed
+  4. Re-run audit to verify fix
+</Accordion>
+
+<Accordion title="Package Contains Non-L1 Files">
+  **Problem:** `validate-package.js` reports violations
+  
+  **Solutions:**
+  1. Check which files are flagged (layer and reason)
+  2. Move L2/L3 files to correct location
+  3. Add violations to `.gitignore`
+  4. Update `package.json` files field if needed
+  5. Re-run validation
+</Accordion>
+
+<Accordion title="Secrets in Package">
+  **Problem:** `pre-publish-gate.js` detects secrets
+  
+  **Solutions:**
+  1. Identify which file contains secret
+  2. Remove secret from file or add to NEVER category
+  3. Ensure file is in `.gitignore`
+  4. Run `git rm --cached` if already committed
+  5. Re-run gate validation
+</Accordion>
+
+<Accordion title="Too Many REVIEW Items">
+  **Problem:** 58.6% of files are REVIEW
+  
+  **Solutions:**
+  1. Run audit to see REVIEW breakdown
+  2. Classify common patterns (IDE config, etc.)
+  3. Update `audit_layers.py` with new patterns
+  4. Document classification decisions
+  5. Re-run audit to reduce REVIEW count
+</Accordion>
+
+## Best Practices
+
+<Card title="Layer Management Guidelines" icon="layer-group">
+  1. **Respect layer boundaries** - Don't mix L1/L2/L3 content
+  2. **Use .gitkeep for structure** - Empty dirs need .gitkeep (always L1)
+  3. **Classify on creation** - Decide layer when creating file
+  4. **Validate before commit** - Run validation tools
+  5. **Never commit NEVER** - Double-check .gitignore
+  6. **Document exceptions** - Explain unusual classifications
+  7. **Update patterns** - Keep audit_layers.py current
+  8. **Review REVIEW items** - Reduce ambiguity over time
+</Card>
+
+## Related Files
+
+| File | Purpose |
+|------|--------|
+| `core/intelligence/audit_layers.py` | Programmatic classifier |
+| `docs/audit/AUDIT-REPORT.json` | Latest full audit (20,797 items) |
+| `docs/audit/AUDIT-REPORT.md` | Human-readable audit summary |
+| `docs/audit/L1-GITIGNORE-TEMPLATE.txt` | .gitignore for L1 distribution |
+| `docs/audit/L2-GITIGNORE-TEMPLATE.txt` | .gitignore for L2 distribution |
+| `docs/audit/L3-GITIGNORE-TEMPLATE.txt` | .gitignore for L3 backup |
+| `.gitignore` | Active gitignore (L1 rules) |
+| `bin/validate-package.js` | Package layer validator |
+| `bin/pre-publish-gate.js` | Pre-publish security gate |
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Validation" icon="check" href="/advanced/validation">
+    Complete validation system with security gates
+  </Card>
+  
+  <Card title="Publishing" icon="upload" href="/advanced/layer-management">
+    Publishing workflow and package preparation
+  </Card>
+  
+  <Card title="Hooks System" icon="webhook" href="/advanced/hooks-system">
+    Layer enforcement via PreToolUse hooks
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    System architecture and design principles
+  </Card>
+</CardGroup>

@@ -1,0 +1,588 @@
+---
+title: 'JARVIS'
+description: 'Meta-agent orchestrator with context preservation and error recovery'
+---
+
+# JARVIS
+
+**J**ust **A**dvanced **R**easoning **V**irtual **I**ntelligent **S**ystem
+
+JARVIS is the meta-agent orchestrator that manages workflows, preserves context, handles errors, and ensures zero information loss.
+
+## Architecture
+
+```
+.claude/jarvis/
+├── STATE.json                  # Current state (CRITICAL)
+├── CONTEXT-STACK.json          # Context history (max 50)
+├── DECISIONS-LOG.md            # All autonomous decisions
+├── PENDING.md                  # Items needing resolution
+├── SESSION-*.md                # Per-session logs
+├── CHECKPOINTS/                # State snapshots
+│   └── CP-{timestamp}.json
+└── PATTERNS/                   # Learned patterns
+    ├── ERRORS.yaml             # Error patterns & solutions
+    ├── RULES.yaml              # Inferred rules
+    └── SUGGESTIONS.yaml        # Improvement suggestions
+```
+
+---
+
+## Core Principles
+
+<Card title="1. Context is Sacred" icon="database">
+  Every bit of information is preserved, categorized, and accessible.
+  
+  **Implementation:**
+  - `STATE.json` updated after every significant action
+  - `CONTEXT-STACK.json` maintains last 50 contexts
+  - Full session logs in `SESSION-*.md`
+</Card>
+
+<Card title="2. Errors are Opportunities" icon="circle-exclamation">
+  Every error becomes diagnosis, every diagnosis becomes prevention.
+  
+  **Implementation:**
+  - Minimum 3 retry attempts before escalation
+  - Error patterns logged to `PATTERNS/ERRORS.yaml`
+  - Auto-generated solutions for recurring errors
+</Card>
+
+<Card title="3. Autonomy with Transparency" icon="eye">
+  Makes decisions independently but communicates everything clearly.
+  
+  **Implementation:**
+  - All decisions logged to `DECISIONS-LOG.md`
+  - Human-readable decision rationale
+  - Rollback support for any decision
+</Card>
+
+<Card title="4. Continuous Improvement" icon="arrow-trend-up">
+  Detects patterns, creates rules, updates protocols automatically.
+  
+  **Implementation:**
+  - Pattern detection across sessions
+  - Auto-rule generation from repeated patterns
+  - CLAUDE.md updates when threshold reached
+</Card>
+
+<Card title="5. Zero Waste" icon="ban">
+  No file skipped, no insight lost, no context forgotten.
+  
+  **Implementation:**
+  - Comprehensive file tracking
+  - Insight attribution to source chunks
+  - Cross-reference validation
+</Card>
+
+---
+
+## STATE.json
+
+CRITICAL file that tracks current system state.
+
+**Structure:**
+
+```json
+{
+  "metadata": {
+    "version": 42,
+    "updated_at": "2026-03-05T14:30:00Z",
+    "session_id": "SESSION-20260305-001"
+  },
+  "status": "PROCESSING",
+  "current_workflow": {
+    "workflow_id": "wf-pipeline-full",
+    "stage_id": "stage-3",
+    "stage_name": "Insight Extraction",
+    "started_at": "2026-03-05T12:00:00Z",
+    "progress": 0.65,
+    "inputs": {
+      "source_file": "inbox/COLE-GORDON/PODCASTS/farm-system.txt"
+    }
+  },
+  "position": {
+    "phase": 3,
+    "step": 2,
+    "batch": 1,
+    "total_batches": 1,
+    "file": "CG001"
+  },
+  "executed": [
+    "Phase 1: Chunking - 23 chunks created",
+    "Phase 2: Entity Resolution - 15 persons, 8 roles, 12 themes",
+    "Phase 3.1: DNA extraction started"
+  ],
+  "pending": [
+    "Phase 3.2: Priority classification",
+    "Phase 4: Narrative synthesis",
+    "Phase 5: Cascade to agents"
+  ],
+  "decisions": [
+    {
+      "decision_id": "DEC-001",
+      "timestamp": "2026-03-05T12:15:00Z",
+      "decision": "Auto-merged 'alex hormozi' → 'Alex Hormozi'",
+      "reason": "Similarity score 0.98 (above 0.95 threshold)",
+      "autonomous": true
+    }
+  ],
+  "metrics": {
+    "processed_files": 42,
+    "pending_files": 5,
+    "total_chunks": 873,
+    "total_insights": 2147,
+    "agents_created": 3,
+    "errors": 0
+  },
+  "last_checkpoint": "CP-20260305130000-wf-pipeline-full-stage-2",
+  "next_action": "Complete Phase 3.2: Priority classification"
+}
+```
+
+**Status Values:**
+- `IDLE`: No active workflow
+- `PROCESSING`: Workflow in progress
+- `PAUSED`: User-paused
+- `ERROR`: Error recovery mode
+- `COMPLETE`: Workflow finished
+
+<Warning>
+  **NEVER edit STATE.json manually.** Use `/jarvis checkpoint` before any risky operation.
+</Warning>
+
+---
+
+## Commands
+
+### /jarvis
+
+Activate JARVIS and show current state.
+
+```bash
+/jarvis
+```
+
+**Output:**
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ 🤖 JARVIS                                              2026-03-05 14:30  │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│ 📍 POSIÇÃO: Phase 3.2 │ Batch 1/1 │ File CG001                            │
+│                                                                          │
+│ ✅ EXECUTADO:                                                            │
+│    • Phase 1: Chunking - 23 chunks                                       │
+│    • Phase 2: Entity Resolution - 15 persons, 8 roles, 12 themes        │
+│    • Phase 3.1: DNA extraction                                           │
+│                                                                          │
+│ 🧠 DECISÕES AUTÔNOMAS:                                                     │
+│    • Auto-merged 'alex hormozi' → 'Alex Hormozi' (similarity: 0.98)     │
+│                                                                          │
+│ 📊 MÉTRICAS:                                                              │
+│    Processados: 42 │ Pendentes: 5 │ Erros: 0                            │
+│                                                                          │
+│ ⚡️ PRÓXIMO: Complete Phase 3.2 - Priority classification                  │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### /jarvis status
+
+Detailed system state.
+
+```bash
+/jarvis status
+```
+
+**Output includes:**
+- Full workflow state
+- All pending items
+- Recent decisions (last 10)
+- Checkpoint history
+- Error log (if any)
+- Performance metrics
+
+---
+
+### /jarvis resume
+
+Continue from last checkpoint.
+
+```bash
+/jarvis resume
+```
+
+**Behavior:**
+- Loads `last_checkpoint` from STATE.json
+- Restores context and inputs
+- Continues workflow from interruption point
+- Validates integrity before proceeding
+
+---
+
+### /jarvis checkpoint
+
+Create manual snapshot.
+
+```bash
+/jarvis checkpoint "before-risky-operation"
+```
+
+**Creates:**
+- `CP-{timestamp}-{label}.json` in `.claude/jarvis/CHECKPOINTS/`
+- Full state snapshot including context
+- Artifact list for rollback reference
+
+---
+
+### /jarvis rollback
+
+Restore from specific checkpoint.
+
+```bash
+/jarvis rollback CP-20260305130000-wf-pipeline-full-stage-2
+```
+
+**Behavior:**
+- Loads checkpoint state
+- Restores artifacts if available
+- Updates STATE.json to checkpoint state
+- Logs rollback action to DECISIONS-LOG.md
+
+<Warning>
+  Rollback does NOT undo file system changes. It restores JARVIS state only.
+</Warning>
+
+---
+
+### /jarvis diagnose
+
+Run complete system health check.
+
+```bash
+/jarvis diagnose
+```
+
+**Checks:**
+
+<AccordionGroup>
+  <Accordion title="State Integrity">
+    - STATE.json valid JSON
+    - All referenced files exist
+    - No orphaned references
+    - Version consistency
+  </Accordion>
+  
+  <Accordion title="Workflow Health">
+    - Current workflow can resume
+    - No stuck processes
+    - Checkpoint validity
+    - Input/output integrity
+  </Accordion>
+  
+  <Accordion title="Registry Consistency">
+    - ENTITY-REGISTRY.json valid
+    - AGENT-INDEX.yaml synced
+    - No duplicate entities
+    - Foreign keys valid
+  </Accordion>
+  
+  <Accordion title="Artifact Completeness">
+    - All state files present
+    - Schema validation passes
+    - No missing chunks/insights
+    - Cross-references resolve
+  </Accordion>
+  
+  <Accordion title="Performance">
+    - Processing time trends
+    - Error rate
+    - Retry count
+    - Memory usage
+  </Accordion>
+</AccordionGroup>
+
+**Output:**
+```
+═══════════════════════════════════════
+JARVIS DIAGNOSTICS
+═══════════════════════════════════════
+
+✅ State Integrity: PASS
+✅ Workflow Health: PASS
+⚠️  Registry Consistency: WARNING
+   - 3 orphaned entities in ENTITY-REGISTRY
+   - Action: Run `/verify --fix`
+✅ Artifact Completeness: PASS
+✅ Performance: HEALTHY
+   - Avg processing: 3.2s per chunk
+   - Error rate: 0.1%
+
+OVERALL HEALTH: GOOD (1 warning)
+```
+
+---
+
+### /jarvis log
+
+Show session log.
+
+```bash
+/jarvis log [--last N]
+```
+
+**Output:**
+- Timestamped action log
+- Decisions made
+- Errors encountered (with recovery)
+- Checkpoints created
+
+---
+
+### /jarvis decisions
+
+List all autonomous decisions.
+
+```bash
+/jarvis decisions [--since DATE]
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+AUTONOMOUS DECISIONS
+═══════════════════════════════════════
+
+2026-03-05 12:15:00 | DEC-001
+Decision: Auto-merged 'alex hormozi' → 'Alex Hormozi'
+Reason: Similarity 0.98 (threshold: 0.95)
+Reversible: Yes
+Rollback: /jarvis rollback CP-20260305121400
+
+2026-03-05 12:18:00 | DEC-002
+Decision: Created agent ACCOUNT-EXECUTIVE
+Reason: Threshold reached (score: 12.5, sources: 3)
+Reversible: No (manual deletion required)
+
+2026-03-05 13:22:00 | DEC-003
+Decision: Auto-organized inbox file
+Reason: Detected person: Cole Gordon, type: PODCAST
+Action: Moved to COLE-GORDON/PODCASTS/
+Reversible: Yes
+```
+
+---
+
+### /jarvis suggest
+
+Show improvement suggestions.
+
+```bash
+/jarvis suggest
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+SUGGESTIONS
+═══════════════════════════════════════
+
+💡 SUGGESTION 1: Batch Processing
+Pattern: Processing files one-by-one
+Recommendation: Use `/process-batch` for 5+ files
+Estimated Time Savings: 40%
+
+💡 SUGGESTION 2: Agent Memory Stale
+Pattern: 5 agents with memory > 7 days old
+Recommendation: Run `/agents --outdated` and refresh
+Impact: Improved debate quality
+
+💡 SUGGESTION 3: Repeated Entity Aliases
+Pattern: 'cole gordon' → 'Cole Gordon' merged 12 times
+Recommendation: Add to DOMAINS-TAXONOMY.yaml
+Impact: Faster normalization
+```
+
+---
+
+### /jarvis pending
+
+Show items needing resolution.
+
+```bash
+/jarvis pending
+```
+
+**Output:**
+```
+═══════════════════════════════════════
+PENDING ITEMS
+═══════════════════════════════════════
+
+⚠️  REVIEW QUEUE (3 items)
+1. Entity merge: "sales lead" vs "SALES-LEAD" (score: 0.88)
+   Action: Approve or reject merge
+
+2. Entity merge: "closer" vs "SALES-CLOSER" (score: 0.87)
+   Action: Approve or reject merge
+
+3. Entity merge: "bdr" vs "BUSINESS-DEVELOPMENT-REP" (score: 0.86)
+   Action: Approve or reject merge
+
+📝 OPEN LOOPS (2 items)
+1. "How to scale farm system beyond 50 closers?"
+   Source: CG001-015
+   Importance: HIGH
+   Action: Research or ask expert
+
+2. "What's the optimal setter-closer ratio for low-ticket?"
+   Source: CG003-008
+   Importance: MEDIUM
+   Action: Gather data
+```
+
+---
+
+## Protocols
+
+### GUARDIAN
+
+**When:** Before phase transition
+
+**Purpose:** Validate prerequisites
+
+**Checks:**
+- Previous phase completed successfully
+- Required inputs present
+- Quality gates passed
+- No blocking errors
+
+**Action on Failure:** Pause and report issue
+
+---
+
+### DETECTIVE
+
+**When:** Error detected
+
+**Purpose:** Diagnose and resolve
+
+**Process:**
+
+<Steps>
+  <Step title="Capture Error">
+    Log full stack trace and context
+  </Step>
+  
+  <Step title="Check Patterns">
+    Look up in `PATTERNS/ERRORS.yaml` for known solutions
+  </Step>
+  
+  <Step title="Attempt Resolution">
+    Try known solution or generic recovery (retry, skip, rollback)
+  </Step>
+  
+  <Step title="Escalate if Needed">
+    After 3 failed attempts, escalate to human
+  </Step>
+  
+  <Step title="Learn">
+    If resolved, add pattern to ERRORS.yaml
+  </Step>
+</Steps>
+
+---
+
+### CONTEXT-KEEPER
+
+**When:** Every message
+
+**Purpose:** Preserve conversation context
+
+**Actions:**
+- Update CONTEXT-STACK.json
+- Maintain last 50 contexts
+- Cross-reference with STATE.json
+- Enable perfect resume from any point
+
+---
+
+### EXPANSION
+
+**When:** New capability needed
+
+**Purpose:** Grow system organically
+
+**Process:**
+- Detect recurring pattern (5+ occurrences)
+- Propose new task/workflow/agent
+- Human approval required
+- Implement and test
+- Update documentation
+
+---
+
+### SYSTEM-UPGRADE
+
+**When:** Pattern becomes rule
+
+**Purpose:** Codify learnings
+
+**Trigger:** 10+ instances of same decision
+
+**Actions:**
+- Create rule in `PATTERNS/RULES.yaml`
+- Update CLAUDE.md if necessary
+- Notify user of system evolution
+
+---
+
+## Anti-Patterns (Prohibited)
+
+<Warning>
+  **✗ "Não consegui, vamos pular?"**
+  
+  Never skip files or steps. Use error recovery protocols.
+</Warning>
+
+<Warning>
+  **✗ "Ocorreu um erro desconhecido"**
+  
+  All errors must be diagnosed. Use DETECTIVE protocol.
+</Warning>
+
+<Warning>
+  **✗ "Onde estávamos mesmo?"**
+  
+  Context must never be lost. STATE.json and CONTEXT-STACK prevent this.
+</Warning>
+
+<Warning>
+  **✗ "Acho que podemos ignorar"**
+  
+  Zero waste principle. Nothing is ignored.
+</Warning>
+
+<Warning>
+  **✗ Perder contexto entre mensagens**
+  
+  CONTEXT-KEEPER protocol prevents this.
+</Warning>
+
+<Warning>
+  **✗ Avançar sem validar integridade**
+  
+  GUARDIAN protocol required before phase transitions.
+</Warning>
+
+---
+
+## See Also
+
+- [Workflows](/api/core/workflows) - JARVIS-orchestrated workflows
+- [Tasks](/api/core/tasks) - Atomic task execution
+- [Slash Commands: /jarvis](/api/slash-commands#jarvis-orchestrator) - Command reference

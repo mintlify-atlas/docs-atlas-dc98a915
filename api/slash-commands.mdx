@@ -1,0 +1,552 @@
+---
+title: 'Slash Commands'
+description: 'Complete reference for Claude Code slash commands'
+---
+
+# Slash Commands
+
+Mega Brain extends Claude Code with 40+ slash commands for knowledge management, agent orchestration, and pipeline processing.
+
+## Quick Reference
+
+| Command | Alias | Category | Description |
+|---------|-------|----------|-------------|
+| `/jarvis` | - | System | Activate JARVIS orchestrator |
+| `/agents` | `/a` | Agents | Show agent status and memory |
+| `/conclave` | - | Deliberation | Multi-agent council session |
+| `/inbox` | `/i` | Pipeline | List pending files |
+| `/process-jarvis` | - | Pipeline | Run 5-phase processing |
+| `/extract-knowledge` | - | Knowledge | Extract insights from source |
+| `/create-agent` | - | Agents | Create new cargo agent |
+| `/save` | - | Session | Save current session |
+| `/resume` | - | Session | Resume previous session |
+
+---
+
+## JARVIS (Orchestrator)
+
+### /jarvis
+
+Activate the JARVIS meta-agent orchestrator.
+
+**Syntax:**
+```bash
+/jarvis [subcommand]
+```
+
+<ParamField path="subcommand" type="string" optional>
+  Optional subcommand: `status`, `resume`, `checkpoint`, `rollback`, `diagnose`, `log`, `decisions`, `suggest`, `pending`, `explain`, `pause`, `force`, `clear-pending`
+</ParamField>
+
+**Behavior:**
+- Loads state from `/.claude/jarvis/STATE.json`
+- Displays system status with visual timeline
+- Auto-resumes if process in progress
+- Provides context preservation and error recovery
+
+**Subcommands:**
+
+<Expandable title="/jarvis status">
+  Show detailed system state with metrics, pending items, and recent decisions.
+</Expandable>
+
+<Expandable title="/jarvis resume">
+  Continue processing from last checkpoint.
+</Expandable>
+
+<Expandable title="/jarvis checkpoint">
+  Create manual snapshot of current state to `/.claude/jarvis/CHECKPOINTS/`.
+</Expandable>
+
+<Expandable title="/jarvis rollback {CP-ID}">
+  Restore from specific checkpoint ID.
+</Expandable>
+
+<Expandable title="/jarvis diagnose">
+  Run complete system health analysis.
+</Expandable>
+
+**Files:**
+- `/.claude/jarvis/STATE.json` - Current state (never edit manually)
+- `/.claude/jarvis/CONTEXT-STACK.json` - Context history (max 50)
+- `/.claude/jarvis/DECISIONS-LOG.md` - All autonomous decisions
+- `/.claude/jarvis/PENDING.md` - Items requiring resolution
+- `/.claude/jarvis/SESSION-*.md` - Per-session logs
+
+**Source:** `.claude/commands/jarvis.md:1-213`
+
+---
+
+## Agents
+
+### /agents
+
+Show status of all agents and their memory freshness.
+
+**Syntax:**
+```bash
+/agents [--outdated | --knowledge "person" | --category CATEGORY]
+```
+
+<ParamField path="--outdated" type="flag" optional>
+  List agents with memory not updated in 3+ days
+</ParamField>
+
+<ParamField path="--knowledge" type="string" optional>
+  Find agents with knowledge about specific person
+</ParamField>
+
+<ParamField path="--category" type="string" optional>
+  Filter by category: `SALES`, `C-LEVEL`, `OPERATIONS`, `MARKETING`
+</ParamField>
+
+**Output:**
+```
+═══════════════════════════════════════
+           AGENTS STATUS
+═══════════════════════════════════════
+🤖 AGENTES ATIVOS: 37
+
+C-LEVEL:
+  CRO      │ MEMORY: 2026-03-01 │ 12 pessoas
+  CFO      │ MEMORY: 2026-02-28 │ 8 pessoas
+  CMO      │ MEMORY: 2026-03-02 │ 15 pessoas
+  COO      │ MEMORY: 2026-03-01 │ 10 pessoas
+
+SALES:
+  CLOSER   │ MEMORY: 2026-03-05 │ 25 pessoas
+  BDR      │ MEMORY: 2026-03-04 │ 18 pessoas
+  ...
+```
+
+**Source:** `.claude/commands/agents.md:1-162`
+
+---
+
+### /create-agent
+
+Create new cargo agent from detected role.
+
+**Syntax:**
+```bash
+/create-agent <role-name>
+```
+
+<ParamField path="role-name" type="string" required>
+  Name of the role (e.g., "ACCOUNT-EXECUTIVE", "PRODUCT-MANAGER")
+</ParamField>
+
+**Behavior:**
+- Checks role mention threshold (10+ weighted mentions)
+- Generates agent files: `AGENT.md`, `SOUL.md`, `MEMORY.md`
+- Updates `AGENT-INDEX.yaml`
+- Assigns DNA from knowledge base
+
+**Source:** `.claude/commands/create-agent.md:1-12`
+
+---
+
+## Conclave (Multi-Agent Deliberation)
+
+### /conclave
+
+Run full council session with debate, critic, devil's advocate, and synthesizer.
+
+**Syntax:**
+```bash
+/conclave "<decision or question>"
+```
+
+<ParamField path="decision" type="string" required>
+  Strategic decision or question to deliberate
+</ParamField>
+
+**Example:**
+```bash
+/conclave "Should we change closer commission from 10% to 15%?"
+/conclave "Invest R$500k in Q1 team expansion?"
+```
+
+**Phases:**
+1. **Constitutional Foundation** - Invoke core principles (Empiricism, Pareto, Inversion, Antifragility)
+2. **Debate** - Multi-agent discussion between relevant roles (CRO, CFO, etc.)
+3. **Critic** - Methodological quality assessment (score 0-100)
+4. **Devil's Advocate** - Challenge assumptions, identify risks
+5. **Synthesis** - Unified recommendation with confidence score
+
+**Output:**
+```
+═══════════════════════════════════════
+DECISÃO RECOMENDADA: [recommendation]
+CONFIANCA: 85%
+
+RISCOS RESIDUAIS:
+• Risk 1: Mitigation strategy
+• Risk 2: Mitigation strategy
+
+PRÓXIMOS PASSOS:
+1. Action - Owner - Deadline
+2. Action - Owner - Deadline
+```
+
+**Anti-loop Rule:** Council runs once per query. If confidence < 60%, escalates to human decision.
+
+**Source:** `.claude/commands/conclave.md:1-197`
+
+---
+
+### /debate
+
+Run debate between specific agents (without full council).
+
+**Syntax:**
+```bash
+/debate <agent1>,<agent2>[,<agent3>] "<topic>"
+```
+
+<ParamField path="agents" type="string" required>
+  Comma-separated agent IDs (e.g., "cro,cfo,cmo")
+</ParamField>
+
+<ParamField path="topic" type="string" required>
+  Topic or decision to debate
+</ParamField>
+
+**Example:**
+```bash
+/debate cro,cfo "Reduce CAC by 30% in Q2"
+```
+
+**Source:** `.claude/commands/debate.md:1-10`
+
+---
+
+## Pipeline Processing
+
+### /inbox
+
+List files pending processing in inbox.
+
+**Syntax:**
+```bash
+/inbox [--all | --pending | --person "Name" | --organize [--execute]]
+```
+
+<ParamField path="--all" type="flag" optional>
+  Show both processed and pending files
+</ParamField>
+
+<ParamField path="--pending" type="flag" optional>
+  Show only pending files (default)
+</ParamField>
+
+<ParamField path="--person" type="string" optional>
+  Filter by person name
+</ParamField>
+
+<ParamField path="--organize" type="flag" optional>
+  Auto-organize files into correct folders (dry-run)
+</ParamField>
+
+<ParamField path="--execute" type="flag" optional>
+  Execute auto-organization (requires --organize)
+</ParamField>
+
+**Auto-Organization:**
+- Detects person from filename/content
+- Classifies content type (PODCASTS, COURSES, MASTERMINDS, etc.)
+- Standardizes naming (UPPERCASE, [youtube link])
+- Moves to `{PERSON}/{TYPE}/` structure
+
+**Output:**
+```
+═══════════════════════════════════════
+           INBOX STATUS
+═══════════════════════════════════════
+📥 AGUARDANDO PROCESSAMENTO: 5
+
+1. COLE-GORDON/PODCASTS/farm-system.txt
+   ├─ Added: 2 days ago | ~5,400 words
+   └─ Command: /process-jarvis "inbox/..."
+```
+
+**Source:** `.claude/commands/inbox.md:1-297`
+
+---
+
+### /process-jarvis
+
+Run 5-phase pipeline processing on source file.
+
+**Syntax:**
+```bash
+/process-jarvis "<file-path>"
+```
+
+<ParamField path="file-path" type="string" required>
+  Path to source file in inbox (e.g., "inbox/COLE-GORDON/PODCASTS/farm-system.txt")
+</ParamField>
+
+**Phases:**
+1. **Chunking** - Split into semantic chunks (500-1500 words)
+2. **Entity Resolution** - Normalize persons, themes, roles
+3. **Insight Extraction** - Extract DNA layers, frameworks, heuristics
+4. **Narrative Synthesis** - Create coherent narratives per person/theme
+5. **Cascade** - Update agent memories, dossiers, and knowledge base
+
+**Checkpoints:**
+- Each phase creates checkpoint in `/.claude/jarvis/CHECKPOINTS/`
+- Auto-resume from last checkpoint on interruption
+- Rollback support via `/jarvis rollback`
+
+**Output Artifacts:**
+- `/processing/chunks/{source-id}.json` - Chunks with metadata
+- `/processing/canonical/CANONICAL-MAP.json` - Entity mappings
+- `/processing/insights/INSIGHTS-STATE.json` - Extracted insights
+- `/processing/narratives/NARRATIVES-STATE.json` - Synthesized narratives
+- `/knowledge/dossiers/persons/{person}.md` - Updated dossiers
+- `/agents/{category}/{agent}/MEMORY.md` - Updated agent memories
+
+**Source:** `.claude/commands/process-jarvis.md:1-144`
+
+---
+
+### /ingest
+
+Ingest new material (URL, file, or folder) into inbox.
+
+**Syntax:**
+```bash
+/ingest <source> [--type TYPE]
+```
+
+<ParamField path="source" type="string" required>
+  URL, file path, or folder path to ingest
+</ParamField>
+
+<ParamField path="--type" type="string" optional>
+  Content type: `podcast`, `course`, `mastermind`, `blueprint`, `vsl`, `script`
+</ParamField>
+
+**Supported Sources:**
+- YouTube URLs (auto-transcription)
+- Google Drive files/folders
+- Local files (.txt, .md, .pdf, .docx)
+- Audio files (.mp3, .wav, .m4a)
+
+**Behavior:**
+- Downloads/copies to inbox
+- Extracts transcriptions (audio/video)
+- Detects person and content type
+- Registers in `INBOX-REGISTRY.md`
+
+**Source:** `.claude/commands/ingest.md:1-4`
+
+---
+
+### /extract-knowledge
+
+Extract insights from source and populate knowledge base.
+
+**Syntax:**
+```bash
+/extract-knowledge "<file-path>" [--mode MODE]
+```
+
+<ParamField path="file-path" type="string" required>
+  Path to source file or "auto" to use NARRATIVES-STATE.json
+</ParamField>
+
+<ParamField path="--mode" type="string" optional>
+  Extraction mode: `legacy` (direct from file) or `narratives` (from pipeline output)
+</ParamField>
+
+**Modes:**
+
+<CodeGroup>
+```bash Legacy Mode
+/extract-knowledge "inbox/source.txt"
+# Reads raw file directly
+# Extracts insights without pipeline
+```
+
+```bash Narratives Mode (Recommended)
+/extract-knowledge "auto"
+# Uses NARRATIVES-STATE.json from pipeline
+# Includes priority scoring and context
+```
+</CodeGroup>
+
+**Extraction Categories:**
+1. `01-ESTRUTURA-TIME` - People structure, roles
+2. `02-PROCESSO-VENDAS` - Selling process, techniques
+3. `03-CONTRATACAO` - Hiring, onboarding
+4. `04-COMISSIONAMENTO` - Compensation, commissions
+5. `05-METRICAS` - Performance metrics
+6. `06-FUNIL-APLICACAO` - Lead qualification, pipeline
+7. `07-PRICING` - Pricing strategy
+8. `08-FERRAMENTAS` - Tools, tech stack
+9. `09-GESTAO` - Management practices
+10. `10-CULTURA-GAMIFICACAO` - Culture, motivation
+11. `99-SECUNDARIO` - Other insights
+
+**Output Structure:**
+```
+/knowledge/SOURCES/{SOURCE-NAME}/{CATEGORY}/{topic}.md
+```
+
+**Source:** `.claude/commands/extract-knowledge.md:1-508`
+
+---
+
+## Knowledge Management
+
+### /dossiers
+
+View or update person/theme dossiers.
+
+**Syntax:**
+```bash
+/dossiers [--person "Name" | --theme "topic" | --list]
+```
+
+**Source:** `.claude/commands/dossiers.md:1-6`
+
+---
+
+### /view-dna
+
+View DNA structure for person or agent.
+
+**Syntax:**
+```bash
+/view-dna <person-or-agent-name> [--layer LAYER]
+```
+
+<ParamField path="name" type="string" required>
+  Person or agent name
+</ParamField>
+
+<ParamField path="--layer" type="string" optional>
+  Specific DNA layer: `L1` (PHILOSOPHIES), `L2` (MENTAL-MODELS), `L3` (HEURISTICS), `L4` (FRAMEWORKS), `L5` (METHODOLOGIES)
+</ParamField>
+
+**DNA Layers:**
+- **L1: PHILOSOPHIES** - Core beliefs, worldview
+- **L2: MENTAL-MODELS** - Thinking frameworks
+- **L3: HEURISTICS** - Practical rules, shortcuts
+- **L4: FRAMEWORKS** - Structured methodologies
+- **L5: METHODOLOGIES** - Step-by-step implementations
+
+**Source:** `.claude/commands/view-dna.md:1-8`
+
+---
+
+## Session Management
+
+### /save
+
+Save current session state.
+
+**Syntax:**
+```bash
+/save [session-name]
+```
+
+<ParamField path="session-name" type="string" optional>
+  Custom session name. If omitted, uses timestamp.
+</ParamField>
+
+**Saved State:**
+- JARVIS state and context stack
+- Processing phase and position
+- Pending decisions and items
+- Conversation history
+
+**Location:** `/.claude/jarvis/SESSION-{timestamp}.md`
+
+**Source:** `.claude/commands/save.md:1-9`
+
+---
+
+### /resume
+
+Resume previous session.
+
+**Syntax:**
+```bash
+/resume [session-id]
+```
+
+<ParamField path="session-id" type="string" optional>
+  Specific session ID to resume. If omitted, resumes most recent.
+</ParamField>
+
+**Source:** `.claude/commands/resume.md:1-5`
+
+---
+
+## System Commands
+
+### /system-digest
+
+Generate system health and metrics digest.
+
+**Syntax:**
+```bash
+/system-digest [--full]
+```
+
+<ParamField path="--full" type="flag" optional>
+  Include detailed breakdown per agent and knowledge domain
+</ParamField>
+
+**Metrics:**
+- Total agents: minds (5), cargo (14), conclave (3)
+- Knowledge base: sources, dossiers, themes
+- Pipeline status: processed files, pending items
+- Agent memory freshness
+- Recent errors and warnings
+
+**Source:** `.claude/commands/system-digest.md:1-8`
+
+---
+
+### /verify
+
+Run 6-level verification protocol.
+
+**Syntax:**
+```bash
+/verify [--level LEVEL] [--fix]
+```
+
+<ParamField path="--level" type="string" optional>
+  Specific level: `L1` (syntax), `L2` (schema), `L3` (references), `L4` (consistency), `L5` (completeness), `L6` (semantic)
+</ParamField>
+
+<ParamField path="--fix" type="flag" optional>
+  Auto-fix detected issues where possible
+</ParamField>
+
+**Verification Levels:**
+1. **L1: Syntax** - File structure, YAML validity, JSON schemas
+2. **L2: Schema** - Compliance with core schemas
+3. **L3: References** - Foreign key integrity, broken links
+4. **L4: Consistency** - Cross-file consistency, entity canonicalization
+5. **L5: Completeness** - Required fields, minimum thresholds
+6. **L6: Semantic** - Logical coherence, narrative quality
+
+**Source:** `.claude/commands/verify.md:1-9`
+
+---
+
+## Notes
+
+<Note>
+  All slash commands are defined in `.claude/commands/` and auto-indexed by `skill_router.py`.
+</Note>
+
+<Warning>
+  Commands that modify state (create-agent, process-jarvis) create automatic backups in `/.claude/jarvis/CHECKPOINTS/`.
+</Warning>

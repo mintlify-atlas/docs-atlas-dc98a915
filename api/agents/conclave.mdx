@@ -1,0 +1,478 @@
+---
+title: 'Conclave Agents'
+description: 'Constitutional deliberation agents for multi-perspective analysis'
+---
+
+# Conclave Agents
+
+The Conclave consists of three specialized deliberation agents that provide constitutional oversight and multi-perspective analysis for strategic decisions.
+
+## Architecture
+
+```
+agents/conclave/
+├── critico-metodologico/
+│   ├── AGENT.md              # Agent definition
+│   └── SOUL.md               # Voice and personality
+├── advogado-do-diabo/
+│   ├── AGENT.md
+│   └── SOUL.md
+├── sintetizador/
+│   ├── AGENT.md
+│   └── SOUL.md
+├── CRITIC.md             # Extended critic framework
+├── DEVILS-ADVOCATE.md    # Contrarian techniques
+├── SYNTHESIZER.md        # Integration methodology
+└── README.md
+```
+
+---
+
+## Constitutional Foundation
+
+All conclave deliberations are governed by four core principles:
+
+<Card title="Principle 1: Empiricism" icon="chart-line">
+  Decisions based on DATA, not opinions or intuitions.
+  
+  **Requirement:** Every claim must cite sources and concrete numbers.
+</Card>
+
+<Card title="Principle 2: Pareto (80/20)" icon="percent">
+  Seek the 20% of actions that generate 80% of results.
+  
+  **Requirement:** Identify highest-leverage options with minimal effort.
+</Card>
+
+<Card title="Principle 3: Inversion" icon="rotate">
+  Before asking "what to do", ask "what would cause failure".
+  
+  **Requirement:** Explicitly state risks for each option.
+</Card>
+
+<Card title="Principle 4: Antifragility" icon="shield-check">
+  Prefer options that BENEFIT from volatility and uncertainty.
+  
+  **Requirement:** Identify which option gets stronger under stress.
+</Card>
+
+**Hierarchy:** CONSTITUTION > PROTOCOLS > AGENT INSTRUCTIONS
+
+---
+
+## Agents
+
+### Crítico Metodológico (Methodological Critic)
+
+**Role:** Analytical Guardian
+
+**Perspective:** Rigorous analysis, detail-oriented, process-focused
+
+**Activation:** Phase 2 of `/conclave` command
+
+#### Responsibilities
+
+<AccordionGroup>
+  <Accordion title="Quality Assessment">
+    Score debate quality on 0-100 scale:
+    
+    - **Premissas declaradas** (0-20): Are assumptions explicit?
+    - **Evidencias rastreaveis** (0-20): Can evidence be traced to sources?
+    - **Lógica consistente** (0-20): Is reasoning logically sound?
+    - **Cenarios alternativos** (0-20): Were alternatives considered?
+    - **Conflitos resolvidos** (0-20): Were contradictions addressed?
+  </Accordion>
+  
+  <Accordion title="Gap Identification">
+    Identify critical gaps:
+    
+    - Missing data that would change the decision
+    - Unstated assumptions
+    - Logical leaps
+    - Insufficient scenario analysis
+  </Accordion>
+  
+  <Accordion title="Recommendation">
+    Provide one of three recommendations:
+    
+    - **APROVAR:** Quality ≥ 80, proceed with decision
+    - **REVISAR:** Quality 60-79, address gaps before deciding
+    - **REJEITAR:** Quality < 60, restart with better foundation
+  </Accordion>
+</AccordionGroup>
+
+#### Output Format
+
+```
+═══════════════════════════════════════
+AVALIAÇÃO DO CRÍTICO
+═══════════════════════════════════════
+
+SCORE DE QUALIDADE: 75/100
+
+Breakdown:
+• Premissas declaradas:      16/20
+• Evidencias rastreaveis:    18/20
+• Lógica consistente:        14/20
+• Cenarios alternativos:     15/20
+• Conflitos resolvidos:      12/20
+
+GAPS CRÍTICOS:
+• No CAC data for last 6 months
+• Commission impact on seller motivation unstudied
+• Competitive commission rates not benchmarked
+
+RECOMENDAÇÃO: REVISAR
+
+Motivo: Faltam dados essenciais sobre impacto no CAC e benchmarks competitivos.
+```
+
+**Location:** `agents/conclave/critico-metodologico/`
+
+---
+
+### Advogado do Diabo (Devil's Advocate)
+
+**Role:** Contrarian Challenger
+
+**Perspective:** Challenge assumptions, identify blind spots, stress-test logic
+
+**Activation:** Phase 3 of `/conclave` command
+
+#### Responsibilities
+
+<AccordionGroup>
+  <Accordion title="Challenge Weakest Premise">
+    Identify and attack the most fragile assumption.
+    
+    **Output:**
+    - Which premise is weakest?
+    - Why is it vulnerable?
+    - What happens if it's wrong?
+  </Accordion>
+  
+  <Accordion title="Surface Undiscussed Risk">
+    Find the elephant in the room.
+    
+    **Output:**
+    - Risk description
+    - Probability estimate
+    - Impact severity
+    - Why it wasn't discussed
+  </Accordion>
+  
+  <Accordion title="Regret Scenario">
+    Paint realistic worst-case picture.
+    
+    **Output:**
+    - 12-month forward scenario
+    - What went wrong?
+    - Early warning signs that were ignored
+  </Accordion>
+  
+  <Accordion title="Ignored Alternative">
+    Present option not on the table.
+    
+    **Output:**
+    - Alternative approach
+    - Why it merits consideration
+    - Pros/cons vs current recommendation
+  </Accordion>
+</AccordionGroup>
+
+#### Output Format
+
+```
+═══════════════════════════════════════
+ADVOGADO DO DIABO
+═══════════════════════════════════════
+
+PREMISSA MAIS FRÁGIL:
+"Increasing commission will directly increase close rate"
+
+Por que é frágil:
+- No historical data supporting this correlation
+- Assumes money is primary motivator (ignores mastery, autonomy, purpose)
+- Ignores possibility of attracting wrong talent profile
+
+RISCO PRINCIPAL NÃO DISCUTIDO:
+Canão dos mercenários: Higher commission may attract sellers who optimize for
+short-term comp over customer fit, damaging brand and increasing churn.
+
+Probabilidade: 40% | Impacto: Alto
+
+CENÁRIO DE ARREPENDIMENTO (12 meses):
+March 2027: We increased commission to 15%. Initial excitement, but after 6
+months we see:
+- Close rate unchanged (still 22%)
+- CAC up 23% due to higher comp
+- Customer satisfaction down (rushed sales)
+- Top performers left (culture shift to transactional)
+- Now stuck with 15% as "market rate"
+
+ALTERNATIVA IGNORADA:
+Instead of raising commission, invest in:
+1. Sales training (NEPQ, objection handling)
+2. Better lead quality (improve qualification)
+3. Sales enablement tools
+
+Custo similar, but builds capability vs dependency on comp.
+```
+
+**Location:** `agents/conclave/advogado-do-diabo/`
+
+---
+
+### Sintetizador (Synthesizer)
+
+**Role:** Integration Architect
+
+**Perspective:** Unify perspectives, find consensus, create actionable recommendation
+
+**Activation:** Phase 4 of `/conclave` command (final)
+
+#### Responsibilities
+
+<AccordionGroup>
+  <Accordion title="Integrate Feedback">
+    Synthesize debate + critic + advocate into unified view.
+    
+    **Process:**
+    1. Acknowledge valid points from all sides
+    2. Identify areas of consensus
+    3. Resolve contradictions
+    4. Incorporate critic's gaps
+    5. Address advocate's risks
+  </Accordion>
+  
+  <Accordion title="Generate Recommendation">
+    Clear, actionable recommendation with modifications.
+    
+    **Components:**
+    - Core decision
+    - Modifications based on feedback
+    - Why this is the best path forward
+  </Accordion>
+  
+  <Accordion title="Assess Confidence">
+    Quantify confidence in recommendation.
+    
+    **Scale:**
+    - 90-100%: High confidence, strong consensus
+    - 70-89%: Good confidence, minor gaps
+    - 60-69%: Acceptable confidence, monitor closely
+    - Below 60%: Insufficient confidence, escalate to human
+  </Accordion>
+  
+  <Accordion title="Risk Mitigation">
+    For each residual risk, provide mitigation strategy.
+    
+    **Format:**
+    - Risk: [description]
+    - Mitigation: [concrete action]
+    - Owner: [responsible party]
+  </Accordion>
+  
+  <Accordion title="Next Steps">
+    Actionable roadmap with owners and deadlines.
+  </Accordion>
+  
+  <Accordion title="Reversal Criteria">
+    Conditions that would invalidate this decision.
+    
+    **Format:** "IF [condition] THEN [action]"
+  </Accordion>
+</AccordionGroup>
+
+#### Output Format
+
+```
+═══════════════════════════════════════
+SÍNTESE FINAL
+═══════════════════════════════════════
+
+DECISÃO RECOMENDADA:
+Pilotar 15% de comissão com top 20% de closers durante Q2, condicionado a:
+1. Mínimo 25% de close rate (vs atual 22%)
+2. NPS mantido acima de 8.5
+3. Comparação com grupo controle (10% commission)
+
+MODIFICAÇÕES APLICADAS:
+• De aumento geral → para piloto focado (resposta ao Crítico)
+• Adicionado grupo controle (resposta ao Advogado)
+• Métricas de qualidade (NPS) para evitar vendas pressionadas
+
+CONFIANÇA: 78%
+
+Justificativa:
+- Aborda lacunas do Crítico (dados via piloto)
+- Mitiga riscos do Advogado (grupo controle, métricas de qualidade)
+- Permite aprendizado antes de escalar
+- Reversível se métricas não atingidas
+
+RISCOS RESIDUAIS:
+• Risco: Piloto pode criar resentimento entre closers não incluídos
+  Mitigação: Comunicar critérios transparentes + caminho para inclusão
+  Responsável: CRO
+
+• Risco: 3 meses pode ser curto para dados conclusivos
+  Mitigação: Estender se inconcluso, mas revisar semanalmente
+  Responsável: CFO
+
+PRÓXIMOS PASSOS:
+1. Definir critérios top 20% - Responsável: CRO - Prazo: 2026-03-15
+2. Estruturar métricas de tracking - Responsável: CFO - Prazo: 2026-03-20
+3. Comunicar piloto ao time - Responsável: CRO - Prazo: 2026-04-01
+4. Kick-off piloto Q2 - Responsável: CRO + CFO - Prazo: 2026-04-01
+
+CRITÉRIOS DE REVERSÃO:
+SE close rate do piloto < 23% após 6 semanas ENTÃO pausar e reavaliar
+SE NPS cair abaixo de 8.0 ENTÃO encerrar piloto imediatamente
+SE custo por cliente aumentar > 15% ENTÃO reconsiderar continuação
+```
+
+**Location:** `agents/conclave/sintetizador/`
+
+---
+
+## Workflow
+
+### Phase Sequence
+
+<Steps>
+  <Step title="Phase 0: Constitutional Foundation">
+    Invoke the four core principles.
+    
+    All agents must ground their analysis in these principles.
+  </Step>
+  
+  <Step title="Phase 1: Debate">
+    Relevant cargo agents discuss the question.
+    
+    **Duration:** Until natural conclusion or timeout
+    
+    **Output:** Multi-perspective debate log
+  </Step>
+  
+  <Step title="Phase 2: Crítico Metodológico">
+    Methodological quality assessment.
+    
+    **Output:** Quality score + gaps + recommendation (APROVAR/REVISAR/REJEITAR)
+  </Step>
+  
+  <Step title="Phase 3: Advogado do Diabo">
+    Challenge assumptions and surface risks.
+    
+    **Output:** Weakest premise + undiscussed risk + regret scenario + alternative
+  </Step>
+  
+  <Step title="Phase 4: Sintetizador">
+    Integrate all perspectives into unified recommendation.
+    
+    **Output:** Decision + confidence + risks + next steps + reversal criteria
+  </Step>
+</Steps>
+
+### Decision Logic
+
+```python
+if synthesizer.confidence >= 60:
+    status = "RECOMMENDATION_READY"
+    output = synthesizer.recommendation
+else:
+    status = "INCONCLUSIVE"
+    output = "Escalate to human decision"
+    present_options = [
+        {"option": "A", "trade_offs": "...", "supporters": ["CRO"]},
+        {"option": "B", "trade_offs": "...", "supporters": ["CFO"]},
+        {"option": "C", "trade_offs": "Gather more data", "supporters": []}
+    ]
+```
+
+---
+
+## Usage
+
+### Command
+
+```bash
+/conclave "Should we increase closer commission from 10% to 15%?"
+```
+
+### Programmatic
+
+```python
+from core.workflows import execute_workflow
+
+result = execute_workflow(
+    workflow_id="wf-conclave",
+    inputs={
+        "query": "Should we increase closer commission from 10% to 15%?",
+        "context": {"current_rate": 0.10, "proposed_rate": 0.15}
+    }
+)
+
+print(f"Confidence: {result['confidence']}%")
+print(f"Recommendation: {result['recommendation']}")
+```
+
+---
+
+## Anti-Patterns
+
+<Warning>
+  **No Recursive Loops:** Council runs ONCE per query. If confidence < 60%, escalate to human. Do not re-run the council.
+</Warning>
+
+<Warning>
+  **No Voting:** The Synthesizer does not average positions. Integration means finding a unified path, not majority rule.
+</Warning>
+
+<Warning>
+  **No Positional Advocacy:** The Crítico evaluates process, not merit. The Advogado challenges, not confirms. Neither advocates for an outcome.
+</Warning>
+
+---
+
+## Agent Files
+
+Each agent has two core files:
+
+### AGENT.md
+
+Agent definition with:
+- Role and responsibilities
+- Execution protocol
+- Output format
+- Quality standards
+
+### SOUL.md
+
+Voice and personality:
+- Communication style
+- Tone (formal, direct, diplomatic)
+- Signature phrases
+- Behavioral traits
+
+**Example (Crítico):**
+```markdown
+# SOUL: Crítico Metodológico
+
+Voice: Precise, exacting, data-driven
+Tone: Firm but fair, never personal
+Signature: "Show me the evidence"
+
+Behavioral Traits:
+- Demands rigor in reasoning
+- Intolerant of logical leaps
+- Values transparency over consensus
+- Questions everything, trusts data
+```
+
+---
+
+## See Also
+
+- [Slash Commands: /conclave](/api/slash-commands#conclave-multi-agent-deliberation) - Command reference
+- [Workflows: wf-conclave](/api/core/workflows#wf-conclave) - Workflow details
+- [Cargo Agents](/api/agents/cargo) - Debate participants

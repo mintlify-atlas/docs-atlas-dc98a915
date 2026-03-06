@@ -1,0 +1,752 @@
+---
+title: /process-jarvis Command
+description: Run the 8-phase JARVIS pipeline to transform raw materials into structured knowledge, dossiers, and agent memories
+---
+
+# /process-jarvis - Knowledge Extraction Pipeline
+
+Transforms raw content from inbox into structured knowledge through an 8-phase semantic processing pipeline. This is the core engine of Mega Brain.
+
+## Syntax
+
+```bash
+/process-jarvis [FILE_PATH]
+```
+
+<ParamField path="FILE_PATH" type="string" required>
+  Path to file in inbox/ directory
+  
+  **Example:** `inbox/ALEX HORMOZI/MASTERCLASSES/video-title.txt`
+</ParamField>
+
+## Pipeline Overview
+
+The JARVIS pipeline processes content through 8 mandatory phases:
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         JARVIS PIPELINE v2.2                                  │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Phase 1: Initialization + Validation          [PRE-1, POST-1]              │
+│  Phase 2: Chunking (~300 words/chunk)           [PRE-2, POST-2]              │
+│  Phase 3: Entity Resolution                     [PRE-3, POST-3]              │
+│  Phase 4: Insight Extraction                    [PRE-4, POST-4]              │
+│  Phase 5: Narrative Synthesis                   [PRE-5, POST-5]              │
+│  Phase 6: Dossier Compilation                   [PRE-6, POST-6]              │
+│  Phase 7: Agent Enrichment                      [User Prompt]                │
+│  Phase 8: Finalization + Registry Update        [CHECKPOINT 7]               │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+<Warning>
+**All 8 phases are MANDATORY**. The pipeline does NOT stop at Phase 7. Skipping Phase 8 will result in incomplete propagation.
+</Warning>
+
+## Phase-by-Phase Breakdown
+
+### Phase 1: Initialization
+
+**Purpose:** Validate input and extract metadata from file path
+
+<Steps>
+  <Step title="Validate File Exists">
+    ```bash
+    # Checks if file exists at specified path
+    test -f "$FILE_PATH" || exit 1
+    ```
+  </Step>
+  
+  <Step title="Extract Path Metadata">
+    ```yaml
+    Path: inbox/COLE GORDON/MASTERMINDS/video-title.txt
+    
+    Extracted:
+      SOURCE_PERSON: "Cole Gordon"
+      SOURCE_COMPANY: "Cole Gordon"
+      SOURCE_TYPE: "MASTERMINDS" → mapped to "lecture"
+      SOURCE_ID: "CG003" (auto-generated hash)
+      SCOPE: "personal" (auto-determined)
+      CORPUS: "closers_io" (from known sources)
+    ```
+  </Step>
+  
+  <Step title="Load State Files">
+    Creates if missing:
+    - `CHUNKS-STATE.json`
+    - `CANONICAL-MAP.json`
+    - `INSIGHTS-STATE.json`
+    - `NARRATIVES-STATE.json`
+  </Step>
+  
+  <Step title="Duplicate Detection (CRITICAL)">
+    ```
+    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    ⛔ DUPLICATE DETECTION - STOPS PROCESSING IF FOUND
+    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    
+    Checks:
+    1. MD5 hash (exact duplicate)
+    2. Content hash (same content, different file)
+    3. Fingerprint (partial duplicate)
+    4. YouTube ID (same video already processed)
+    
+    If duplicate found: EXIT immediately
+    ```
+  </Step>
+</Steps>
+
+**Checkpoint:** PRE-1 + POST-1 must pass
+
+### Phase 2: Chunking
+
+**Purpose:** Split content into ~300-word semantic chunks with metadata
+
+<Tabs>
+  <Tab title="Chunk Structure">
+    ```json
+    {
+      "id_chunk": "chunk_CG003_001",
+      "content": "Full text of chunk...",
+      "word_count": 287,
+      "pessoas": ["Cole Gordon", "Alex Hormozi"],
+      "temas": ["Sales Process", "Closing Techniques"],
+      "meta": {
+        "source_type": "lecture",
+        "source_id": "CG003",
+        "source_title": "video-title.txt",
+        "source_path": "inbox/COLE GORDON/...",
+        "source_datetime": "2026-03-06T10:00:00Z",
+        "scope": "personal",
+        "corpus": "closers_io"
+      }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Chunking Rules">
+    - **Target size:** ~300 words (~1000 tokens)
+    - **Preserve:** Timestamps, speaker labels, formatting
+    - **Extract:** People mentioned (raw), themes (raw)
+    - **Sequential IDs:** `chunk_{SOURCE_ID}_{001...NNN}`
+  </Tab>
+  
+  <Tab title="Output">
+    Appends to `processing/chunks/CHUNKS-STATE.json`:
+    
+    ```json
+    {
+      "chunks": [
+        {...},  // existing chunks
+        {...}   // new chunks from this file
+      ],
+      "meta": {
+        "last_updated": "2026-03-06T10:15:23Z",
+        "total_chunks": 1247,
+        "version": "v1"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Checkpoint:** PRE-2 + POST-2 must pass
+
+### Phase 3: Entity Resolution
+
+**Purpose:** Canonicalize person/company names and themes
+
+<Note>
+**Why?** "Cole", "Cole Gordon", "CG" all refer to the same person. This phase unifies them.
+</Note>
+
+```yaml
+Canonical Mapping:
+  "Alex" → "Alex Hormozi"
+  "Hormozi" → "Alex Hormozi"
+  "acquisition.com" → "Acquisition.com"
+  
+Threshold: 0.85 confidence
+Output: CANONICAL-MAP.json + updated CHUNKS-STATE.json
+```
+
+**Handles:**
+- Name variations ("Cole" vs "Cole Gordon")
+- Typos ("Hormozi" vs "Hormozzi")
+- Abbreviations ("CG" → "Cole Gordon")
+- Collisions (same name in different corpora)
+
+**Checkpoint:** PRE-3 + POST-3 must pass
+
+### Phase 4: Insight Extraction
+
+**Purpose:** Extract actionable insights with priority classification
+
+<Tabs>
+  <Tab title="Priority Levels">
+    ```yaml
+    HIGH:
+      - Affects money, structure, risk, decisions
+      - Operational criticality
+      - Example: "Commission structure must be 10% base + 5% accelerator"
+    
+    MEDIUM:
+      - Improves process/clarity
+      - Not urgent
+      - Example: "Weekly team meetings improve morale"
+    
+    LOW:
+      - Peripheral context
+      - Background information
+      - Example: "Cole started his career in 2015"
+    ```
+  </Tab>
+  
+  <Tab title="Insight Structure">
+    ```json
+    {
+      "insight_id": "insight_CG003_042",
+      "content": "Close rate drops 40% without proper qualification",
+      "priority": "HIGH",
+      "confidence": 0.92,
+      "chunks": ["chunk_CG003_012", "chunk_CG003_013"],
+      "actionable_by": ["CLOSER", "SALES-MANAGER"],
+      "theme": "02-PROCESSO-VENDAS",
+      "status": "new"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Contradiction Detection">
+    ```
+    If insight contradicts existing insight:
+      - Mark status: "contradiction"
+      - Document both sides
+      - Require human review
+      
+    Example:
+      Source A: "Cold calls work best 9-11am"
+      Source B: "Cold calls work best 4-6pm"
+      → Flag as contradiction, include in dossier
+    ```
+  </Tab>
+</Tabs>
+
+**Output:** `processing/insights/INSIGHTS-STATE.json`
+
+**Checkpoint:** PRE-4 + POST-4 must pass
+
+### Phase 5: Narrative Synthesis
+
+**Purpose:** Synthesize insights into executive narratives
+
+<Note>
+**Style:** "Executive memory" - clear, strategic, evidence-based
+</Note>
+
+```yaml
+Narrative Structure:
+  - Patterns identified
+  - Positions (expert's stance)
+  - Tensions (contradictions)
+  - Open loops (unanswered questions)
+  - Consensus points
+  - Next questions
+
+Merge Rules (CRITICAL):
+  narrative: CONCATENATE with separator
+  insights_included[]: APPEND (don't replace)
+  tensions[]: APPEND (don't replace)
+  open_loops[]: APPEND, mark RESOLVED if answered
+  next_questions[]: REPLACE (only exception)
+```
+
+**Output:** `processing/narratives/NARRATIVES-STATE.json`
+
+**Checkpoint:** PRE-5 + POST-5 must pass
+
+### Phase 6: Dossier Compilation
+
+**Purpose:** Transform narratives into Markdown dossiers
+
+<Warning>
+**CRITICAL RULE:** Every section MUST have chunk_ids for traceability
+
+```markdown
+### Christmas Tree Structure [CG001_012, SS001_045]
+  ✓ Correct
+
+### Christmas Tree Structure
+  ✗ BLOCKED - No chunk_ids
+```
+</Warning>
+
+<Tabs>
+  <Tab title="Person Dossiers">
+    ```markdown
+    # DOSSIER: COLE GORDON
+    
+    **Voice:** 1st person ("I believe...")
+    **Sources:** CG001, CG002, CG003
+    
+    ## TL;DR
+    [1-2 sentence essence]
+    
+    ## Central Philosophy [CG001_045, CG002_012]
+    Core beliefs and worldview...
+    
+    ## Modus Operandi [CG001_067, CG003_023]
+    How this person operates...
+    
+    ## Technical Arsenal [CG002_089]
+    Frameworks and methodologies...
+    
+    ## Traps & Antipatterns [CG001_123]
+    What to avoid...
+    
+    ## Signature Quotes
+    > "Philosophy beats tactics" — [CG001_001]
+    ```
+  </Tab>
+  
+  <Tab title="Theme Dossiers">
+    ```markdown
+    # DOSSIER: 02-PROCESSO-VENDAS
+    
+    **Voice:** Neutral narrator
+    **Contributors:** Cole Gordon, Alex Hormozi
+    
+    ## Overview
+    [Theme summary]
+    
+    ## Consensus Points [CG001_045, AH002_067]
+    What experts agree on...
+    
+    ## Divergences
+    Where experts disagree...
+    
+    ## Frameworks
+    ### STAR Qualification [CG001_089]
+    - Situation
+    - Timing
+    - Authority
+    - Resources
+    ```
+  </Tab>
+  
+  <Tab title="Incremental Updates">
+    ```
+    IF dossier exists:
+      MODE = "INCREMENTAL"
+      
+      Actions:
+      1. APPEND new source to header
+      2. APPEND new patterns/positions
+      3. MERGE contradictions into Tensions section
+      4. UPDATE last_updated timestamp
+      
+    ELSE:
+      MODE = "CREATE"
+      Generate from template
+    ```
+  </Tab>
+</Tabs>
+
+**Output:** 
+- `knowledge/dossiers/persons/DOSSIER-{PERSON}.md`
+- `knowledge/dossiers/THEMES/DOSSIER-{THEME}.md`
+
+**Checkpoint:** PRE-6 + POST-6 must pass
+
+### Phase 7: Agent Enrichment
+
+**Purpose:** Update agent MEMORYs with relevant knowledge
+
+```yaml
+Theme-to-Agent Mapping:
+  "02-PROCESSO-VENDAS" → [CLOSER, SDS, LNS]
+  "04-COMISSIONAMENTO" → [SALES-MANAGER, CRO, CFO]
+  "07-PRICING" → [CRO, CFO, CLOSER]
+  
+Framework-to-Agent Mapping:
+  "3 Audience Buckets" → [CLOSER, SDS, LNS]
+  "STAR Qualification" → [SDS, CLOSER]
+  "28 Rules of Closing" → [CLOSER, SALES-MANAGER]
+```
+
+**Process:**
+1. Identify themes in processed content
+2. Map themes → relevant agents
+3. Update each agent's `MEMORY.md`
+4. Append source_id to memory
+
+**Output:** Updated `agents/cargo/{AREA}/{ROLE}/MEMORY.md` files
+
+**Checkpoint:** User confirmation prompt
+
+### Phase 8: Finalization (MANDATORY)
+
+<Warning>
+**This phase is NON-OPTIONAL**. Pipeline is incomplete without it.
+</Warning>
+
+<Steps>
+  <Step title="Update RAG Index">
+    ```bash
+    python scripts/rag_index.py --knowledge --force
+    ```
+    
+    Re-indexes all knowledge files for semantic search
+  </Step>
+  
+  <Step title="Update File Registry">
+    ```bash
+    python scripts/file_registry.py --scan
+    ```
+    
+    Registers MD5 hash and marks file as PROCESSED
+  </Step>
+  
+  <Step title="Update SESSION-STATE.md">
+    Adds entry to "Processed Files" table
+  </Step>
+  
+  <Step title="Update INBOX-REGISTRY.md">
+    Marks file as COMPLETE with propagation status
+  </Step>
+  
+  <Step title="Verify Agent Coverage">
+    ```
+    CRITICAL CHECK:
+    For each theme/framework:
+      → List expected agents
+      → Verify each agent has source_id in MEMORY.md
+      → If missing: LOG ERROR and FAIL
+    ```
+    
+    Example failure:
+    ```
+    ❌ AGENT COVERAGE FAILED
+    
+    Expected: [CLOSER, SDS, LNS]
+    Received: [CLOSER, SDS]
+    MISSING: LNS
+    
+    Framework "3 Audience Buckets" was NOT propagated to LNS
+    ```
+  </Step>
+  
+  <Step title="Role Tracking (Optional)">
+    ```bash
+    python scripts/role_tracker.py --scan
+    ```
+    
+    Counts role mentions. Auto-creates agent if ≥ 10 mentions.
+  </Step>
+</Steps>
+
+**Checkpoint:** CHECKPOINT 7 (10 validation items) must all pass
+
+## Execution Report
+
+After successful completion:
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+JARVIS PIPELINE COMPLETE: COLE GORDON (CG003)
+═══════════════════════════════════════════════════════════════════════════════
+
+[INPUT] SOURCE
+   File: inbox/COLE GORDON/MASTERMINDS/video-title.txt
+   Person: Cole Gordon (Closers.io)
+   Type: lecture
+   Words: 8,542
+
+[CHUNK] CHUNKING
+   Chunks created: 29
+   Avg chunk size: 294 words
+
+[ENTITY] ENTITY RESOLUTION
+   Entities resolved: 47
+   Aliases added: 12
+   [!] Review queue: 0
+   [!] Collisions: 0
+
+[INSIGHT] INSIGHTS
+   Total extracted: 63
+   HIGH priority: 18
+   MEDIUM priority: 32
+   LOW priority: 13
+   Contradictions: 0
+
+[NARRATIVE] NARRATIVES
+   Persons updated: 1 (Cole Gordon)
+   Themes updated: 5
+   Open loops: 8
+   Tensions: 2
+
+[DOSSIER] DOSSIERS (PHASE 6)
+   Persons: 0 created, 1 updated (DOSSIER-COLE-GORDON.md)
+   Themes: 0 created, 5 updated
+   RAG indexed: 6 files
+
+[AGENT] AGENT ENRICHMENT (PHASE 7)
+   MEMORYs updated: 8 agents
+   ✓ CLOSER
+   ✓ SDS
+   ✓ LNS
+   ✓ SALES-MANAGER
+   ✓ SALES-LEAD
+   ✓ BDR
+   ✓ CRO
+   ✓ SALES-COORDINATOR
+
+[FINALIZE] PHASE 8 COMPLETE
+   ✓ RAG index updated (127 files)
+   ✓ File registry updated
+   ✓ SESSION-STATE updated
+   ✓ INBOX-REGISTRY updated
+   ✓ Agent coverage: 100% (8/8 agents)
+   ✓ Role tracking: 3 roles scanned
+
+[OK] STATUS: SUCCESS
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+## Examples
+
+<CodeGroup>
+```bash Single File
+/process-jarvis "inbox/ALEX HORMOZI/MASTERCLASSES/scaling-masterclass.txt"
+```
+
+```bash Different Expert
+/process-jarvis "inbox/COLE GORDON/PODCASTS/episode-042.txt"
+```
+
+```bash Course Module
+/process-jarvis "inbox/SAM OVENS/COURSES/module-3-sales.txt"
+```
+</CodeGroup>
+
+## Performance
+
+### Processing Time
+
+| Content Size | Chunks | Time |
+|--------------|--------|------|
+| 3k words | ~10 chunks | 2-3 min |
+| 10k words | ~33 chunks | 5-8 min |
+| 30k words | ~100 chunks | 15-20 min |
+
+<Note>
+Time varies based on chunk count, not file size. More chunks = longer processing.
+</Note>
+
+### Resource Usage
+
+- **RAM:** ~500MB per file
+- **Disk:** Temporary files in `artifacts/`
+- **API calls:** 0 (runs locally)
+
+## Error Handling
+
+### File Not Found
+
+```
+✗ PIPELINE FAILED
+
+File not found: inbox/PERSON/file.txt
+
+Check:
+  1. File path is correct
+  2. File exists in inbox/
+  3. Spelling matches exactly
+```
+
+### Duplicate Detected
+
+```
+⛔ DUPLICATE EXACT DETECTED - PROCESSING STOPPED
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Current file: inbox/COLE GORDON/video.txt                                  │
+│  MD5: abc123def456...                                                       │
+│                                                                            │
+│  Duplicate of: inbox/COLE GORDON/old-video.txt                             │
+│  Registered: 2026-02-15T10:30:00Z                                          │
+│  SOURCE_ID: CG001                                                          │
+│                                                                            │
+│  This file will NOT be processed.                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Agent Coverage Failed
+
+```
+❌ VERIFICATION FAILED: AGENT COVERAGE
+
+Framework "3 Audience Buckets" detected
+
+Expected agents: [CLOSER, SDS, LNS]
+Agents updated: [CLOSER, SDS]
+MISSING: LNS
+
+Phase 7 must be re-run to fix coverage.
+```
+
+### Phase Checkpoint Failure
+
+```
+✗ CHECKPOINT POST-4 FAILED
+
+Insights extraction incomplete:
+  - 0 HIGH priority insights (expected: > 0)
+  - No chunk_ids in insights
+
+Pipeline stopped. Review Phase 4 output.
+```
+
+## Troubleshooting
+
+### "Pipeline stopped at Phase 7"
+
+**Issue:** Pipeline does not continue to Phase 8
+
+**Solution:**
+This is intentional. Phase 8 requires confirmation:
+
+```bash
+# Phase 7 completes, then prompts:
+"Continue to Phase 8 (Finalization)? [Y/n]"
+
+# Type 'Y' to proceed
+```
+
+### "Chunk_ids missing in dossier"
+
+**Issue:** Dossier compilation fails validation
+
+**Solution:**
+Phase 6 requires chunk_ids. Check:
+
+```markdown
+### Section Title [CG001_045, CG002_067]
+  ✓ Has chunk_ids
+
+### Section Title
+  ✗ Missing chunk_ids - BLOCKED
+```
+
+### "Agent MEMORY not updated"
+
+**Issue:** Agent doesn't have source_id after Phase 7
+
+**Solution:**
+Check theme/framework mapping:
+
+```yaml
+Theme: "02-PROCESSO-VENDAS"
+Expected agents: [CLOSER, SDS, LNS]
+
+Verify:
+  - Theme is correctly identified
+  - Agent files exist at agents/cargo/SALES/{AGENT}/MEMORY.md
+  - No file permission issues
+```
+
+## Best Practices
+
+### 1. Process in Order
+
+Process files chronologically when possible:
+
+```bash
+# Good: Chronological order
+/process-jarvis "inbox/PERSON/video-2024-01-15.txt"
+/process-jarvis "inbox/PERSON/video-2024-02-20.txt"
+/process-jarvis "inbox/PERSON/video-2024-03-10.txt"
+
+# Suboptimal: Random order
+/process-jarvis "inbox/PERSON/video-2024-03-10.txt"
+/process-jarvis "inbox/PERSON/video-2024-01-15.txt"
+```
+
+### 2. Review High Priority Insights
+
+After processing, check:
+
+```bash
+# View insights
+cat processing/insights/INSIGHTS-STATE.json | jq '.insights_state.persons["Cole Gordon"] | .[] | select(.priority == "HIGH")'
+```
+
+### 3. Verify Agent Coverage
+
+After Phase 8:
+
+```bash
+# Check which agents were updated
+grep -r "CG003" agents/cargo/*/MEMORY.md
+```
+
+### 4. Monitor Contradictions
+
+If contradictions found:
+
+```bash
+# List contradictions
+cat processing/insights/INSIGHTS-STATE.json | jq '.insights_state.persons["Cole Gordon"] | .[] | select(.status == "contradiction")'
+```
+
+## Advanced Usage
+
+### Batch Processing
+
+<Note>
+Coming soon: `--batch` flag for processing entire directory
+</Note>
+
+### Reprocessing
+
+If file was already processed:
+
+```
+⚠️  File already processed: CG003
+
+Reprocess? This will:
+  - Remove old chunks for this source_id
+  - Re-extract all insights
+  - Update existing dossiers
+
+[y/N]
+```
+
+### Incremental Updates
+
+Dossiers update incrementally:
+
+```markdown
+## Modus Operandi
+
+[Previous content...]
+
+--- Update 2026-03-06 via CG003 ---
+
+[New content from latest source...]
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Extract DNA" icon="dna" href="/commands/extract-dna">
+    Generate cognitive DNA after 3+ sources
+  </Card>
+  <Card title="JARVIS Briefing" icon="clipboard-check" href="/commands/jarvis-briefing">
+    Check processing statistics
+  </Card>
+  <Card title="Dossiers Guide" icon="book" href="/concepts/knowledge-pipeline">
+    Understanding dossier structure
+  </Card>
+  <Card title="Agent System" icon="users" href="/concepts/agents">
+    How agents use processed knowledge
+  </Card>
+</CardGroup>

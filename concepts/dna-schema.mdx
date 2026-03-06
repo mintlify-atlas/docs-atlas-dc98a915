@@ -1,0 +1,362 @@
+---
+title: DNA Schema
+description: The 5-layer cognitive framework for extracting and organizing expert knowledge
+---
+
+The DNA Schema is Mega Brain's core knowledge extraction framework. It organizes expert knowledge into 5 hierarchical layers, from foundational beliefs to actionable methodologies.
+
+## The 5 Layers
+
+<CardGroup cols={1}>
+  <Card title="L1: Philosophies" icon="lightbulb">
+    **Core beliefs and worldview**
+    
+    Fundamental principles that guide all decisions and behaviors. The "why" behind everything.
+  </Card>
+  
+  <Card title="L2: Mental Models" icon="brain">
+    **Thinking and decision frameworks**
+    
+    Ways of understanding and interpreting reality. How the expert sees the world.
+  </Card>
+  
+  <Card title="L3: Heuristics" icon="compass">
+    **Practical rules and decision shortcuts**
+    
+    Quick decision rules derived from experience. When to act, when to wait, when to pivot.
+  </Card>
+  
+  <Card title="L4: Frameworks" icon="diagram-project">
+    **Structured methodologies and processes**
+    
+    Complete systems for solving complex problems. Repeatable approaches.
+  </Card>
+  
+  <Card title="L5: Methodologies" icon="list-check">
+    **Step-by-step implementations**
+    
+    Detailed execution plans with specific actions, sequences, and expected outcomes.
+  </Card>
+</CardGroup>
+
+## Layer Details
+
+### L1: Philosophies
+
+Core beliefs that shape everything else. These rarely change and form the expert's identity.
+
+<Accordion title="Structure">
+  ```yaml
+  filosofia:
+    - id: FIL-001
+      crenca: "The master is always right, except when wrong - and it's my duty to say when."
+      implicacao: "Loyalty doesn't mean blind agreement. Respectful disagreement is service."
+      origem: "Original JARVIS-Tony dynamic"
+      confidence: 0.95
+      sources: ["JV001", "JV003"]
+  ```
+</Accordion>
+
+<Accordion title="Examples">
+  **Alex Hormozi:**
+  - "Price is a consequence of value" (Confidence: 0.95)
+  - "Scale before you optimize" (Confidence: 0.87)
+  
+  **Cole Gordon:**
+  - "Speed beats perfection in lead response" (Confidence: 0.92)
+  - "Qualification is superior to persuasion" (Confidence: 0.89)
+</Accordion>
+
+### L2: Mental Models
+
+Frameworks for understanding how systems work. These shape decision-making.
+
+<Accordion title="Structure">
+  ```yaml
+  modelos_mentais:
+    - id: MM-001
+      modelo: "Three-Level Alert System"
+      descricao: "Classify situations: Normal (continue), Attention (monitor), Critical (alert)"
+      aplicacao: "Used to decide when to interrupt"
+      exemplo: |
+        Normal: Task proceeding, no blockers
+        Attention: Dependency detected, monitoring
+        Critical: Error requiring immediate decision
+      sources: ["JV001"]
+  ```
+</Accordion>
+
+<Accordion title="Examples">
+  **Alex Hormozi:**
+  - **Value Equation:** (Dream Outcome × Probability) / (Time × Effort)
+  - **Product Ladder:** Front End → Back End → High End
+  
+  **JARVIS:**
+  - **Cognitive Opportunity Cost:** Every question has a cost in attention
+  - **Context is King:** Information without context is noise
+</Accordion>
+
+### L3: Heuristics
+
+Rapid decision rules and triggers. "If X, then Y" logic.
+
+<Accordion title="Structure">
+  ```yaml
+  heuristicas:
+    - id: HEU-001
+      regra: "When in doubt, ask. When certain, execute."
+      gatilho: "Decisions with reversible vs irreversible impact"
+      acao: |
+        Reversible: Execute and inform
+        Irreversible: Ask before acting
+      sources: ["JV001", "JV002"]
+  ```
+</Accordion>
+
+<Accordion title="Examples">
+  **Cole Gordon:**
+  - "Respond to leads in less than 5 minutes" (Context: Speed impacts 80% of conversion)
+  - "Always anchor before revealing price" (Context: Anchoring defines value perception)
+  
+  **JARVIS:**
+  - "5 seconds of context saves 5 minutes of confusion"
+  - "If it can be automated and is repetitive, it should be automated"
+</Accordion>
+
+### L4: Frameworks
+
+Structured approaches to complex problems. Multi-step systems.
+
+<Accordion title="Structure">
+  ```yaml
+  frameworks:
+    - id: FW-001
+      nome: "SCAN - Status, Context, Action, Next"
+      proposito: "Structure status updates"
+      estrutura:
+        - Status: "Where we are now"
+        - Context: "How we got here"
+        - Action: "What was done"
+        - Next: "Next steps"
+      exemplo: |
+        Status: Pipeline phase 4 complete
+        Context: Started yesterday, processed 23 files
+        Action: All chunks extracted, validation OK
+        Next: Begin phase 5 (narrative synthesis)
+      sources: ["JV001"]
+  ```
+</Accordion>
+
+<Accordion title="Examples">
+  **Cole Gordon:**
+  - **SPIN Selling:** Situation → Problem → Implication → Need
+  - **NEPQ:** Neuro-Emotional Persuasion Questions framework
+  
+  **JARVIS:**
+  - **SCAN:** Status, Context, Action, Next (for updates)
+  - **DECIDE:** Define, Explore, Consider, Identify, Develop, Execute
+</Accordion>
+
+### L5: Methodologies
+
+Detailed step-by-step procedures. Complete execution playbooks.
+
+<Accordion title="Structure">
+  ```yaml
+  metodologias:
+    - id: MET-001
+      nome: "Session Initialization"
+      passos:
+        - passo: 1
+          acao: "Load JARVIS-STATE.json"
+          output: "Global state in memory"
+        - passo: 2
+          acao: "Check last session"
+          output: "Context of where we stopped"
+        - passo: 3
+          acao: "Greet appropriately"
+          output: "Time-appropriate greeting"
+        - passo: 4
+          acao: "Present status summary"
+          output: "SCAN of project"
+        - passo: 5
+          acao: "Offer next steps"
+          output: "Action suggestions"
+      sources: ["JV001"]
+  ```
+</Accordion>
+
+<Accordion title="Examples">
+  **Alex Hormozi:**
+  - **30-Day Onboarding Pipeline:** Day 1-3 (Welcome), Day 4-7 (Quick Win), Day 8-14 (Core), Day 15-30 (Optimization)
+  
+  **JARVIS:**
+  - **Session Initialization:** 5-step startup sequence
+  - **Self-Improvement Loop:** Detect → Analyze → Propose → Implement → Verify → Document
+</Accordion>
+
+## DNA Extraction Process
+
+<Steps>
+  <Step title="Insight Collection">
+    Extract insights from source materials during Phase 4 of the pipeline
+  </Step>
+  
+  <Step title="Layer Classification">
+    Classify each insight into one of the 5 layers based on abstraction level
+  </Step>
+  
+  <Step title="Confidence Scoring">
+    Assign confidence scores (0.0-1.0) based on evidence strength
+  </Step>
+  
+  <Step title="Source Tracing">
+    Link every DNA element back to source chunks with `chunk_id` references
+  </Step>
+  
+  <Step title="Cross-Validation">
+    Identify contradictions, reinforcements, and consensus across sources
+  </Step>
+  
+  <Step title="DNA Schema Generation">
+    Compile into YAML DNA schema file for the expert
+  </Step>
+</Steps>
+
+## DNA Schema Structure
+
+```yaml
+# DNA Cognitivo - Alex Hormozi
+# Generated by Pipeline Jarvis v2.1
+
+expert:
+  name: "Alex Hormozi"
+  id: "alex-hormozi"
+  sources_count: 23
+  extraction_date: "2026-01-15"
+
+layers:
+  L1_filosofias:
+    - belief: "Price is a consequence of value"
+      confidence: 0.95
+      sources: ["AH001", "AH002"]
+    - belief: "Scale before optimizing"
+      confidence: 0.87
+      sources: ["AH003"]
+
+  L2_modelos_mentais:
+    - model: "Value Equation"
+      description: "(Dream Outcome × Probability) / (Time × Effort)"
+      application: "Evaluate and improve offers"
+      sources: ["AH001"]
+
+  L3_heuristicas:
+    - rule: "Never negotiate on price without anchoring value first"
+      context: "Anchoring defines perception"
+      sources: ["AH002"]
+
+  L4_frameworks:
+    - name: "Offer Stack Formula"
+      steps:
+        - "Dream Outcome identification"
+        - "Probability maximization"
+        - "Time/effort minimization"
+      sources: ["AH001", "AH003"]
+
+  L5_metodologias:
+    - name: "Lead Magnet Launch Sequence"
+      duration: "7 days"
+      steps:
+        - "Day 1: Tease + Problem awareness"
+        - "Day 2-3: Education + Social proof"
+        - "Day 4-5: Offer reveal + Scarcity"
+        - "Day 6-7: Last chance + Close"
+      sources: ["AH003"]
+
+metadata:
+  version: "1.0.0"
+  pipeline_version: "JARVIS v2.1"
+  total_chunks_analyzed: 847
+  total_insights_extracted: 156
+```
+
+## DNA in Agent Files
+
+Extracted DNA schemas are used to populate agent minds:
+
+<Tabs>
+  <Tab title="Mind Clone Agents">
+    Located in `agents/minds/{expert}/DNA-CONFIG.yaml`
+    
+    Mind clones reason using the expert's actual DNA extracted from their materials.
+  </Tab>
+  
+  <Tab title="Cargo Agents">
+    Synthesize DNA from multiple experts relevant to their role.
+    
+    Example: Sales-Lead agent combines DNA from Cole Gordon, Alex Hormozi, and Jeremy Miner.
+  </Tab>
+  
+  <Tab title="System Agents">
+    Like JARVIS, have hand-crafted DNA schemas that define their cognitive framework.
+  </Tab>
+</Tabs>
+
+## Traceability
+
+Every DNA element traces back to source material:
+
+```
+Philosophy (FIL-001)
+  ↓
+Sources: ["CG003", "CG007"]
+  ↓
+Chunks: ["CG003-042", "CG007-018"]
+  ↓
+Files: inbox/cole-gordon/nepq-masterclass-session-3.txt:1247
+```
+
+<Note>
+  This full traceability allows you to verify any claim by jumping directly to the source material.
+</Note>
+
+## DNA Evolution
+
+DNA schemas evolve as new material is processed:
+
+- **New beliefs:** Added with source references
+- **Contradictions:** Flagged for review
+- **Reinforcements:** Confidence scores increase
+- **Refinements:** Descriptions become more precise
+
+## Using DNA
+
+<CardGroup cols={2}>
+  <Card title="Query DNA" icon="search">
+    Use `/rag-search` to query across all DNA schemas
+  </Card>
+  
+  <Card title="Agent Reasoning" icon="robot">
+    Mind clones use DNA to reason like the expert
+  </Card>
+  
+  <Card title="Compare Experts" icon="code-compare">
+    Theme dossiers show consensus and divergence
+  </Card>
+  
+  <Card title="Build Playbooks" icon="book">
+    Compile L4/L5 into operational playbooks
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Knowledge Pipeline" icon="arrows-spin" href="/concepts/knowledge-pipeline">
+    See how DNA is extracted in the pipeline
+  </Card>
+  
+  <Card title="Agents" icon="users" href="/concepts/agents">
+    Learn how agents use DNA for reasoning
+  </Card>
+</CardGroup>

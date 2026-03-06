@@ -1,0 +1,232 @@
+---
+title: Architecture Overview
+description: Understanding the file structure and components of Mega Brain
+---
+
+Mega Brain follows a modular architecture designed to separate concerns between processing engine, knowledge storage, agent systems, and user workspace.
+
+## Directory Structure
+
+<CardGroup cols={2}>
+  <Card title="core/" icon="gear">
+    **Processing Engine**
+    
+    Tasks, workflows, protocols, schemas, and intelligence scripts that power the knowledge pipeline.
+  </Card>
+  
+  <Card title="agents/" icon="users">
+    **AI Agents**
+    
+    Mind clones, cargo roles, conclave deliberation agents, and agent templates.
+  </Card>
+  
+  <Card title=".claude/" icon="code">
+    **Claude Integration**
+    
+    Hooks, skills, slash commands, and rules for Claude Code integration.
+  </Card>
+  
+  <Card title="knowledge/" icon="book">
+    **Knowledge Base**
+    
+    Playbooks, dossiers, DNA schemas, and sources with full traceability.
+  </Card>
+  
+  <Card title="artifacts/" icon="box">
+    **Processing Artifacts**
+    
+    Intermediate pipeline outputs: chunks, insights, narratives, and extractions.
+  </Card>
+  
+  <Card title="inbox/" icon="inbox">
+    **Input Directory**
+    
+    Raw materials for processing: videos, PDFs, transcriptions, courses.
+  </Card>
+</CardGroup>
+
+## Core Components
+
+### Processing Engine (`core/`)
+
+The core engine contains everything needed to transform raw materials into structured knowledge:
+
+<Accordion title="core/tasks/">
+  Task definitions for atomic operations:
+  - `extract-dna.md` - Extract 5-layer DNA from sources
+  - `analyze-themes.md` - Identify themes and patterns
+  - `normalize-entities.md` - Resolve entity names
+  - `process-batch.md` - Batch processing orchestration
+  - `validate-cascade.md` - Validation and integrity checks
+</Accordion>
+
+<Accordion title="core/workflows/">
+  YAML workflow definitions:
+  - `wf-pipeline-full.yaml` - Complete 5-phase pipeline
+  - `wf-ingest.yaml` - Material ingestion
+  - `wf-extract-dna.yaml` - DNA extraction workflow
+  - `wf-conclave.yaml` - Multi-agent deliberation
+</Accordion>
+
+<Accordion title="core/schemas/">
+  JSON Schema definitions for all state files:
+  - `chunks-state.schema.json`
+  - `insights-state.schema.json`
+  - `narratives-state.schema.json`
+  - `canonical-map.schema.json`
+  - `decisions-registry.schema.json`
+</Accordion>
+
+<Accordion title="core/intelligence/">
+  Python intelligence scripts:
+  - `audit_layers.py` - Layer system validation
+  - RAG and semantic processing utilities
+  - Quality control and validation scripts
+</Accordion>
+
+### Agent System (`agents/`)
+
+Mega Brain includes a hierarchical agent system with four main types:
+
+```
+agents/
+├── minds/          # L3 - Expert mind clones (Hormozi, Cole Gordon, etc.)
+├── cargo/          # L4 - Functional roles (Sales, Marketing, Ops, Finance)
+├── conclave/       # L1 - Deliberative agents (Critic, Advocate, Synthesizer)
+├── boardroom/      # L2 - C-Level strategic debates
+├── _templates/     # Official agent templates (V3)
+└── AGENT-INDEX.yaml # Master catalog (auto-updated)
+```
+
+See the [Agents](/concepts/agents) page for detailed information.
+
+### Claude Code Integration (`.claude/`)
+
+The `.claude/` directory contains all Claude Code integration files:
+
+<Tabs>
+  <Tab title="Hooks">
+    **20+ lifecycle hooks** for automated operations:
+    
+    - `agent_index_updater.py` - Auto-update agent catalog
+    - `continuous_save.py` - Session auto-save
+    - `enforce_dual_location.py` - Dual-location logging
+    - `memory_persister.py` - Agent memory updates
+    - `inbox_age_alert.py` - Unprocessed material alerts
+    - `creation_validator.py` - File creation validation
+  </Tab>
+  
+  <Tab title="Commands">
+    **Slash commands** for common operations:
+    
+    - `/jarvis-briefing` - System status
+    - `/ingest` - Ingest new material
+    - `/process-jarvis` - Run full pipeline
+    - `/conclave` - Multi-agent session
+    - `/save` - Save session state
+    - `/resume` - Resume previous session
+  </Tab>
+  
+  <Tab title="Skills">
+    **40+ skills** with keyword-based routing:
+    
+    Skills automatically activate based on context and keywords, providing specialized instructions for specific tasks.
+  </Tab>
+</Tabs>
+
+### Knowledge Base (`knowledge/`)
+
+All extracted and structured knowledge lives here:
+
+```
+knowledge/
+├── dossiers/
+│   ├── persons/    # Expert dossiers (ALEX-HORMOZI.md, etc.)
+│   └── themes/     # Theme-based compilations
+├── playbooks/      # Operational playbooks
+├── dna/            # 5-layer DNA schemas
+└── sources/        # Source material metadata
+```
+
+<Note>
+  Every piece of knowledge traces back to source material with `chunk_id`, file path, and original context.
+</Note>
+
+### Pipeline Artifacts (`artifacts/`)
+
+Intermediate processing stages store data here:
+
+```
+artifacts/
+├── chunks/         # Segmented content with metadata
+├── insights/       # Extracted actionable insights
+├── narratives/     # Synthesized narratives per person/theme
+├── extractions/    # DNA layer extractions
+└── canonical/      # Entity resolution maps
+```
+
+## State Management
+
+Mega Brain maintains several critical state files:
+
+| State File | Purpose | Location |
+|------------|---------|----------|
+| `CHUNKS-STATE.json` | All content chunks | `artifacts/chunks/` |
+| `CANONICAL-MAP.json` | Entity name resolution | `artifacts/canonical/` |
+| `INSIGHTS-STATE.json` | Extracted insights | `artifacts/insights/` |
+| `NARRATIVES-STATE.json` | Synthesized narratives | `artifacts/narratives/` |
+| `AGENT-INDEX.yaml` | Agent registry | `agents/` |
+| `file-registry.json` | Processed files tracking | `system/REGISTRY/` |
+
+## Binaries and CLI (`bin/`)
+
+Command-line tools for setup and operations:
+
+- `setup.js` - Interactive setup wizard
+- `cli.js` - Main CLI entry point
+- `pre-publish-gate.js` - Layer validation before publishing
+- `validate-layers.js` - Layer system integrity check
+
+## Development Workflow
+
+<Steps>
+  <Step title="Add Material">
+    Place raw materials (PDFs, videos, transcripts) in `inbox/`
+  </Step>
+  
+  <Step title="Run Pipeline">
+    Execute `/process-jarvis` to run the 8-phase processing pipeline
+  </Step>
+  
+  <Step title="Review Artifacts">
+    Check `artifacts/` for chunks, insights, and narratives
+  </Step>
+  
+  <Step title="Access Knowledge">
+    Query structured knowledge in `knowledge/dossiers/` and `knowledge/playbooks/`
+  </Step>
+  
+  <Step title="Consult Agents">
+    Use mind clones and cargo agents for expert reasoning
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Knowledge Pipeline" icon="arrows-spin" href="/concepts/knowledge-pipeline">
+    Learn about the 8-phase processing pipeline
+  </Card>
+  
+  <Card title="DNA Schema" icon="dna" href="/concepts/dna-schema">
+    Understand the 5-layer knowledge extraction
+  </Card>
+  
+  <Card title="Layer System" icon="layer-group" href="/concepts/layer-system">
+    Explore the L1/L2/L3 distribution layers
+  </Card>
+  
+  <Card title="Agents" icon="users" href="/concepts/agents">
+    Deep dive into the agent system
+  </Card>
+</CardGroup>

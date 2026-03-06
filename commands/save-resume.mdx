@@ -1,0 +1,605 @@
+---
+title: /save and /resume Commands
+description: Save current work context and resume previous sessions for seamless workflow continuity in Mega Brain
+---
+
+# /save & /resume - Session Persistence
+
+Save and restore work context between Claude Code sessions, preserving tasks, files, notes, and next steps.
+
+## Commands
+
+<CardGroup cols={2}>
+  <Card title="/save" icon="floppy-disk">
+    Save current session context
+  </Card>
+  <Card title="/resume" icon="play">
+    Restore previous session context
+  </Card>
+</CardGroup>
+
+## /save Command
+
+### Syntax
+
+```bash
+/save
+```
+
+No parameters required. Command is interactive.
+
+### What Gets Saved
+
+```yaml
+Context Elements:
+  - Last task description
+  - Current status (in_progress | completed | blocked)
+  - Pending items list
+  - Next steps
+  - Important file paths
+  - User notes
+  - Timestamp
+```
+
+### Execution Flow
+
+<Steps>
+  <Step title="Read Current Session">
+    ```bash
+    # Loads existing session file
+    cat /logs/LIVE-SESSION/CURRENT-SESSION.md
+    ```
+  </Step>
+  
+  <Step title="Prompt User for Context">
+    ```
+    What do you want me to save as context?
+    
+    Examples:
+    - "Processing Alex Hormozi materials, 3 of 5 files done"
+    - "Fixing DNA extraction bug, need to test with Cole Gordon"
+    - "Setting up new expert: Sam Ovens"
+    ```
+  </Step>
+  
+  <Step title="Update Session Files">
+    Saves to two locations:
+    
+    **CURRENT-SESSION.md** (human-readable):
+    ```markdown
+    # Session: 2026-03-06
+    
+    ## Current Task
+    Processing Alex Hormozi materials through pipeline
+    
+    ## Status
+    IN_PROGRESS
+    
+    ## Completed
+    - ✓ Ingested AH024 (VSL on scaling)
+    - ✓ Ingested AH025 (Podcast episode)
+    - ✓ Processed AH024 through all 8 phases
+    
+    ## Pending
+    - [ ] Process AH025
+    - [ ] Process AH026
+    - [ ] Extract DNA after 3rd file
+    
+    ## Next Steps
+    1. /process-jarvis "inbox/ALEX HORMOZI/PODCASTS/AH025.txt"
+    2. /process-jarvis "inbox/ALEX HORMOZI/MASTERCLASSES/AH026.txt"
+    3. /extract-dna alex-hormozi
+    
+    ## Important Files
+    - inbox/ALEX HORMOZI/VSL/AH024.txt
+    - inbox/ALEX HORMOZI/PODCASTS/AH025.txt
+    - inbox/ALEX HORMOZI/MASTERCLASSES/AH026.txt
+    
+    ## Notes
+    AH024 had excellent heuristics on pricing. Make sure to review
+    HEURISTICAS.yaml after DNA extraction.
+    
+    ---
+    Saved: 2026-03-06T15:30:00Z
+    ```
+    
+    **CONTEXT.json** (machine-readable):
+    ```json
+    {
+      "last_task": "Processing Alex Hormozi materials through pipeline",
+      "status": "in_progress",
+      "pending": [
+        "Process AH025",
+        "Process AH026",
+        "Extract DNA after 3rd file"
+      ],
+      "next_steps": [
+        "/process-jarvis \"inbox/ALEX HORMOZI/PODCASTS/AH025.txt\"",
+        "/process-jarvis \"inbox/ALEX HORMOZI/MASTERCLASSES/AH026.txt\"",
+        "/extract-dna alex-hormozi"
+      ],
+      "important_files": [
+        "inbox/ALEX HORMOZI/VSL/AH024.txt",
+        "inbox/ALEX HORMOZI/PODCASTS/AH025.txt",
+        "inbox/ALEX HORMOZI/MASTERCLASSES/AH026.txt"
+      ],
+      "notes": "AH024 had excellent heuristics on pricing. Review HEURISTICAS.yaml after DNA extraction.",
+      "timestamp": "2026-03-06T15:30:00Z"
+    }
+    ```
+  </Step>
+  
+  <Step title="Confirm to User">
+    ```
+    [SAVED] Context saved in:
+    - /logs/LIVE-SESSION/CURRENT-SESSION.md
+    - /logs/LIVE-SESSION/CONTEXT.json
+    
+    Next session: execute /resume to load context
+    ```
+  </Step>
+</Steps>
+
+### Example Interaction
+
+```
+User: /save
+
+Assistant: What do you want me to save as context?
+
+User: I'm halfway through processing Cole Gordon materials. Processed
+CG003 and CG004. Still need to do CG005, then extract DNA. CG004 had
+great content on the Email Hammer framework.
+
+Assistant: [SAVED] Context saved in:
+- /logs/LIVE-SESSION/CURRENT-SESSION.md
+- /logs/LIVE-SESSION/CONTEXT.json
+
+Session Summary:
+  • Task: Processing Cole Gordon materials
+  • Status: In Progress
+  • Pending: Process CG005, extract DNA
+  • Note: Email Hammer framework in CG004
+
+Next session: execute /resume to load context
+```
+
+## /resume Command
+
+### Syntax
+
+```bash
+/resume
+```
+
+No parameters required.
+
+### What Gets Loaded
+
+```yaml
+Restored Context:
+  - Previous task description
+  - Task status
+  - Pending items
+  - Next recommended steps
+  - Important file references
+  - User notes
+  - Original save timestamp
+```
+
+### Execution Flow
+
+<Steps>
+  <Step title="Load Session Files">
+    ```bash
+    # Reads both files
+    cat /logs/LIVE-SESSION/CURRENT-SESSION.md
+    cat /logs/LIVE-SESSION/CONTEXT.json
+    ```
+  </Step>
+  
+  <Step title="Display Summary">
+    ```
+    [RESUMING SESSION]
+    
+    ## Last Activity
+    Processing Cole Gordon materials through pipeline
+    
+    ## Status
+    In Progress
+    
+    ## Completed
+    ✓ Processed CG003 (Masterclass - Scaling Sales Teams)
+    ✓ Processed CG004 (Blueprint - Email Hammer Framework)
+    
+    ## Pending
+    ◻ Process CG005
+    ◻ Extract DNA (after 3+ sources)
+    
+    ## Next Steps
+    1. /process-jarvis "inbox/COLE GORDON/COURSES/CG005.txt"
+    2. /extract-dna cole-gordon
+    
+    ## Important Files
+    • inbox/COLE GORDON/MASTERCLASSES/CG003.txt
+    • inbox/COLE GORDON/BLUEPRINTS/CG004.txt
+    • inbox/COLE GORDON/COURSES/CG005.txt
+    
+    ## Notes
+    Email Hammer framework in CG004 has great heuristics.
+    Review after DNA extraction.
+    
+    ---
+    Last saved: 2026-03-06 15:30 (2 hours ago)
+    
+    Want to continue where you left off?
+    ```
+  </Step>
+  
+  <Step title="Await User Confirmation">
+    User can:
+    - Proceed with suggested next steps
+    - Do something else
+    - Update the context
+  </Step>
+</Steps>
+
+### Example Interaction
+
+```
+User: /resume
+
+Assistant:
+[RESUMING SESSION]
+
+## Last Activity
+Processing Cole Gordon materials through pipeline
+
+## Status
+In Progress
+
+## Completed
+✓ Processed CG003 (Masterclass)
+✓ Processed CG004 (Blueprint)
+
+## Pending
+◻ Process CG005
+◻ Extract DNA
+
+## Next Steps
+1. /process-jarvis "inbox/COLE GORDON/COURSES/CG005.txt"
+2. /extract-dna cole-gordon
+
+## Notes
+Email Hammer framework in CG004 - review after DNA extraction.
+
+---
+Last saved: 2 hours ago
+
+Want to continue where you left off?
+
+User: Yes, let's process CG005
+
+Assistant: [Executes /process-jarvis command...]
+```
+
+## Storage Location
+
+```
+logs/LIVE-SESSION/
+├── CURRENT-SESSION.md     # Human-readable context
+├── CONTEXT.json          # Machine-readable context
+└── history/              # Previous sessions (archived)
+    ├── 2026-03-05.md
+    ├── 2026-03-04.md
+    └── ...
+```
+
+<Note>
+Only the **most recent** session is kept in `CURRENT-SESSION.md`. Previous sessions are archived to `history/` by date.
+</Note>
+
+## Session Status Values
+
+<Tabs>
+  <Tab title="in_progress">
+    ```yaml
+    Meaning:
+      Work is actively ongoing, not yet complete
+    
+    Use when:
+      - Processing multiple files (some done, some pending)
+      - Multi-step task partially complete
+      - Waiting for something (but will continue)
+    
+    Example:
+      "Processing 5 videos, 3 done, 2 remaining"
+    ```
+  </Tab>
+  
+  <Tab title="completed">
+    ```yaml
+    Meaning:
+      Task fully finished, no pending work
+    
+    Use when:
+      - All files processed
+      - DNA extraction complete
+      - Session concluded successfully
+    
+    Example:
+      "Extracted DNA for Cole Gordon, all 5 sources processed"
+    ```
+  </Tab>
+  
+  <Tab title="blocked">
+    ```yaml
+    Meaning:
+      Cannot proceed without external input/action
+    
+    Use when:
+      - Waiting for API keys
+      - Missing source files
+      - Dependency not met
+      - Bug preventing progress
+    
+    Example:
+      "Pipeline stuck at Phase 4, duplicate detection failing"
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+### 1. Save at Natural Break Points
+
+Good times to save:
+
+```yaml
+End of work session:
+  "/save" before closing Claude Code
+
+Before switching tasks:
+  Finish processing, then /save before starting new work
+
+After completing a batch:
+  Processed 3 files? Save before ingesting more.
+```
+
+### 2. Be Specific in Notes
+
+Good vs bad notes:
+
+<CodeGroup>
+```yaml Good
+notes: |
+  CG004 has Email Hammer framework (12 emails, 48h).
+  Heuristic: "If show rate < 60%, deploy Email Hammer".
+  This should map to LNS agent memory.
+```
+
+```yaml Bad
+notes: "Processed some files, everything looks good"
+```
+</CodeGroup>
+
+### 3. List Important Files
+
+Include files you'll need to reference:
+
+```yaml
+important_files:
+  - "inbox/EXPERT/file-with-good-heuristics.txt"
+  - "knowledge/dna/expert/HEURISTICAS.yaml"  # For review
+  - "processing/insights/INSIGHTS-STATE.json"  # Check contradictions
+```
+
+### 4. Clear Next Steps
+
+Make it easy to resume:
+
+```yaml
+Good:
+  next_steps:
+    - "/process-jarvis \"inbox/PERSON/file.txt\""
+    - "/extract-dna person-name"
+    - "Review HEURISTICAS.yaml for person-name"
+
+Bad:
+  next_steps:
+    - "Finish processing"
+    - "Do the DNA thing"
+```
+
+### 5. Update Status Regularly
+
+If task status changes:
+
+```bash
+# Was: in_progress
+# Now: blocked (found bug)
+/save
+# Update with new status and blocker details
+```
+
+## Use Cases
+
+### Multi-Session Projects
+
+```yaml
+Scenario:
+  Processing 10 videos for new expert over 3 days
+
+Day 1:
+  - Ingest 10 videos
+  - Process 3 videos
+  - /save (status: in_progress, 7 pending)
+
+Day 2:
+  - /resume
+  - Process 4 more videos
+  - /save (status: in_progress, 3 pending)
+
+Day 3:
+  - /resume
+  - Process final 3 videos
+  - Extract DNA
+  - /save (status: completed)
+```
+
+### Blocked Workflows
+
+```yaml
+Scenario:
+  Pipeline fails mid-processing
+
+Session 1:
+  - Start processing CG005
+  - Phase 4 fails (missing chunk_ids)
+  - /save (status: blocked, note: "Phase 4 bug, needs fix")
+
+Later (after fix):
+  - /resume
+  - See note about Phase 4 bug
+  - Retry processing
+  - /save (status: completed)
+```
+
+### Handoff Between Sessions
+
+```yaml
+Scenario:
+  Different Claude Code sessions (new chat)
+
+Old session:
+  - Work for 2 hours
+  - /save with detailed context
+  - Close Claude Code
+
+New session:
+  - Open Claude Code (fresh chat)
+  - /resume
+  - Continue seamlessly
+```
+
+## Troubleshooting
+
+### "No session to resume"
+
+**Issue:** `/resume` finds no saved context
+
+**Solution:**
+```bash
+# Check if files exist
+ls -la logs/LIVE-SESSION/
+
+# If missing, start fresh and save:
+/save
+```
+
+### "Session is stale"
+
+**Issue:** Last save was weeks ago, context outdated
+
+**Solution:**
+```bash
+# Archive old session
+mv logs/LIVE-SESSION/CURRENT-SESSION.md logs/LIVE-SESSION/history/2026-02-15.md
+
+# Start fresh
+/save
+```
+
+### "Context doesn't match reality"
+
+**Issue:** Session says "pending" but files are actually processed
+
+**Solution:**
+```bash
+# Check actual state
+/jarvis-briefing
+
+# Update session with correct info
+/save
+# Provide accurate current state
+```
+
+## Advanced: Session Hooks
+
+<Note>
+Mega Brain includes session hooks that auto-save/restore:
+
+- **SessionStart hook** - Offers to resume if session exists
+- **Stop hook** - Reminds to save before closing
+
+These run automatically. You can also manually `/save` anytime.
+</Note>
+
+## Session Persistence Tips
+
+### 1. One Session Per Goal
+
+```yaml
+Good:
+  Session: "Process all Cole Gordon materials"
+  Scope: 5 files, DNA extraction
+  Duration: 2-3 days
+
+Bad:
+  Session: "Do Mega Brain stuff"
+  Scope: Everything
+  Duration: Forever
+```
+
+### 2. Archive Completed Sessions
+
+```bash
+# After completing a session
+mv logs/LIVE-SESSION/CURRENT-SESSION.md logs/LIVE-SESSION/history/cole-gordon-complete.md
+
+# Start fresh for next project
+/save
+```
+
+### 3. Session Templates
+
+For recurring workflows:
+
+```markdown
+# Template: New Expert Processing
+
+## Task
+Process all materials for [EXPERT_NAME]
+
+## Checklist
+- [ ] Ingest all videos/docs
+- [ ] Process each through pipeline
+- [ ] Extract DNA (after 3+ sources)
+- [ ] Review heuristics
+- [ ] Update agent memories
+
+## Files
+- inbox/[EXPERT]/...
+
+## Next Steps
+1. /ingest [first video]
+2. /process-jarvis [first file]
+...
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="JARVIS Briefing" icon="clipboard-check" href="/commands/jarvis-briefing">
+    Check system state after resuming
+  </Card>
+  <Card title="Workflow Guide" icon="diagram-project" href="/guides/processing-pipeline">
+    Learn optimal processing workflows
+  </Card>
+  <Card title="Session Hooks" icon="webhook" href="/advanced/hooks-system">
+    Understand auto-save/restore behavior
+  </Card>
+  <Card title="Logging System" icon="file-lines" href="/guides/session-management">
+    Explore comprehensive logging
+  </Card>
+</CardGroup>

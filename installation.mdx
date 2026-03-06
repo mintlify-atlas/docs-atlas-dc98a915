@@ -1,0 +1,308 @@
+---
+title: Installation
+description: Install Mega Brain and set up your AI knowledge management system
+---
+
+## Prerequisites
+
+Before installing Mega Brain, ensure you have the following installed on your system:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js" iconType="duotone">
+    **Version 18.0.0 or higher**
+    
+    [Download from nodejs.org](https://nodejs.org)
+  </Card>
+  
+  <Card title="Python" icon="python" iconType="duotone">
+    **Version 3.10 or higher**
+    
+    [Download from python.org](https://python.org)
+  </Card>
+  
+  <Card title="Claude Code" icon="brain" iconType="duotone">
+    **Max or Pro plan required**
+    
+    The core runtime for Mega Brain
+  </Card>
+  
+  <Card title="OpenAI API Key" icon="key" iconType="duotone">
+    **Required for transcription**
+    
+    [Get your key](https://platform.openai.com/api-keys)
+  </Card>
+</CardGroup>
+
+## System Requirements
+
+| Component | Requirement | Notes |
+|-----------|-------------|-------|
+| **Operating System** | Linux, macOS, or Windows | Windows requires WSL for best compatibility |
+| **Memory** | 4GB RAM minimum | 8GB+ recommended for processing large files |
+| **Storage** | 1GB free space | More space needed for your knowledge base |
+| **Network** | Internet connection | Required for API calls and transcription |
+
+<Warning>
+  Mega Brain uses Claude Code as its core runtime. Make sure you have an active Claude Code Max or Pro subscription before proceeding.
+</Warning>
+
+## Installation Methods
+
+### Quick Install (Recommended)
+
+Install Mega Brain globally using npm:
+
+<Steps>
+  <Step title="Install via npm">
+    Run the installation command:
+    
+    ```bash
+    npm install -g mega-brain-ai
+    ```
+    
+    Or use npx to run without installing:
+    
+    ```bash
+    npx mega-brain-ai install
+    ```
+  </Step>
+  
+  <Step title="Run the setup wizard">
+    The setup wizard will automatically launch on first use:
+    
+    ```bash
+    npx mega-brain-ai setup
+    ```
+    
+    This interactive wizard will:
+    - Check for Python 3.10+ and Node.js 18+
+    - Install Python dependencies (PyYAML)
+    - Prompt you to configure API keys
+    - Validate your API connections
+    - Generate your `.env` file
+  </Step>
+  
+  <Step title="Verify installation">
+    Check your system status:
+    
+    ```bash
+    npx mega-brain-ai status
+    ```
+    
+    Expected output:
+    
+    ```
+    Mega Brain v1.3.0
+    
+    SETUP SUMMARY
+    
+    Tools
+      Python 3 ........... OK  3.10.12
+      Node.js ............ OK  18.17.0
+      pip install ........ OK  installed
+    
+    API Keys
+      OPENAI_API_KEY ..... OK  sk-...
+      VOYAGE_API_KEY ..... OK  pa-...
+      Google OAuth ....... SKIP not set
+    
+    .env file ............ WRITTEN
+    ```
+  </Step>
+</Steps>
+
+### Local Development Install
+
+For contributors or users who want to modify the source code:
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/mega-brain.git
+    cd mega-brain
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  
+  <Step title="Install Python dependencies">
+    ```bash
+    pip install -r requirements.txt
+    ```
+    
+    Or with Python 3:
+    
+    ```bash
+    python3 -m pip install -r requirements.txt
+    ```
+  </Step>
+  
+  <Step title="Run setup">
+    ```bash
+    npm run install-wizard
+    ```
+  </Step>
+</Steps>
+
+## Post-Installation Setup
+
+### Verify Python Installation
+
+The setup wizard automatically detects Python. If you need to verify manually:
+
+<CodeGroup>
+```bash macOS/Linux
+python3 --version
+# Should output: Python 3.10.x or higher
+```
+
+```bash Windows
+python --version
+# Should output: Python 3.10.x or higher
+```
+</CodeGroup>
+
+<Note>
+  Python is required for hooks and intelligence scripts. The minimum version is 3.10, but 3.11+ is recommended for better performance.
+</Note>
+
+### Verify Node.js Installation
+
+```bash
+node --version
+# Should output: v18.0.0 or higher
+```
+
+### Directory Structure
+
+After installation, your Mega Brain directory will look like this:
+
+```
+mega-brain/
+├── .claude/          # Claude Code integration (hooks, skills, commands)
+├── agents/           # AI agent definitions and templates
+├── artifacts/        # Processing pipeline stages
+├── bin/              # CLI tools and entry points
+├── core/             # Processing engine and schemas
+├── inbox/            # Raw materials input directory
+├── knowledge/        # Your knowledge base (playbooks, dossiers)
+├── logs/             # Session and processing logs
+├── .env              # Your API keys (generated, gitignored)
+└── package.json      # Project metadata
+```
+
+## Available Packages
+
+Mega Brain comes in different editions based on the layer system:
+
+<CardGroup cols={3}>
+  <Card title="Layer 1 - Community" icon="box-open">
+    **Free & Open Source**
+    
+    Core engine, templates, hooks, skills, CLI tools, and agent templates.
+    
+    Perfect for building your own knowledge system from scratch.
+  </Card>
+  
+  <Card title="Layer 2 - Pro" icon="box-check">
+    **Premium Edition**
+    
+    Everything in Community plus:
+    - Pre-populated knowledge base
+    - Mind clone agents
+    - Full pipeline processing
+    - Conclave multi-agent system
+    
+    Requires MoneyClub membership.
+  </Card>
+  
+  <Card title="Layer 3 - Personal" icon="box-archive">
+    **Your Data**
+    
+    Your personal materials, sessions, and environment configuration.
+    
+    Always stays local and never leaves your machine.
+  </Card>
+</CardGroup>
+
+## Upgrading Editions
+
+To upgrade from Community to Pro:
+
+```bash
+npx mega-brain-ai upgrade
+```
+
+You'll be prompted to validate your MoneyClub email.
+
+## Troubleshooting
+
+### Python Not Found
+
+If the setup wizard can't find Python:
+
+1. Ensure Python 3.10+ is installed from [python.org](https://python.org)
+2. Add Python to your system PATH
+3. Try using `python3` instead of `python`
+4. Restart your terminal after installation
+
+### Node Version Too Old
+
+If your Node.js version is below 18:
+
+```bash
+# Update Node.js using nvm (recommended)
+nvm install 18
+nvm use 18
+
+# Or download from nodejs.org
+```
+
+### Permission Errors on npm Install
+
+If you get `EACCES` errors:
+
+<CodeGroup>
+```bash macOS/Linux
+# Use npm's built-in permission fix
+npx npm-reinstall-global-without-sudo
+
+# Or install without sudo using npx
+npx mega-brain-ai install
+```
+
+```bash Windows
+# Run as Administrator
+# Right-click Command Prompt → Run as administrator
+npm install -g mega-brain-ai
+```
+</CodeGroup>
+
+### Python Dependencies Failed
+
+If pip installation fails:
+
+```bash
+# Install dependencies manually
+pip install -r requirements.txt
+
+# Or with Python 3 explicitly
+python3 -m pip install -r requirements.txt
+
+# On macOS, you may need:
+pip3 install --user -r requirements.txt
+```
+
+## Next Steps
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Learn how to ingest your first material and process it through the pipeline
+</Card>
+
+<Card title="Configuration" icon="gear" href="/configuration" iconType="duotone">
+  Configure API keys and customize Mega Brain for your workflow
+</Card>

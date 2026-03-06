@@ -1,0 +1,186 @@
+---
+title: CLI Commands Overview
+description: Complete reference of all Mega Brain CLI commands for knowledge management and AI agent operations
+---
+
+# CLI Commands Overview
+
+Mega Brain provides a comprehensive set of slash commands for managing your AI knowledge system. These commands run inside Claude Code and orchestrate the entire pipeline from content ingestion to multi-agent deliberation.
+
+## Quick Reference
+
+<CardGroup cols={2}>
+  <Card title="Setup" icon="wrench" href="/commands/setup">
+    Configure API keys and dependencies
+  </Card>
+  <Card title="Ingest" icon="download" href="/commands/ingest">
+    Import materials from YouTube, PDFs, or local files
+  </Card>
+  <Card title="Process" icon="gears" href="/commands/process-jarvis">
+    Run the 8-phase knowledge extraction pipeline
+  </Card>
+  <Card title="Briefing" icon="clipboard-check" href="/commands/jarvis-briefing">
+    View system status and health metrics
+  </Card>
+  <Card title="Extract DNA" icon="dna" href="/commands/extract-dna">
+    Generate cognitive DNA from expert materials
+  </Card>
+  <Card title="Conclave" icon="users" href="/commands/conclave">
+    Multi-agent decision framework
+  </Card>
+  <Card title="Save Session" icon="floppy-disk" href="/commands/save-resume">
+    Save and resume work context
+  </Card>
+</CardGroup>
+
+## Command Categories
+
+### System Management
+
+Commands for initial setup and system monitoring:
+
+| Command | Purpose | Frequency |
+|---------|---------|----------|
+| [`/setup`](/commands/setup) | Configure environment and API keys | Once (first run) |
+| [`/jarvis-briefing`](/commands/jarvis-briefing) | System health and status | Daily |
+
+### Content Pipeline
+
+Commands for ingesting and processing knowledge:
+
+| Command | Purpose | Typical Usage |
+|---------|---------|---------------|
+| [`/ingest`](/commands/ingest) | Add new materials to inbox | Per video/document |
+| [`/process-jarvis`](/commands/process-jarvis) | Transform raw content into structured knowledge | Per source |
+| [`/extract-dna`](/commands/extract-dna) | Generate cognitive DNA schemas | Per expert (3+ sources) |
+
+### AI Agents
+
+Commands for working with AI agents:
+
+| Command | Purpose | Use Case |
+|---------|---------|----------|
+| [`/conclave`](/commands/conclave) | Multi-agent deliberation | Strategic decisions |
+
+### Session Management
+
+Commands for preserving work context:
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| [`/save`](/commands/save-resume) | Save current context | End of session |
+| [`/resume`](/commands/save-resume) | Restore previous context | Start of session |
+
+## Common Workflows
+
+### First-Time Setup
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment (interactive wizard)
+/setup
+
+# 3. Check system status
+/jarvis-briefing
+```
+
+### Processing New Content
+
+```bash
+# 1. Ingest a YouTube video
+/ingest https://youtube.com/watch?v=VIDEO_ID
+
+# 2. Process through the pipeline
+/process-jarvis "inbox/PERSON/TYPE/filename.txt"
+
+# 3. Extract DNA (after 3+ sources)
+/extract-dna person-name
+```
+
+### Making Strategic Decisions
+
+```bash
+# Multi-agent deliberation with evidence
+/conclave "Should we increase commission from 10% to 15%?"
+```
+
+## Command Syntax
+
+<Note>
+All commands start with `/` and run inside Claude Code. They are NOT terminal commands.
+</Note>
+
+### General Pattern
+
+```
+/command-name [required-arg] [--optional-flag]
+```
+
+### Examples
+
+<CodeGroup>
+```bash Basic
+/jarvis-briefing
+```
+
+```bash With Arguments
+/ingest https://youtube.com/watch?v=abc123
+```
+
+```bash With Flags
+/ingest video.mp4 --person "Alex Hormozi" --process
+```
+
+```bash Complex
+/conclave "Expand sales team by 5 people in Q1?"
+```
+</CodeGroup>
+
+## Environment Requirements
+
+<Warning>
+Before using any command, ensure your environment is configured with `/setup`
+</Warning>
+
+### Required
+
+- **Claude Code** (Max or Pro plan)
+- **Node.js** >= 18.0.0
+- **Python** >= 3.10
+- **OpenAI API Key** (for Whisper transcription)
+
+### Recommended
+
+- **Voyage API Key** (for semantic search)
+- **Google Drive credentials** (for importing from Drive)
+
+## Getting Help
+
+Each command includes built-in help:
+
+```bash
+# Show command usage
+/command-name --help
+
+# View system documentation
+/jarvis-briefing
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Setup Command" icon="wrench" href="/commands/setup">
+    Start here: Configure your environment
+  </Card>
+  <Card title="Ingest Command" icon="download" href="/commands/ingest">
+    Add your first material
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the system design
+  </Card>
+  <Card title="DNA Schema" icon="dna" href="/concepts/dna-schema">
+    Learn about the 5-layer knowledge model
+  </Card>
+</CardGroup>

@@ -1,0 +1,292 @@
+---
+title: "Ingesting Materials"
+description: "Learn how to ingest videos, PDFs, podcasts, and other expert materials into Mega Brain"
+---
+
+Mega Brain accepts any format of expert content and transforms it into structured knowledge. This guide walks you through ingesting different material types into the system.
+
+## Overview
+
+The ingestion process automatically:
+- Downloads and transcribes content
+- Extracts metadata (author, title, date)
+- Saves files with source traceability
+- Detects duplicates to prevent reprocessing
+- Prepares materials for the processing pipeline
+
+<Note>
+All ingested materials are saved to the `inbox/` directory organized by person and content type.
+</Note>
+
+## Supported Material Types
+
+<Tabs>
+  <Tab title="YouTube Videos">
+    
+### Ingesting YouTube Videos
+
+The most common source. JARVIS automatically downloads transcriptions using the YouTube Transcript API.
+
+```bash
+/ingest https://www.youtube.com/watch?v=EXAMPLE_ID
+```
+
+**What happens:**
+1. Video metadata is fetched (title, author, duration)
+2. Transcript is downloaded automatically
+3. File is saved as `inbox/[PERSON]/[TYPE]/video-title.txt`
+4. A unique SOURCE_ID is generated (e.g., `CG003` for Cole Gordon video 3)
+
+**Example output:**
+```
+JARVIS: Material received.
+
+  Source:    YouTube
+  Title:     "How to Create Irresistible Offers"
+  Author:    Alex Hormozi
+  Duration:  42:15
+  Words:     6,230
+
+  Saved to: inbox/alex-hormozi/MASTERCLASS/how-to-create-irresistible-offers.txt
+
+  Next step: execute /process-jarvis to process.
+```
+
+  </Tab>
+  
+  <Tab title="PDFs & Documents">
+    
+### Ingesting PDFs and Documents
+
+Upload local files including PDFs, Word documents, and text files.
+
+```bash
+/ingest /path/to/playbook-vendas.pdf
+```
+
+**Supported formats:**
+- PDF documents
+- Microsoft Word (.doc, .docx)
+- Plain text (.txt, .md)
+- Google Docs (via URL)
+
+<Tip>
+For best results, ensure PDFs have text layers (not just scanned images).
+</Tip>
+
+  </Tab>
+  
+  <Tab title="Podcasts & Audio">
+    
+### Ingesting Podcasts and Audio
+
+Process audio content through transcription.
+
+```bash
+/ingest https://podcast-url.com/episode-123
+```
+
+**Requirements:**
+- `OPENAI_API_KEY` configured (uses Whisper for transcription)
+
+**Content detection:** The system automatically detects podcast episodes based on keywords ("podcast", "episode", "ep", "interview"), file metadata, and URL patterns.
+
+</Tab>
+  
+  <Tab title="Courses & Training">
+    
+### Ingesting Course Materials
+
+Process complete training courses with multiple modules.
+
+```bash
+/ingest /path/to/course-module-1.pdf --type COURSE
+```
+
+**Scope detection:**
+Course materials are automatically tagged with scope:
+- `scope: "course"` - Complete training programs
+- `corpus: "[course-name]"` - Groups related modules
+
+**Organization:**
+```
+inbox/
+└── setterlun/
+    └── COURSES/
+        ├── module-01-foundation.txt
+        ├── module-02-strategy.txt
+        └── module-03-execution.txt
+```
+
+  </Tab>
+</Tabs>
+
+## Advanced Ingestion Options
+
+### Manual Metadata Override
+
+Override auto-detected metadata:
+
+```bash
+# Specify person explicitly
+/ingest https://youtube.com/watch?v=abc123 --person "Cole Gordon"
+
+# Set content type
+/ingest /path/to/file.txt --type MASTERCLASS
+
+# Ingest and immediately process
+/ingest https://youtube.com/watch?v=abc123 --process
+```
+
+### Content Type Classification
+
+<Accordion title="Available Content Types">
+
+| Type | Auto-Detection Keywords | Use Case |
+|------|------------------------|----------|
+| PODCAST | "podcast", "episode", "interview" | Conversational content |
+| MASTERCLASS | "masterclass", "mastermind", "training" | Expert workshops |
+| COURSE | "course", "module", "lesson" | Structured programs |
+| BLUEPRINT | "blueprint", "pdf", "playbook" | Strategic documents |
+| VSL | "vsl", "webinar", "sales letter" | Sales presentations |
+| SCRIPT | "script", "template", "copy" | Templates and frameworks |
+
+</Accordion>
+
+## Known Source Detection
+
+The system recognizes expert sources automatically:
+
+<Steps>
+
+<Step title="Path Analysis">
+Analyzes the file path or URL to detect known experts:
+
+```
+inbox/COLE GORDON/MASTERMINDS/video.txt
+       ↓
+SOURCE_PERSON: Cole Gordon
+SOURCE_COMPANY: Cole Gordon
+CORPUS: closers_io
+```
+</Step>
+
+<Step title="Known Sources Library">
+
+| Detected Pattern | Person | Company | Corpus |
+|-----------------|---------|---------|--------|
+| "hormozi", "acquisition" | Alex Hormozi | Alex Hormozi | acquisition_com |
+| "cole gordon", "closers" | Cole Gordon | Cole Gordon | closers_io |
+| "leila" | Leila Hormozi | Alex Hormozi | acquisition_com |
+| "setterlun", "sam ovens" | Sam Ovens | Setterlun University | setterlun |
+
+</Step>
+
+<Step title="Automatic Corpus Assignment">
+Related materials from the same expert are grouped into a corpus for cross-referencing.
+</Step>
+
+</Steps>
+
+## Duplicate Detection
+
+<Warning>
+The pipeline includes 6 levels of duplicate detection to prevent reprocessing:
+</Warning>
+
+### Detection Levels
+
+1. **Exact MD5 Match** - Same file already processed
+2. **Content Hash** - Different file, same content
+3. **Partial Match** - Content is substring of processed material
+4. **YouTube ID** - Same video from different source
+5. **File Registry** - Cross-reference with processing history
+6. **Chunk Fingerprint** - First 1000 characters comparison
+
+**When duplicates are found:**
+```
+┌─────────────────────────────────────────────────────────┐
+│  ⛔ DUPLICATE DETECTED - PROCESSING INTERRUPTED        │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Current file:  inbox/new-video.txt                     │
+│  MD5:           a1b2c3d4e5f6...                         │
+│                                                         │
+│  Duplicate of:  inbox/old-video.txt                     │
+│  Registered:    2026-02-15                              │
+│  SOURCE_ID:     CG005                                   │
+│                                                         │
+│  ACTION: File will NOT be processed.                    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Batch Ingestion
+
+Process multiple materials at once:
+
+<CodeGroup>
+
+```bash Ingest Multiple URLs
+# List of YouTube videos
+/ingest https://youtube.com/watch?v=video1
+/ingest https://youtube.com/watch?v=video2
+/ingest https://youtube.com/watch?v=video3
+```
+
+```bash Ingest Directory
+# Process all files in a directory
+/scan-inbox /path/to/materials/
+```
+
+</CodeGroup>
+
+## Verification
+
+### Check Inbox Status
+
+View pending materials:
+
+```bash
+/inbox
+```
+
+**Output:**
+```
+═══════════════════════════════════════════════
+                INBOX STATUS
+═══════════════════════════════════════════════
+
+📥 PENDING: 3 files
+
+  Cole Gordon (2 files)
+  ├─ masterclass-closing.txt (6,234 words)
+  └─ podcast-interview.txt (8,901 words)
+
+  Alex Hormozi (1 file)
+  └─ offer-creation-framework.txt (4,567 words)
+
+⭐ NEXT: /process-jarvis to process pending files
+```
+
+### Check System Status
+
+```bash
+/jarvis-briefing
+```
+
+Provides:
+- Health score (0-100)
+- Processed materials count
+- Pending inbox files
+- Active agents status
+
+## Next Steps
+
+<Card title="Process Ingested Materials" icon="gears" href="/guides/processing-pipeline">
+  Learn how to run the 5-phase processing pipeline on ingested materials
+</Card>
+
+<Card title="View Processing Results" icon="chart-line" href="/guides/session-management">
+  Check processing logs and generated artifacts
+</Card>

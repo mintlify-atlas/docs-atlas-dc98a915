@@ -1,0 +1,511 @@
+---
+title: /ingest Command
+description: Import materials (YouTube, PDFs, local files) into Mega Brain inbox with automatic metadata extraction
+---
+
+# /ingest - Material Ingestion
+
+Ingests external materials into the Mega Brain inbox, extracting metadata and preparing content for pipeline processing.
+
+## Syntax
+
+```bash
+/ingest [SOURCE] [FLAGS]
+```
+
+<ParamField path="SOURCE" type="string" required>
+  YouTube URL, local file path, or Google Drive link
+</ParamField>
+
+## Supported Sources
+
+<CardGroup cols={3}>
+  <Card title="YouTube" icon="youtube">
+    Videos with automatic transcription
+  </Card>
+  <Card title="Local Files" icon="file">
+    .txt, .pdf, .docx documents
+  </Card>
+  <Card title="Google Drive" icon="google">
+    Docs, PDFs, Sheets
+  </Card>
+</CardGroup>
+
+## Flags
+
+<ParamField query="--person" type="string">
+  Manually specify the expert/person name (overrides automatic detection)
+  
+  **Example:** `--person "Cole Gordon"`
+</ParamField>
+
+<ParamField query="--type" type="string">
+  Content type: PODCAST, MASTERCLASS, COURSE, BLUEPRINT, VSL, etc.
+  
+  **Example:** `--type MASTERCLASS`
+</ParamField>
+
+<ParamField query="--process" type="boolean">
+  Automatically start pipeline processing after ingestion
+  
+  **Example:** `--process`
+</ParamField>
+
+## Examples
+
+<CodeGroup>
+```bash YouTube Video
+/ingest https://youtube.com/watch?v=abc123
+```
+
+```bash YouTube with Person
+/ingest https://youtube.com/watch?v=abc123 --person "Alex Hormozi"
+```
+
+```bash Local File
+/ingest "/path/to/transcription.txt" --type MASTERCLASS
+```
+
+```bash Ingest and Process
+/ingest https://youtube.com/watch?v=abc123 --process
+```
+
+```bash Google Drive Doc
+/ingest https://docs.google.com/document/d/ABC123/edit
+```
+</CodeGroup>
+
+## How It Works
+
+### Step 1: Source Type Detection
+
+The command identifies the source type:
+
+```
+IF URL starts with "http":
+  IF contains "youtube.com" or "youtu.be":
+    → TYPE = "YOUTUBE"
+    → Fetch transcript via youtube-transcript-api
+  ELSE IF contains "docs.google.com":
+    → TYPE = "GDOC"
+    → Download content via Google API
+  ELSE:
+    → TYPE = "WEB"
+    → Fetch page content
+ELSE:
+  → TYPE = "LOCAL"
+  → Read file directly
+```
+
+### Step 2: Metadata Extraction
+
+Automatic metadata detection:
+
+<Tabs>
+  <Tab title="Person Detection">
+    ```yaml
+    Known Patterns:
+      "hormozi" OR "acquisition" → Alex Hormozi
+      "cole gordon" OR "closers" → Cole Gordon
+      "leila" → Leila Hormozi
+      "setterlun" OR "sam ovens" → Sam Ovens
+      "jordan lee" → Jordan Lee
+    ```
+    
+    If `--person` flag provided, uses that instead.
+  </Tab>
+  
+  <Tab title="Content Type Detection">
+    ```yaml
+    Patterns:
+      "podcast", "episode", "ep" → PODCAST
+      "masterclass", "mastermind" → MASTERCLASS
+      "course", "module", "lesson" → COURSE
+      "blueprint", "pdf", "playbook" → BLUEPRINT
+      "vsl", "webinar" → VSL
+      "script", "template" → SCRIPT
+    ```
+    
+    If `--type` flag provided, uses that instead.
+  </Tab>
+  
+  <Tab title="Company Detection">
+    ```yaml
+    Associations:
+      Alex Hormozi → Acquisition.com
+      Cole Gordon → Closers.io
+      Leila Hormozi → Acquisition.com
+      Sam Ovens → Setterlun University
+    ```
+  </Tab>
+</Tabs>
+
+### Step 3: Destination Path
+
+Files are saved to structured inbox:
+
+```
+inbox/
+├── {PERSON} ({COMPANY})/
+│   ├── PODCASTS/
+│   ├── MASTERCLASSES/
+│   ├── COURSES/
+│   └── BLUEPRINTS/
+└── ...
+```
+
+**Filename Format:**
+
+- **YouTube:** `{VIDEO_TITLE} [youtube.com_watch_v={ID}].txt`
+- **Local:** `{ORIGINAL_NAME}.txt`
+- **Google Drive:** `{DOC_TITLE}.txt`
+
+### Step 4: Generate Source ID
+
+Each file gets a unique identifier:
+
+```yaml
+Format: {INITIALS}{NUMBER}
+
+Examples:
+  CG005  # Cole Gordon, 5th file
+  AH023  # Alex Hormozi, 23rd file
+  JL010  # Jordan Lee, 10th file
+```
+
+### Step 5: Ingest Report
+
+Display confirmation:
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+                          INGEST REPORT
+                     2026-03-06 10:45:23 UTC
+═══════════════════════════════════════════════════════════════════════════════
+
+📥 MATERIAL INGERIDO
+   Fonte: https://youtube.com/watch?v=abc123
+   Tipo: VIDEO (YouTube)
+   Título: "How to Scale from $1M to $10M ARR"
+
+📁 DESTINO
+   Path: inbox/ALEX HORMOZI (Acquisition.com)/MASTERCLASSES/
+   Arquivo: How to Scale from $1M to $10M ARR [youtube.com_watch_v=abc123].txt
+   Source ID: AH024
+
+📊 ESTATÍSTICAS
+   Palavras: 8,542
+   Duração: 45m 32s
+   Pessoa detectada: Alex Hormozi
+   Empresa: Acquisition.com
+
+⭐ PRÓXIMA ETAPA
+   Para processar: /process-jarvis "inbox/ALEX HORMOZI/MASTERCLASSES/How to Scale from $1M to $10M ARR [youtube.com_watch_v=abc123].txt"
+   Ou: /inbox para ver todos pendentes
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+### Step 6: Auto-Process (if --process flag)
+
+If `--process` flag is present, automatically triggers:
+
+```bash
+/process-jarvis "inbox/ALEX HORMOZI/MASTERCLASSES/filename.txt"
+```
+
+## Audit Logging
+
+All ingestions are logged to `/logs/AUDIT/audit.jsonl`:
+
+```json
+{
+  "timestamp": "2026-03-06T10:45:23Z",
+  "operation": "INGEST",
+  "source": "https://youtube.com/watch?v=abc123",
+  "destination": "inbox/ALEX HORMOZI/MASTERCLASSES/How to Scale from $1M to $10M ARR [youtube.com_watch_v=abc123].txt",
+  "source_id": "AH024",
+  "word_count": 8542,
+  "status": "SUCCESS"
+}
+```
+
+## YouTube Transcription
+
+### Requirements
+
+<Note>
+**OPENAI_API_KEY** required for YouTube transcription via Whisper
+</Note>
+
+YouTube videos are transcribed using OpenAI Whisper:
+
+1. Download audio using `yt-dlp`
+2. Convert to MP3
+3. Send to Whisper API
+4. Save transcript with timestamps
+
+### Transcript Format
+
+```
+[00:00:00] Welcome to today's masterclass on scaling...
+[00:00:15] The first thing you need to understand is...
+[00:00:45] Let me give you a specific example...
+```
+
+### Supported Languages
+
+Whisper auto-detects language. Supports 50+ languages including:
+
+- English
+- Spanish
+- Portuguese
+- French
+- German
+- Chinese
+- Japanese
+- And more...
+
+## Google Drive Import
+
+### Setup Required
+
+<Warning>
+**GOOGLE_CLIENT_ID** and **GOOGLE_CLIENT_SECRET** required for Drive import
+</Warning>
+
+Configure during `/setup` or manually in `.env`:
+
+```bash
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+### OAuth Flow
+
+First time accessing Drive:
+
+```
+🔑 Google Drive Authorization Required
+
+Opening browser for authentication...
+
+1. Sign in to your Google account
+2. Grant access to Mega Brain
+3. Return to this window
+
+Waiting for authorization...
+```
+
+### Supported Document Types
+
+- **Google Docs** - Converted to plain text
+- **Google Sheets** - Converted to CSV then text
+- **PDFs** - Extracted with OCR if needed
+- **Word Docs (.docx)** - Converted to text
+
+## Error Handling
+
+### YouTube Video Not Available
+
+```
+✗ INGEST FAILED
+
+YouTube video not available:
+  - Video is private
+  - Video was deleted
+  - Invalid video ID
+
+Please check the URL and try again.
+```
+
+### Transcription Failed
+
+```
+✗ TRANSCRIPTION FAILED
+
+OpenAI Whisper error: Quota exceeded
+
+Options:
+  1. Wait and try again (quota resets hourly)
+  2. Upload transcript manually to inbox/
+  3. Use pre-existing transcript file
+```
+
+### File Already Exists
+
+```
+⚠️  FILE EXISTS
+
+A file with the same name already exists:
+  inbox/ALEX HORMOZI/MASTERCLASSES/filename.txt
+
+Options:
+  [o] Overwrite existing file
+  [r] Rename new file (append timestamp)
+  [s] Skip ingestion
+
+Choice:
+```
+
+### Unsupported File Type
+
+```
+✗ INGEST FAILED
+
+Unsupported file type: .pptx
+
+Supported types:
+  - Text: .txt, .md
+  - Documents: .pdf, .docx
+  - Web: YouTube URLs, Google Drive links
+
+Convert the file to a supported format and try again.
+```
+
+## Performance
+
+### Processing Times
+
+| Source Type | Size | Time |
+|-------------|------|------|
+| YouTube (1hr) | ~1 video | 2-5 min |
+| PDF (50 pages) | ~5 MB | 10-30 sec |
+| Local .txt | ~10k words | 1-2 sec |
+| Google Doc | ~10k words | 5-10 sec |
+
+<Note>
+YouTube transcription time depends on video length and Whisper API latency
+</Note>
+
+### Rate Limits
+
+- **OpenAI Whisper**: 50 requests/min (Tier 1)
+- **YouTube API**: 10,000 quota/day
+- **Google Drive API**: 1,000 requests/100s/user
+
+## Best Practices
+
+### 1. Organize by Expert
+
+Use `--person` flag for consistency:
+
+```bash
+/ingest video1.mp4 --person "Alex Hormozi"
+/ingest video2.mp4 --person "Alex Hormozi"
+/ingest video3.mp4 --person "Alex Hormozi"
+```
+
+### 2. Specify Content Type
+
+Helps with later analysis:
+
+```bash
+/ingest course-module-1.pdf --type COURSE
+/ingest webinar-replay.mp4 --type MASTERCLASS
+/ingest sales-script.txt --type SCRIPT
+```
+
+### 3. Batch Processing
+
+For multiple files, ingest first, then batch process:
+
+```bash
+# Ingest without processing
+/ingest video1.mp4
+/ingest video2.mp4
+/ingest video3.mp4
+
+# Then batch process all
+/process-jarvis --batch inbox/PERSON/TYPE/
+```
+
+### 4. Use Descriptive Filenames
+
+Before ingesting local files:
+
+```bash
+# Good
+/ingest "Alex-Hormozi-Pricing-Masterclass-2024.txt"
+
+# Bad
+/ingest "transcript_final_v2.txt"
+```
+
+## Advanced Usage
+
+### Playlist Ingestion
+
+<Note>
+Coming soon: `/ingest-playlist` for bulk YouTube playlist import
+</Note>
+
+### Webhook Integration
+
+<Note>
+Coming soon: Auto-ingest via webhooks when new content is published
+</Note>
+
+### Custom Metadata
+
+<Note>
+Coming soon: `--metadata` flag for custom tags and annotations
+</Note>
+
+## Troubleshooting
+
+### "yt-dlp not found"
+
+**Issue:** YouTube downloader not installed
+
+**Solution:**
+```bash
+# macOS
+brew install yt-dlp
+
+# Linux
+sudo apt install yt-dlp
+
+# Windows
+winget install yt-dlp
+```
+
+### "OpenAI API key invalid"
+
+**Issue:** API key not configured or incorrect
+
+**Solution:**
+```bash
+# Re-run setup
+/setup
+
+# Or manually edit .env
+OPENAI_API_KEY=sk-your-key-here
+```
+
+### "Permission denied writing to inbox/"
+
+**Issue:** Insufficient file permissions
+
+**Solution:**
+```bash
+# Fix inbox permissions
+chmod -R 755 inbox/
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Process Command" icon="gears" href="/commands/process-jarvis">
+    Transform raw content into structured knowledge
+  </Card>
+  <Card title="JARVIS Briefing" icon="clipboard-check" href="/commands/jarvis-briefing">
+    Monitor your knowledge base growth
+  </Card>
+  <Card title="Pipeline Guide" icon="diagram-project" href="/guides/processing-pipeline">
+    Understand the 8-phase processing pipeline
+  </Card>
+  <Card title="Inbox Management" icon="inbox" href="/guides/ingesting-materials">
+    Best practices for organizing materials
+  </Card>
+</CardGroup>

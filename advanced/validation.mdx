@@ -1,0 +1,792 @@
+---
+title: "Validation System"
+description: "Comprehensive validation tools for package integrity, layer compliance, and quality assurance in Mega Brain."
+---
+
+# Validation System
+
+Mega Brain includes robust validation tools to ensure package integrity, layer compliance, and code quality. The validation system runs automatically during development and blocks publish if issues are found.
+
+## Validation Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  VALIDATION PIPELINE                                                         │
+│                                                                              │
+│  Development       →    Pre-Commit      →    Pre-Publish     →    CI/CD    │
+│  (Real-time)            (Hooks)              (Gate)                (Verify) │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Core Validation Tools
+
+### validate-package.js
+
+**Purpose:** Validates that npm package contains **only L1 (Community)** content
+
+**Location:** `bin/validate-package.js`
+
+**Usage:**
+```bash
+# Human-readable report
+node bin/validate-package.js
+
+# JSON output for CI
+node bin/validate-package.js --json
+```
+
+<CodeGroup>
+```javascript validate-package.js Core Logic
+export function validatePackageSync(projectRoot) {
+  // Step 1: Get pack files
+  const packFiles = getPackFiles(projectRoot);
+  if (packFiles === null) {
+    throw new Error('Failed to run npm pack --dry-run');
+  }
+
+  // Step 2: Classify each file using audit_layers.py
+  const classifications = classifyFiles(packFiles, projectRoot);
+
+  // Step 3: Find violations (anything not L1)
+  const violations = [];
+  for (const file of packFiles) {
+    const info = classifications[file];
+    if (info.layer !== 'L1') {
+      violations.push({ 
+        path: file, 
+        layer: info.layer, 
+        reason: info.reason 
+      });
+    }
+  }
+
+  return {
+    status: violations.length === 0 ? 'PASSED' : 'FAILED',
+    totalFiles: packFiles.length,
+    violations,
+  };
+}
+```
+
+```bash Example Output
+[validate] Scanning pack files against L1 audit...
+[validate] PASSED: All 247 pack files are L1
+
+# OR if violations found:
+
+[validate] FAILED: 3 non-L1 file(s) found in package:
+  [L3] inbox/my-data.txt — Personal data
+  [L2] knowledge/dossiers/ALEX.md — Premium content
+  [NEVER] .env.example — Secrets/sensitive config
+
+[validate] 250 total files scanned, 3 violation(s).
+```
+
+```json JSON Output
+{
+  "status": "FAILED",
+  "total_files": 250,
+  "violations": [
+    {
+      "path": "inbox/my-data.txt",
+      "layer": "L3",
+      "reason": "Personal data"
+    },
+    {
+      "path": "knowledge/dossiers/ALEX.md",
+      "layer": "L2",
+      "reason": "Premium content"
+    }
+  ]
+}
+```
+</CodeGroup>
+
+**How it works:**
+
+<Steps>
+  <Step title="Get Package Files">
+    Runs `npm pack --dry-run --json` to get list of files that would be published:
+    ```javascript
+    const packOutput = execSync('npm pack --dry-run --json');
+    const packData = JSON.parse(packOutput);
+    const files = packData[0].files.map(f => f.path);
+    ```
+  </Step>
+  
+  <Step title="Classify Files">
+    Calls `audit_layers.py` via Python subprocess:
+    ```python
+    from audit_layers import classify_path
+    
+    for path in files:
+        layer, reason = classify_path(repo / path, repo, is_file=True)
+        results[path] = {"layer": layer, "reason": reason}
+    ```
+  </Step>
+  
+  <Step title="Check Violations">
+    Any file not classified as L1 is a violation:
+    ```javascript
+    if (classification.layer !== 'L1') {
+      violations.push(file);
+    }
+    ```
+  </Step>
+  
+  <Step title="Return Status">
+    - **Exit 0** - All files are L1 (PASSED)
+    - **Exit 1** - Non-L1 files found (FAILED)
+    - **Exit 2** - Validation error (ERROR)
+  </Step>
+</Steps>
+
+<Note>
+  See [Layer Management](/advanced/layer-management) for complete L1/L2/L3 classification rules.
+</Note>
+
+### pre-publish-gate.js
+
+**Purpose:** Security gate that blocks npm publish if secrets or non-L1 content detected
+
+**Location:** `bin/pre-publish-gate.js`
+
+**Trigger:** Automatically via `prepublishOnly` npm script
+
+<CodeGroup>
+```json package.json
+{
+  "scripts": {
+    "prepublishOnly": "node bin/pre-publish-gate.js"
+  }
+}
+```
+
+```javascript pre-publish-gate.js
+#!/usr/bin/env node
+
+/**
+ * Pre-Publish Security Gate (PHYSICAL BLOCK)
+ * 
+ * PURPOSE: Scan npm package for secrets AND verify only L1 content
+ * DESIGN: fail-CLOSED — if scanning fails, publish is BLOCKED
+ */
+
+const SECRET_PATTERNS = [
+  // GitHub tokens
+  /ghp_[A-Za-z0-9]{36}/,
+  /github_pat_[A-Za-z0-9_]{82}/,
+  
+  // Anthropic
+  /sk-ant-[A-Za-z0-9-]{90,}/,
+  
+  // OpenAI
+  /sk-[A-Za-z0-9]{48}/,
+  
+  // AWS
+  /AKIA[0-9A-Z]{16}/,
+  
+  // N8N webhooks
+  /https?:\/\/[^/]*\.app\.n8n\.cloud\/webhook/,
+  
+  // JWT tokens
+  /eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/,
+  
+  // Generic secrets
+  /(?:password|api_key|secret|token|private_key)\s*[:=]\s*['"][^'"]{12,}['"]/i,
+];
+
+const FORBIDDEN_FILE_PATTERNS = [
+  /\.env($|\.)/i,
+  /credentials\.json$/i,
+  /service.account.*\.json$/i,
+  /\.pem$/i,
+  /\.key$/i,
+  /id_rsa/i,
+];
+```
+</CodeGroup>
+
+**Validation Steps:**
+
+<Accordion title="Step 1: Clean __pycache__">
+  Removes Python cache directories:
+  ```bash
+  find . -type d -name __pycache__ -exec rm -rf {} +
+  ```
+</Accordion>
+
+<Accordion title="Step 2: Get Package Files">
+  Same as `validate-package.js`:
+  ```javascript
+  const packOutput = execSync('npm pack --dry-run --json');
+  const packFiles = JSON.parse(packOutput)[0].files.map(f => f.path);
+  ```
+</Accordion>
+
+<Accordion title="Step 3: Check File Names">
+  Blocks forbidden files:
+  ```javascript
+  for (const file of packFiles) {
+    for (const pattern of FORBIDDEN_FILE_PATTERNS) {
+      if (pattern.test(file)) {
+        console.error(`[BLOCKED] Forbidden file: ${file}`);
+        foundIssues++;
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Step 4: Scan File Contents">
+  Scans text files for secret patterns:
+  ```javascript
+  const content = readFileSync(filePath, 'utf-8');
+  
+  for (const pattern of SECRET_PATTERNS) {
+    const matches = content.match(new RegExp(pattern.source, 'g'));
+    if (matches) {
+      const redacted = matches[0].substring(0, 12) + '**REDACTED**';
+      console.error(`[BLOCKED] Secret found in: ${file} → ${redacted}`);
+      foundIssues++;
+    }
+  }
+  ```
+  
+  **Special handling:**
+  - Skips binary files (.png, .pdf, .zip, etc.)
+  - Allows up to 3 emails per file (more = PII leak)
+</Accordion>
+
+<Accordion title="Step 5: Run trufflehog (Optional)">
+  If `trufflehog` is installed, runs deep scan:
+  ```bash
+  trufflehog filesystem "." --only-verified --no-update --json
+  ```
+  
+  <Tip>
+    Install trufflehog for enhanced secret detection: `brew install trufflehog`
+  </Tip>
+</Accordion>
+
+<Accordion title="Step 6: Layer Validation">
+  Calls `validate-package.js`:
+  ```javascript
+  const validation = validatePackageSync(PROJECT_ROOT);
+  if (validation.status === 'FAILED') {
+    console.error(`[BLOCKED] ${validation.violations.length} non-L1 files`);
+    foundIssues += validation.violations.length;
+  }
+  ```
+</Accordion>
+
+**Verdict:**
+
+```bash
+# If foundIssues > 0:
+====================================================
+  NPM PUBLISH BLOCKED: 5 security issue(s) found
+====================================================
+
+  Fix the issues above before publishing.
+  Run 'npm pack --dry-run' to see what would be published.
+
+# Exit code: 1 (blocks npm publish)
+
+# If foundIssues === 0:
+[pre-publish] Security gate PASSED. 247 files scanned, 0 issues.
+[pre-publish] Package is safe to publish.
+
+# Exit code: 0 (allows npm publish)
+```
+
+<Warning>
+  The pre-publish gate uses **fail-CLOSED** design: if validation fails, publish is **physically blocked**.
+</Warning>
+
+## Layer Validation
+
+### audit_layers.py
+
+**Purpose:** Classify all repository files into L1/L2/L3/NEVER/DELETE/REVIEW
+
+**Location:** `core/intelligence/audit_layers.py`
+
+**Usage:**
+```bash
+# Full audit (generates report)
+python3 core/intelligence/audit_layers.py
+
+# Outputs:
+# - docs/audit/AUDIT-REPORT.json (machine-readable)
+# - docs/audit/AUDIT-REPORT.md (human-readable)
+```
+
+<CodeGroup>
+```python Classification Logic
+def classify_path(path: Path, repo_root: Path, is_file: bool = True) -> Tuple[str, str]:
+    """
+    Classify a path into layer.
+    Returns: (layer, reason)
+    """
+    rel_path = str(path.relative_to(repo_root))
+    
+    # Priority: DELETE > NEVER > L3 > L2 > L1 > REVIEW
+    
+    # Check DELETE patterns
+    for pattern in DELETE_PATTERNS:
+        if pattern in rel_path:
+            return ("DELETE", "Obsolete — replaced by newer implementation")
+    
+    # Check NEVER patterns (secrets)
+    for pattern in NEVER_PATTERNS:
+        if pattern.search(rel_path):
+            return ("NEVER", "Secrets/sensitive config")
+    
+    # Check L3 patterns (personal data)
+    for prefix in L3_PATTERNS:
+        if rel_path.startswith(prefix):
+            # Exception: .gitkeep is always L1
+            if path.name == ".gitkeep":
+                return ("L1", "Empty structure marker")
+            return ("L3", "Personal data")
+    
+    # Check L2 patterns (premium content)
+    for prefix in L2_PATTERNS:
+        if rel_path.startswith(prefix):
+            if path.name == ".gitkeep":
+                return ("L1", "Empty structure marker")
+            return ("L2", "Premium content")
+    
+    # Check L1 patterns (core engine)
+    for prefix in L1_PATTERNS:
+        if rel_path.startswith(prefix):
+            return ("L1", "Core engine")
+    
+    # Default: REVIEW (needs human decision)
+    return ("REVIEW", "Unclear (needs classification)")
+```
+
+```python Layer Patterns
+L1_PATTERNS = [
+    "core/",
+    "bin/",
+    ".claude/",
+    "agents/conclave/",
+    "agents/_templates/",
+    "docs/",
+]
+
+L2_PATTERNS = [
+    "agents/minds/",
+    "agents/cargo/",
+    "knowledge/dossiers/",
+    "knowledge/playbooks/",
+    "knowledge/dna/",
+    "knowledge/sources/",
+    "artifacts/insights/",
+    "artifacts/chunks/",
+]
+
+L3_PATTERNS = [
+    "inbox/",
+    "logs/",
+    ".claude/sessions/",
+    ".claude/mission-control/",
+    "agents/sua-empresa/",
+]
+
+NEVER_PATTERNS = [
+    re.compile(r"\.env($|\.)"),
+    re.compile(r"credentials\.json$"),
+    re.compile(r"\.mcp\.json$"),
+    re.compile(r"settings\.local\.json$"),
+    re.compile(r"\.(key|pem|secret)$"),
+]
+
+DELETE_PATTERNS = [
+    "archive/*/finance-agent/",
+    "archive/*/talent-agent/",
+]
+```
+</CodeGroup>
+
+**Audit Report Structure:**
+
+```json
+{
+  "version": "1.0.0",
+  "timestamp": "2026-03-06T10:30:00Z",
+  "total_items": 20797,
+  "summary": {
+    "L1": 8234,
+    "L2": 147,
+    "L3": 203,
+    "NEVER": 30,
+    "DELETE": 10,
+    "REVIEW": 12173
+  },
+  "files": [
+    {
+      "path": "core/tasks/HO-TP-001.md",
+      "layer": "L1",
+      "reason": "Core engine",
+      "size": 4521
+    }
+  ],
+  "delete_candidates": [
+    {
+      "path": "archive/finance-agent/",
+      "reason": "Obsolete — replaced by agents/cargo/"
+    }
+  ]
+}
+```
+
+<Note>
+  The audit includes **20,797 items** across all layers. REVIEW items (58.6%) need manual classification.
+</Note>
+
+## Validation Hooks
+
+Mega Brain uses **PreToolUse hooks** for real-time validation:
+
+### creation_validator.py
+
+**Event:** PreToolUse (Write|Edit)
+
+**Purpose:** Validates new file creation against layer rules
+
+<CodeGroup>
+```python creation_validator.py
+#!/usr/bin/env python3
+"""
+Creation Validator - Validates file creation against layer rules.
+
+Prevents:
+- Creating L3 files in L1 directories
+- Creating NEVER files anywhere
+- Creating files in wrong layer
+"""
+
+import sys
+import json
+from pathlib import Path
+
+def validate_creation(file_path: str) -> dict:
+    """
+    Validates file creation.
+    Returns: {"continue": bool, "feedback": str}
+    """
+    path = Path(file_path)
+    
+    # Check if file is in NEVER category
+    if is_never_file(path):
+        return {
+            "continue": False,
+            "feedback": f"[BLOCKED] Cannot create {path.name} - contains secrets"
+        }
+    
+    # Check layer compliance
+    expected_layer = get_expected_layer(path)
+    if expected_layer == "VIOLATION":
+        return {
+            "continue": False,
+            "feedback": f"[BLOCKED] {path} violates layer rules"
+        }
+    
+    return {"continue": True}
+```
+
+```json Hook Output (Block)
+{
+  "continue": false,
+  "feedback": "[BLOCKED] Cannot create .env - contains secrets"
+}
+```
+
+```json Hook Output (Allow)
+{
+  "continue": true
+}
+```
+</CodeGroup>
+
+### claude_md_guard.py
+
+**Event:** PreToolUse (Write|Edit)
+
+**Purpose:** Prevents CLAUDE.md creation in invalid locations
+
+```python
+def is_valid_claude_md_location(path: Path) -> bool:
+    """
+    Only 2 valid locations:
+    - Root: ./CLAUDE.md
+    - Claude dir: .claude/CLAUDE.md
+    """
+    valid_paths = [
+        Path("CLAUDE.md"),
+        Path(".claude/CLAUDE.md")
+    ]
+    return path in valid_paths
+
+if path.name == "CLAUDE.md" and not is_valid_claude_md_location(path):
+    return {
+        "continue": False,
+        "feedback": "[BLOCKED] CLAUDE.md only allowed in root or .claude/"
+    }
+```
+
+<Warning>
+  CLAUDE.md files in subdirectories (e.g., `data/CLAUDE.md`) are **strictly forbidden** per system policy.
+</Warning>
+
+## Quality Validation
+
+### quality_watchdog.py
+
+**Event:** UserPromptSubmit
+
+**Purpose:** Monitors quality metrics and warns about potential issues
+
+```python
+def check_quality_metrics(prompt: str, context: dict) -> dict:
+    """
+    Monitors:
+    - Prompt length (warn if > 10k chars)
+    - Context size (warn if > 100k tokens)
+    - Pattern violations (anti-patterns)
+    """
+    warnings = []
+    
+    if len(prompt) > 10000:
+        warnings.append("Prompt very long (>10k chars) - consider splitting")
+    
+    if contains_anti_patterns(prompt):
+        warnings.append("Detected anti-pattern: avoid hardcoded paths")
+    
+    if warnings:
+        return {
+            "continue": True,
+            "feedback": "[QUALITY WARNING] " + "; ".join(warnings)
+        }
+    
+    return {"continue": True}
+```
+
+### stop_hook_completeness.py
+
+**Event:** Stop
+
+**Purpose:** Checks if tasks are complete before stopping
+
+```python
+def check_completeness(session_state: dict) -> dict:
+    """
+    Checks:
+    - Pending TODOs
+    - Incomplete validation
+    - Unsaved changes
+    """
+    issues = []
+    
+    if session_state.get("pending_todos", 0) > 0:
+        issues.append(f"{session_state['pending_todos']} TODO items pending")
+    
+    if session_state.get("unsaved_changes", False):
+        issues.append("Unsaved changes detected")
+    
+    if issues:
+        return {
+            "continue": True,
+            "feedback": f"[COMPLETENESS CHECK] {'; '.join(issues)}"
+        }
+    
+    return {"continue": True}
+```
+
+## CI/CD Validation
+
+### GitHub Actions Integration
+
+<CodeGroup>
+```yaml .github/workflows/validate.yml
+name: Validate Package
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install pyyaml
+      
+      - name: Validate package layers
+        run: |
+          node bin/validate-package.js --json > validation.json
+          cat validation.json
+          
+          # Fail if status is not PASSED
+          if [ "$(jq -r '.status' validation.json)" != "PASSED" ]; then
+            echo "Validation FAILED"
+            jq '.violations' validation.json
+            exit 1
+          fi
+      
+      - name: Run security gate
+        run: |
+          node bin/pre-publish-gate.js
+```
+
+```bash Manual Validation
+# Run all validations locally before pushing
+
+# 1. Package validation
+node bin/validate-package.js
+
+# 2. Security gate
+node bin/pre-publish-gate.js
+
+# 3. Full audit
+python3 core/intelligence/audit_layers.py
+
+# 4. Check delete candidates
+cat docs/audit/AUDIT-REPORT.md | grep DELETE
+```
+</CodeGroup>
+
+## Validation Checklist
+
+Before publishing or committing:
+
+<Steps>
+  <Step title="Run Package Validation">
+    ```bash
+    node bin/validate-package.js
+    ```
+    Ensure: `PASSED: All {N} pack files are L1`
+  </Step>
+  
+  <Step title="Run Security Gate">
+    ```bash
+    node bin/pre-publish-gate.js
+    ```
+    Ensure: `Security gate PASSED`
+  </Step>
+  
+  <Step title="Check Audit Report">
+    ```bash
+    python3 core/intelligence/audit_layers.py
+    cat docs/audit/AUDIT-REPORT.md
+    ```
+    Review DELETE and REVIEW items
+  </Step>
+  
+  <Step title="Validate Layer Compliance">
+    - [ ] No L2/L3 files in package
+    - [ ] No NEVER files anywhere
+    - [ ] DELETE candidates removed
+    - [ ] REVIEW items classified
+  </Step>
+  
+  <Step title="Test Hooks">
+    ```bash
+    # Test creation validator
+    echo '{"tool": "Write", "path": ".env"}' | python3 .claude/hooks/creation_validator.py
+    
+    # Should return: {"continue": false}
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Validation Fails with 'npm pack error'">
+  **Problem:** `validate-package.js` fails to run `npm pack --dry-run`
+  
+  **Solutions:**
+  1. Check `package.json` has valid `files` field
+  2. Run `npm pack --dry-run` manually to see error
+  3. Ensure npm version >= 7
+  4. Check for circular dependencies
+</Accordion>
+
+<Accordion title="Layer Classification Incorrect">
+  **Problem:** File classified as wrong layer
+  
+  **Solutions:**
+  1. Check `audit_layers.py` patterns match file path
+  2. Verify path doesn't have typos
+  3. Update `L1_PATTERNS` / `L2_PATTERNS` if needed
+  4. Re-run audit after pattern updates
+</Accordion>
+
+<Accordion title="Pre-Publish Gate Blocks Valid File">
+  **Problem:** Security gate blocks file that shouldn't be blocked
+  
+  **Solutions:**
+  1. Check if file matches `FORBIDDEN_FILE_PATTERNS`
+  2. Verify file content doesn't match `SECRET_PATTERNS`
+  3. If false positive, update patterns in `pre-publish-gate.js`
+  4. Add exception for specific file type
+</Accordion>
+
+<Accordion title="Hook Validation Too Slow">
+  **Problem:** PreToolUse hooks slow down file operations
+  
+  **Solutions:**
+  1. Check hook timeout settings (should be 2-5s)
+  2. Optimize validation logic (cache results)
+  3. Move heavy validation to PostToolUse
+  4. Use `settings.local.json` to disable non-critical hooks
+</Accordion>
+
+## Best Practices
+
+<Card title="Validation Guidelines" icon="shield-check">
+  1. **Run validation early** - Test before committing
+  2. **Trust the gates** - Never bypass pre-publish checks
+  3. **Review REVIEW items** - Classify unknown files promptly
+  4. **Update patterns** - Keep layer patterns current
+  5. **Monitor false positives** - Adjust secret patterns if needed
+  6. **Document exceptions** - Note why files are excluded
+  7. **Automate in CI** - Run validation on every PR
+</Card>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Layer Management" icon="layer-group" href="/advanced/layer-management">
+    Complete L1/L2/L3 layer classification system
+  </Card>
+  
+  <Card title="Hooks System" icon="webhook" href="/advanced/hooks-system">
+    PreToolUse and PostToolUse validation hooks
+  </Card>
+  
+  <Card title="Publishing" icon="upload" href="/advanced/layer-management">
+    Publishing workflow and security gates
+  </Card>
+  
+  <Card title="CI/CD" icon="gitlab" href="/advanced/validation">
+    Continuous integration and deployment
+  </Card>
+</CardGroup>

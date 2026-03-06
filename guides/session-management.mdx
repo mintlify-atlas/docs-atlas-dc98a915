@@ -1,0 +1,716 @@
+---
+title: "Session Management"
+description: "Save, resume, and manage processing sessions with full context preservation"
+---
+
+Mega Brain's session management system allows you to save your work and resume exactly where you left off. This guide covers session workflows, context preservation, and best practices.
+
+## Session Overview
+
+Sessions preserve:
+- Current task and status
+- Pending files and processing queue
+- Recent operations and results
+- Important file references
+- User notes and context
+
+<Note>
+Sessions are stored in `/logs/LIVE-SESSION/` with both human-readable Markdown and structured JSON formats.
+</Note>
+
+## Saving Sessions
+
+### Basic Save
+
+```bash
+/save
+```
+
+System prompts: **"What do you want me to save as context?"**
+
+<Tabs>
+  <Tab title="Example: Mid-Processing">
+
+**User input:**
+```
+"I've ingested 3 Cole Gordon videos and processed 2 of them.
+Still need to process the third one and then extract DNA."
+```
+
+**Saved session:**
+```markdown
+# SESSION: 2026-03-06 14:32
+
+## Status
+IN_PROGRESS
+
+## Last Task
+Processing Cole Gordon materials
+- Completed: 2/3 videos
+- Pending: 1 video (closing-masterclass-part3.txt)
+
+## Next Steps
+1. Process inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+2. Extract DNA: /extract-dna cole-gordon
+3. Verify agent enrichment
+
+## Important Files
+- inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+- knowledge/dossiers/persons/DOSSIER-COLE-GORDON.md
+
+## Notes
+User wants to complete Cole Gordon DNA extraction before
+moving to Alex Hormozi materials.
+```
+
+  </Tab>
+  
+  <Tab title="Example: Strategic Decision">
+
+**User input:**
+```
+"Just ran a Conclave on commission structure. Decision was
+to implement tiered system. Need to create implementation
+plan and get CFO approval before executing."
+```
+
+**Saved session:**
+```markdown
+# SESSION: 2026-03-06 16:45
+
+## Status
+BLOCKED (waiting for approval)
+
+## Last Task
+Conclave deliberation on closer commission structure
+
+## Decision Made
+Implement 3-tier commission system:
+- <60% close rate: 10%
+- 60-70% close rate: 12%  
+- >70% close rate: 15%
+
+## Pending Actions
+1. Draft implementation plan
+2. Get CFO approval
+3. Communicate to sales team
+4. Update compensation docs
+
+## Important Files
+- logs/conclave/session-2026-03-06-commission.md
+- agents/cargo/C-LEVEL/MEMORY-CFO.md
+
+## Notes
+Conclave confidence was 78%. Devil's Advocate flagged
+entitlement spiral risk. Need to include reversion
+criteria in implementation plan.
+```
+
+  </Tab>
+  
+  <Tab title="Example: Completed Work">
+
+**User input:**
+```
+"Finished processing all Alex Hormozi materials, extracted
+DNA, and verified all agents were enriched. Ready to move
+to next expert."
+```
+
+**Saved session:**
+```markdown
+# SESSION: 2026-03-06 18:20
+
+## Status
+COMPLETED
+
+## Last Task
+Complete Alex Hormozi processing pipeline
+
+## Completed Steps
+✓ Ingested 5 videos
+✓ Processed all 5 through pipeline
+✓ Extracted DNA (19 items, weight 0.74)
+✓ Verified agent enrichment (CRO, CFO, CLOSER)
+
+## Results
+- knowledge/dna/persons/alex-hormozi/
+- knowledge/dossiers/persons/DOSSIER-ALEX-HORMOZI.md
+- 5 sources: AH001-AH005
+- 47 insights extracted
+
+## Next Expert
+Sam Ovens (Setterlun) - 3 course modules pending
+
+## Notes
+Alex Hormozi DNA is high quality. All heuristics have
+numeric thresholds. Ready for production use.
+```
+
+  </Tab>
+</Tabs>
+
+### Automatic Saves
+
+The system auto-saves context:
+
+<Steps>
+
+<Step title="After Pipeline Completion">
+When `/process-jarvis` completes, session automatically updates with:
+- Source processed
+- Artifacts created
+- Agent enrichment status
+</Step>
+
+<Step title="After DNA Extraction">
+When `/extract-dna` completes, session records:
+- DNA quality metrics
+- Number of items per layer
+- Average weight
+</Step>
+
+<Step title="After Conclave">
+When `/conclave` completes, session saves:
+- Decision recommendation
+- Confidence score
+- Action items
+</Step>
+
+</Steps>
+
+## Resuming Sessions
+
+### Basic Resume
+
+```bash
+/resume
+```
+
+<Accordion title="Resume Output Example">
+
+```
+═══════════════════════════════════════════════
+           RESUMING SESSION
+═══════════════════════════════════════════════
+
+📅 Last Activity
+Processing Cole Gordon materials
+Saved: 2026-03-06 14:32 (2 hours ago)
+
+🟡 Status
+IN_PROGRESS
+
+Completed:
+✓ Processed 2/3 videos
+  - closing-masterclass-part1.txt → CG004
+  - closing-masterclass-part2.txt → CG005
+
+Pending:
+⚠ 1 video remaining:
+  - inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+
+🎯 Next Steps
+1. Process remaining video:
+   /process-jarvis inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+   
+2. Extract DNA after processing:
+   /extract-dna cole-gordon
+   
+3. Verify agent enrichment:
+   /agents --knowledge "Cole Gordon"
+
+📁 Important Files
+- inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+- knowledge/dossiers/persons/DOSSIER-COLE-GORDON.md
+
+📝 Notes
+User wants to complete Cole Gordon DNA extraction
+before moving to Alex Hormozi materials.
+
+───────────────────────────────────────────────
+Want to continue from where you left off? (Y/n)
+```
+
+</Accordion>
+
+### Resume with Context
+
+System loads:
+1. **Task status** - What was being worked on
+2. **File references** - Exact paths to continue
+3. **Pending queue** - What's left to do
+4. **User notes** - Custom context saved
+
+## Session Files
+
+### File Locations
+
+```
+logs/LIVE-SESSION/
+├── CURRENT-SESSION.md    # Human-readable session log
+├── CONTEXT.json          # Structured session data
+└── session-history/     # Archive of past sessions
+    ├── 2026-03-05.md
+    ├── 2026-03-04.md
+    └── 2026-03-03.md
+```
+
+### CONTEXT.json Structure
+
+<CodeGroup>
+
+```json Structure
+{
+  "last_task": "Processing Cole Gordon materials",
+  "status": "in_progress",
+  "pending": [
+    "Process closing-masterclass-part3.txt",
+    "Extract DNA for Cole Gordon",
+    "Verify agent enrichment"
+  ],
+  "next_steps": [
+    "/process-jarvis inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt",
+    "/extract-dna cole-gordon",
+    "/agents --knowledge 'Cole Gordon'"
+  ],
+  "important_files": [
+    "inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt",
+    "knowledge/dossiers/persons/DOSSIER-COLE-GORDON.md"
+  ],
+  "notes": "User wants to complete Cole Gordon before Alex Hormozi",
+  "saved_at": "2026-03-06T14:32:00Z",
+  "statistics": {
+    "files_processed": 2,
+    "files_pending": 1,
+    "insights_extracted": 23,
+    "agents_enriched": 3
+  }
+}
+```
+
+```json Status Values
+{
+  "status": "in_progress",    // Active work
+  "status": "completed",      // Task finished
+  "status": "blocked",        // Waiting on external
+  "status": "paused"          // Intentionally stopped
+}
+```
+
+</CodeGroup>
+
+## Advanced Session Management
+
+### Check Session Status
+
+```bash
+# View current session without resuming
+/log
+```
+
+**Output:**
+```markdown
+## Current Session
+
+**Status:** IN_PROGRESS
+**Started:** 2026-03-06 14:00
+**Last Updated:** 2026-03-06 14:32
+**Duration:** 32 minutes
+
+**Progress:**
+- Files processed: 2
+- Files pending: 1
+- Insights extracted: 23
+- Agents enriched: 3
+
+**Recent Operations:**
+1. [14:15] Ingested cole-gordon/closing-part1.txt
+2. [14:18] Processed CG004 → 23 chunks, 12 insights
+3. [14:25] Ingested cole-gordon/closing-part2.txt  
+4. [14:28] Processed CG005 → 21 chunks, 11 insights
+5. [14:32] Saved session
+```
+
+### View Session History
+
+```bash
+# List past sessions
+ls logs/LIVE-SESSION/session-history/
+
+# Read specific session
+cat logs/LIVE-SESSION/session-history/2026-03-05.md
+```
+
+### System Briefing
+
+Get complete system status:
+
+```bash
+/jarvis-briefing
+```
+
+<Accordion title="Briefing Output">
+
+```
+═══════════════════════════════════════════════
+JARVIS: Operational Briefing
+═══════════════════════════════════════════════
+
+🟢 Health Score: 92/100
+
+📚 Knowledge Base:
+   Experts:        3 (Alex Hormozi, Cole Gordon, Sam Ovens)
+   Dossiers:       8 (5 persons, 3 themes)
+   Playbooks:      2
+   Total Insights: 127
+   DNA Schemas:    3
+
+📄 Last Processing:
+   "Cole Gordon - Closing Masterclass Part 2" (CG005)
+   Processed: 2026-03-06 14:28
+   Result: 21 chunks, 11 insights
+
+🤖 Active Agents: 37
+   C-Level:  4 (CRO, CFO, CMO, COO)
+   Sales:    8 (CLOSER, BDR, SDS, LNS, ...)
+   Minds:    3 (Alex, Cole, Sam)
+   Conclave: 3 (Critic, Advocate, Synthesizer)
+
+📥 Inbox Status:
+   Pending: 1 file
+   └─ cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+
+📆 Current Session:
+   Status: IN_PROGRESS
+   Task: Processing Cole Gordon materials
+   Progress: 2/3 complete
+
+⭐ Next Action:
+   /process-jarvis inbox/cole-gordon/MASTERCLASS/closing-masterclass-part3.txt
+
+═══════════════════════════════════════════════
+```
+
+</Accordion>
+
+## Session Workflows
+
+### Multi-Day Project
+
+<Steps>
+
+<Step title="Day 1: Ingest Materials">
+```bash
+# Ingest multiple videos
+/ingest https://youtube.com/watch?v=video1
+/ingest https://youtube.com/watch?v=video2
+/ingest https://youtube.com/watch?v=video3
+
+# Save progress
+/save
+```
+
+Input: "Ingested 3 Cole Gordon videos. Will process tomorrow."
+</Step>
+
+<Step title="Day 2: Resume and Process">
+```bash
+# Resume where left off
+/resume
+
+# Process files
+/process-jarvis inbox/cole-gordon/video1.txt
+/process-jarvis inbox/cole-gordon/video2.txt
+
+# Save progress
+/save
+```
+
+Input: "Processed 2/3 videos. Third one tomorrow."
+</Step>
+
+<Step title="Day 3: Complete and Extract DNA">
+```bash
+# Resume
+/resume
+
+# Process final video
+/process-jarvis inbox/cole-gordon/video3.txt
+
+# Extract DNA
+/extract-dna cole-gordon
+
+# Save completion
+/save
+```
+
+Input: "Completed Cole Gordon processing and DNA extraction. Ready for next expert."
+</Step>
+
+</Steps>
+
+### Interrupted Work
+
+<Tabs>
+  <Tab title="Emergency Stop">
+
+**Scenario:** Pipeline running, need to stop immediately
+
+```bash
+# Stop pipeline (Ctrl+C)
+^C
+
+# Save current state
+/save
+```
+
+Input:
+```
+"Pipeline was at Phase 4 (Insight Extraction) when stopped.
+Need to rerun from beginning when resuming.
+File: inbox/alex-hormozi/offer-framework.txt"
+```
+
+**Resume later:**
+```bash
+/resume
+# System shows exactly where you stopped
+# Rerun from beginning:
+/process-jarvis inbox/alex-hormozi/offer-framework.txt
+```
+
+  </Tab>
+  
+  <Tab title="Waiting for Input">
+
+**Scenario:** Blocked on external decision
+
+```bash
+# Save with blocked status
+/save
+```
+
+Input:
+```
+"Conclave recommended tiered commission structure.
+Waiting for CEO approval before implementing.
+Decision log: logs/conclave/session-2026-03-06.md"
+```
+
+**Resume after approval:**
+```bash
+/resume
+# System reminds you of pending approval
+# Continue with implementation
+```
+
+  </Tab>
+  
+  <Tab title="Switching Context">
+
+**Scenario:** Need to switch to urgent task
+
+```bash
+# Save current work
+/save
+```
+
+Input: "Pausing Cole Gordon processing to handle urgent Sam Ovens material."
+
+**Work on urgent task:**
+```bash
+/ingest [urgent-file]
+/process-jarvis [urgent-file]
+```
+
+**Return to original work:**
+```bash
+/resume
+# System shows Cole Gordon context
+# Continue where left off
+```
+
+  </Tab>
+</Tabs>
+
+## Session Best Practices
+
+<CardGroup cols={2}>
+
+<Card title="Save Frequently" icon="floppy-disk">
+  Save after completing each major step:
+  - After ingesting batch
+  - After processing material
+  - After DNA extraction
+  - Before/after Conclave
+</Card>
+
+<Card title="Use Descriptive Notes" icon="memo">
+  Include:
+  - What you completed
+  - What's pending
+  - Any blockers
+  - Context for decisions
+</Card>
+
+<Card title="Reference File Paths" icon="folder-open">
+  Always include:
+  - Exact file paths
+  - Source IDs (CG001, AH002)
+  - Artifact locations
+</Card>
+
+<Card title="Track Dependencies" icon="link">
+  Note what needs to complete first:
+  - Process before extract DNA
+  - Get approval before implement
+  - Verify before scaling
+</Card>
+
+</CardGroup>
+
+## Troubleshooting Sessions
+
+<Accordion title="Common Issues">
+
+**Issue: Resume shows wrong context**
+
+Solution:
+```bash
+# Check current session file
+cat logs/LIVE-SESSION/CURRENT-SESSION.md
+
+# If corrupted, restore from history
+cp logs/LIVE-SESSION/session-history/2026-03-06.md logs/LIVE-SESSION/CURRENT-SESSION.md
+
+# Resume again
+/resume
+```
+
+**Issue: Lost progress (no recent save)**
+
+Recovery:
+```bash
+# Check JARVIS briefing for last processing
+/jarvis-briefing
+
+# Check file registry for what was processed
+cat system/REGISTRY/file-registry.json
+
+# Check inbox for pending files
+/inbox
+
+# Reconstruct context and save
+/save
+```
+
+**Issue: Multiple overlapping sessions**
+
+Solution:
+```bash
+# Review session history
+ls -lt logs/LIVE-SESSION/session-history/
+
+# Pick the correct session
+cat logs/LIVE-SESSION/session-history/[date].md
+
+# Copy to current
+cp logs/LIVE-SESSION/session-history/[date].md logs/LIVE-SESSION/CURRENT-SESSION.md
+
+# Resume
+/resume
+```
+
+</Accordion>
+
+## Viewing Processing Logs
+
+Different log types for different purposes:
+
+<Tabs>
+  <Tab title="Session Logs">
+
+**Current session:**
+```bash
+cat logs/LIVE-SESSION/CURRENT-SESSION.md
+```
+
+**Session history:**
+```bash
+ls logs/LIVE-SESSION/session-history/
+cat logs/LIVE-SESSION/session-history/2026-03-06.md
+```
+
+  </Tab>
+  
+  <Tab title="Pipeline Logs">
+
+**Processing manifests:**
+```bash
+# View specific pipeline run
+cat artifacts/processing/manifests/CG005-manifest.json
+
+# See all phases completed
+# Verify artifacts created
+# Check statistics
+```
+
+  </Tab>
+  
+  <Tab title="Audit Logs">
+
+**System operations:**
+```bash
+# View audit log (JSONL format)
+tail -n 50 logs/AUDIT/audit.jsonl
+
+# Search for specific operation
+grep "INGEST" logs/AUDIT/audit.jsonl
+grep "EXTRACT_DNA" logs/AUDIT/audit.jsonl
+```
+
+  </Tab>
+  
+  <Tab title="Conclave Logs">
+
+**Deliberation sessions:**
+```bash
+# List conclave sessions
+ls logs/conclave/
+
+# View specific session
+cat logs/conclave/session-2026-03-06-commission.md
+
+# Shows:
+# - Full debate transcript
+# - Critic evaluation
+# - Devil's Advocate concerns
+# - Final synthesis
+```
+
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Card title="Start Your First Session" icon="play">
+  
+1. Ingest materials: `/ingest [source]`
+2. Save session: `/save`
+3. Resume anytime: `/resume`
+4. Continue workflow
+
+</Card>
+
+<CardGroup cols={2}>
+
+<Card title="Process Pipeline" icon="gears" href="/guides/processing-pipeline">
+  Learn the 5-phase processing workflow
+</Card>
+
+<Card title="Work with Agents" icon="robot" href="/guides/working-with-agents">
+  Query enriched agents after processing
+</Card>
+
+</CardGroup>

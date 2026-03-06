@@ -1,122 +1,133 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Mega Brain",
+  "theme": "aspen",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#94cb04",
+    "light": "#545454",
+    "dark": "#94cb04"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/logo.png",
+  "logo": {
+    "light": "/logo.png",
+    "dark": "/logo.png"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/thiagofinch/mega-brain"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/thiagofinch/mega-brain"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Get Started",
             "pages": [
-              "index",
+              "introduction",
+              "installation",
               "quickstart",
-              "development"
+              "configuration"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Core Concepts",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "concepts/architecture",
+              "concepts/knowledge-pipeline",
+              "concepts/dna-schema",
+              "concepts/layer-system",
+              "concepts/agents"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "CLI Commands",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "commands/overview",
+              "commands/setup",
+              "commands/ingest",
+              "commands/process-jarvis",
+              "commands/jarvis-briefing",
+              "commands/extract-dna",
+              "commands/conclave",
+              "commands/save-resume"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Guides",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "guides/ingesting-materials",
+              "guides/processing-pipeline",
+              "guides/creating-mind-clones",
+              "guides/using-conclave",
+              "guides/working-with-agents",
+              "guides/session-management"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/hooks-system",
+              "advanced/skills-routing",
+              "advanced/agent-creation",
+              "advanced/validation",
+              "advanced/layer-management"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Command Reference",
             "pages": [
-              "api-reference/introduction"
+              "api/cli-commands",
+              "api/slash-commands"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Core Modules",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api/core/tasks",
+              "api/core/workflows",
+              "api/core/intelligence",
+              "api/core/schemas"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "api/agents/conclave",
+              "api/agents/cargo",
+              "api/agents/minds",
+              "api/agents/jarvis"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Community",
+        "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "community/contributing",
+              "community/community-vs-pro",
+              "community/troubleshooting",
+              "community/faq",
+              "community/changelog"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

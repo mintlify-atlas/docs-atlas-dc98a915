@@ -1,0 +1,630 @@
+---
+title: 'Intelligence Layer'
+description: 'Python scripts for AI processing, entity resolution, and analysis'
+---
+
+# Intelligence Layer
+
+The Intelligence Layer consists of Python 3 scripts that power core processing, entity resolution, role detection, and system orchestration.
+
+## Architecture
+
+```
+core/intelligence/
+├── __init__.py
+├── role_detector.py          # 3-level role detection
+├── entity_normalizer.py      # Entity canonicalization
+├── theme_analyzer.py          # Theme classification
+├── bootstrap_registry.py      # Registry initialization
+├── agent_trigger.py           # Agent creation triggers
+├── dossier_trigger.py         # Dossier generation
+├── task_orchestrator.py       # Task execution engine
+├── autonomous_processor.py    # Autonomous decision-making
+├── audit_layers.py            # Security layer validation
+├── validate_layers.py         # Layer integrity checks
+└── [22 more modules...]
+```
+
+**Requirements:**
+- Python 3.9+
+- Standard library only (pathlib, json, re, datetime)
+- Optional: `PyYAML` for config files
+
+---
+
+## Core Modules
+
+### role_detector.py
+
+3-level role detection system with weighted scoring.
+
+**Version:** 2.0.0
+
+**Function: `detect_roles_in_text()`**
+
+<ParamField path="text" type="str" required>
+  Content to analyze for role mentions
+</ParamField>
+
+<ParamField path="source_id" type="str" optional>
+  Source identifier for tracking
+</ParamField>
+
+<ParamField path="registry" type="dict" optional>
+  ENTITY-REGISTRY dict (loaded if None)
+</ParamField>
+
+**Returns:**
+
+```python
+{
+    "roles_detected": [
+        {
+            "role": "SALES-MANAGER",
+            "detection_type": "direct",  # direct | inferred | emergent
+            "weight": 1.0,
+            "contexts": ["...surrounding text..."]
+        }
+    ],
+    "new_roles": [  # Emergent only
+        {
+            "role": "REVENUE-OPERATIONS",
+            "detection_type": "emergent"
+        }
+    ],
+    "triggers_activated": [
+        {
+            "role": "ACCOUNT-EXECUTIVE",
+            "trigger_type": "create_agent",
+            "tier": "established",
+            "weighted_score": 15.2,
+            "source_count": 3
+        }
+    ]
+}
+```
+
+**Detection Levels:**
+
+<Expandable title="Level 1: Direct Detection (weight: 1.0 / 2.0)">
+  Matches known role patterns from `_ROLE_PATTERNS.yaml`.
+  
+  **Strong patterns (2x weight):**
+  - Exact role title with context
+  - "hire a closer", "our BDR team"
+  
+  **Normal patterns (1x weight):**
+  - Generic role mentions
+  - "sales manager", "customer success"
+  
+  **Exclude patterns:**
+  - False positives ("close the deal" ≠ CLOSER)
+</Expandable>
+
+<Expandable title="Level 2: Inferred Detection (weight: 0.7)">
+  Activity implies role via `_inference_map`.
+  
+  **Examples:**
+  - "writing sales page copy" → COPYWRITER
+  - "running paid ads" → PAID-MEDIA-SPECIALIST
+  - "handling customer support" → CUSTOMER-SUCCESS
+</Expandable>
+
+<Expandable title="Level 3: Emergent Detection (weight: 0.5)">
+  Domain-agnostic pattern detection for unknown roles.
+  
+  **Patterns:**
+  - "our [unknown role] handles..."
+  - "the [unknown role] is responsible for..."
+  
+  **Filters:**
+  - Stopwords (avoid false positives)
+  - Common non-role words
+  - Minimum 5 characters for single words
+</Expandable>
+
+**Registry Update:**
+
+```python
+# Entity structure in ENTITY-REGISTRY.json
+{
+    "canonical": "SALES-MANAGER",
+    "aliases": ["sales manager", "manager of sales"],
+    "mention_count": 15,
+    "mention_breakdown": {
+        "direct": 10,
+        "inferred": 3,
+        "emergent": 2
+    },
+    "weighted_score": 13.6,  # 10*1.0 + 3*0.7 + 2*0.5
+    "sources": ["CG001", "JL003", "HR005"],
+    "has_agent": false,
+    "status": "active",  # emergent_candidate | tracking | active
+    "detection_history": [
+        {
+            "type": "direct",
+            "weight": 1.0,
+            "timestamp": "2026-03-05T12:00:00Z",
+            "source": "CG001",
+            "context": "...surrounding text..."
+        }
+    ]
+}
+```
+
+**Trigger Thresholds:**
+
+<ResponseField name="established" type="object">
+  **Criteria:** `weighted_score >= 10` AND `sources >= 2`
+  
+  **Action:** Trigger agent creation
+</ResponseField>
+
+<ResponseField name="emerging" type="object">
+  **Criteria:** `weighted_score >= 5` AND `sources >= 1`
+  
+  **Action:** Track for promotion
+  
+  **Promotion:** Becomes "established" when criteria met
+</ResponseField>
+
+**CLI Usage:**
+
+```bash
+# Scan all chunk files
+python3 core/intelligence/role_detector.py --all
+
+# Scan single file
+python3 core/intelligence/role_detector.py /path/to/chunks.json
+
+# Test text
+python3 core/intelligence/role_detector.py --text "our closer handles the final call"
+```
+
+**Source:** `core/intelligence/role_detector.py:1-856`
+
+---
+
+### entity_normalizer.py
+
+Canonical entity resolution with fuzzy matching and domain awareness.
+
+**Version:** 1.0.0
+
+**Function: `normalize_entity()`**
+
+<ParamField path="name" type="str" required>
+  Raw entity name to normalize
+</ParamField>
+
+<ParamField path="entity_type" type="str" required>
+  Type: `"person"`, `"theme"`, `"role"`, `"concept"`
+</ParamField>
+
+<ParamField path="registry" type="dict" optional>
+  ENTITY-REGISTRY dict (loaded if None)
+</ParamField>
+
+<ParamField path="source_id" type="str" optional>
+  Source that mentioned this entity
+</ParamField>
+
+<ParamField path="auto_save" type="bool" optional>
+  Save registry after modification (default: False)
+</ParamField>
+
+<ParamField path="domain_hint" type="str" optional>
+  Domain ID for context-aware matching (e.g., "SALES")
+</ParamField>
+
+**Returns:**
+
+```python
+{
+    "canonical": "Alex Hormozi",
+    "match_type": "fuzzy",  # exact | alias | fuzzy | domain_boost | taxonomy | new
+    "score": 0.92,
+    "entity_type": "person",
+    "created": False
+}
+```
+
+**Resolution Algorithm:**
+
+<Steps>
+  <Step title="Exact Match on Canonical">
+    Check if name matches any canonical entity (case-insensitive).
+    
+    **Score:** 1.0
+  </Step>
+  
+  <Step title="Exact Match on Aliases">
+    Check if name matches any registered alias.
+    
+    **Score:** 1.0
+  </Step>
+  
+  <Step title="Fuzzy Match">
+    Use difflib.SequenceMatcher for similarity scoring.
+    
+    **Threshold:** 0.85 (configurable)
+    
+    **Example:** "alex hormozi" → "Alex Hormozi" (score: 0.92)
+  </Step>
+  
+  <Step title="Domain Boost">
+    If `domain_hint` provided and entity shares domain, add +0.10 bonus.
+    
+    **Example:** "sales lead" in SALES domain gets boost when matching SALES-LEAD
+  </Step>
+  
+  <Step title="Taxonomy Check">
+    Look up in `DOMAINS-TAXONOMY.yaml` for known entities.
+    
+    **Score:** 1.0 if found
+  </Step>
+  
+  <Step title="Create New Entity">
+    If no match found, create new canonical entity.
+    
+    **Score:** 0.0 (no match)
+  </Step>
+</Steps>
+
+**Auto-Merge Rules:**
+
+| Score Range | Action |
+|-------------|--------|
+| ≥ 0.95 | **Auto-merge:** Add as alias, no review |
+| 0.85 - 0.94 | **Review queue:** Human review required |
+| < 0.85 | **Create new:** No match found |
+
+**Canonical Name Formats:**
+
+```python
+# Person: Title Case
+"alex hormozi" → "Alex Hormozi"
+
+# Role: UPPER-CASE-WITH-HYPHENS
+"sales manager" → "SALES-MANAGER"
+
+# Theme: lowercase-with-hyphens
+"Processo de Vendas" → "processo-vendas"
+
+# Concept: Title Case
+"farm system" → "Farm System"
+```
+
+**Batch Normalization:**
+
+```python
+from core.intelligence.entity_normalizer import normalize_entities_batch
+
+results = normalize_entities_batch(
+    entities_list=["alex hormozi", "cole gordon", "jeremy miner"],
+    entity_type="person",
+    source_id="CG001",
+    auto_save=True
+)
+# Returns list of normalization results
+```
+
+**CLI Usage:**
+
+```bash
+# Normalize single entity
+python3 core/intelligence/entity_normalizer.py person "alex hormozi"
+
+# Output:
+# === ENTITY NORMALIZER ===
+# Input:      'alex hormozi'
+# Type:       person
+# Canonical:  'Alex Hormozi'
+# Match:      fuzzy
+# Score:      0.9200
+# Created:    False
+```
+
+**Source:** `core/intelligence/entity_normalizer.py:1-566`
+
+---
+
+### theme_analyzer.py
+
+Automatic theme classification and domain assignment.
+
+**Version:** 1.0.0
+
+**Function: `analyze_themes()`**
+
+<ParamField path="text" type="str" required>
+  Content to analyze for themes
+</ParamField>
+
+<ParamField path="source_id" type="str" optional>
+  Source identifier
+</ParamField>
+
+<ParamField path="registry" type="dict" optional>
+  ENTITY-REGISTRY dict
+</ParamField>
+
+**Returns:**
+
+```python
+{
+    "themes_detected": [
+        {
+            "theme": "processo-vendas",
+            "theme_code": "02-PROCESSO-VENDAS",
+            "confidence": 0.85,
+            "keywords_matched": ["sales", "closing", "objection"]
+        }
+    ],
+    "cross_references": [
+        {
+            "primary": "04-COMISSIONAMENTO",
+            "secondary": ["02-PROCESSO-VENDAS", "01-ESTRUTURA-TIME"]
+        }
+    ],
+    "domain_ids": ["SALES", "OPERATIONS"]
+}
+```
+
+**Theme Categories:**
+
+| Code | Theme | Keywords |
+|------|-------|----------|
+| 01 | ESTRUTURA-TIME | roles, team, structure, hierarchy |
+| 02 | PROCESSO-VENDAS | sales, closing, objection, pitch |
+| 03 | CONTRATACAO | hire, onboard, recruit, interview |
+| 04 | COMISSIONAMENTO | commission, compensation, OTE, bonus |
+| 05 | METRICAS | KPI, metrics, conversion, CAC, LTV |
+| 06 | FUNIL-APLICACAO | lead, qualify, pipeline, MQL, SQL |
+| 07 | PRICING | pricing, price, discount, value |
+| 08 | FERRAMENTAS | tools, software, CRM, tech stack |
+| 09 | GESTAO | management, leadership, meetings |
+| 10 | CULTURA-GAMIFICACAO | culture, motivation, gamification |
+| 99 | SECUNDARIO | other, miscellaneous |
+
+**Source:** `core/intelligence/theme_analyzer.py:1-xxx`
+
+---
+
+### bootstrap_registry.py
+
+Initialize ENTITY-REGISTRY from taxonomy and existing data.
+
+**Function: `bootstrap_registry()`**
+
+<ParamField path="force" type="bool" optional>
+  Overwrite existing registry (default: False)
+</ParamField>
+
+**Behavior:**
+
+1. Load `DOMAINS-TAXONOMY.yaml`
+2. Scan existing agents, dossiers, and knowledge base
+3. Create registry entries for all entities
+4. Set initial `mention_count` based on artifacts
+5. Save to `processing/canonical/ENTITY-REGISTRY.json`
+
+**CLI Usage:**
+
+```bash
+# Initialize registry
+python3 core/intelligence/bootstrap_registry.py
+
+# Force overwrite
+python3 core/intelligence/bootstrap_registry.py --force
+```
+
+**Source:** `core/intelligence/bootstrap_registry.py:1-xxx`
+
+---
+
+### agent_trigger.py
+
+Automatic agent creation trigger detection.
+
+**Function: `check_agent_triggers()`**
+
+<ParamField path="registry" type="dict" optional>
+  ENTITY-REGISTRY dict
+</ParamField>
+
+**Returns:**
+
+```python
+{
+    "triggers_ready": [
+        {
+            "role": "ACCOUNT-EXECUTIVE",
+            "tier": "established",
+            "weighted_score": 15.2,
+            "source_count": 3,
+            "action": "create_agent"
+        }
+    ],
+    "triggers_pending": [
+        {
+            "role": "REVENUE-OPERATIONS",
+            "tier": "emerging",
+            "weighted_score": 6.5,
+            "source_count": 1,
+            "needs": {"weighted_score": 3.5, "sources": 1}
+        }
+    ]
+}
+```
+
+**Trigger Logic:**
+
+```python
+if role.weighted_score >= 10 and len(role.sources) >= 2:
+    tier = "established"
+    action = "create_agent"
+elif role.weighted_score >= 5 and len(role.sources) >= 1:
+    tier = "emerging"
+    action = "track"
+```
+
+**Logging:**
+- Triggers written to `logs/triggers.jsonl`
+- One JSON object per line
+
+**Source:** `core/intelligence/agent_trigger.py:1-xxx`
+
+---
+
+### task_orchestrator.py
+
+Task execution engine with dependency resolution.
+
+**Function: `execute_task()`**
+
+<ParamField path="task_id" type="str" required>
+  Task identifier (e.g., "TSK-020")
+</ParamField>
+
+<ParamField path="inputs" type="dict" required>
+  Input parameters for task
+</ParamField>
+
+<ParamField path="context" type="dict" optional>
+  Execution context (previous task outputs)
+</ParamField>
+
+**Returns:**
+
+```python
+{
+    "task_id": "TSK-020",
+    "status": "success",  # success | failure | skipped
+    "outputs": {
+        "dna_config": "/path/to/DNA-CONFIG.yaml",
+        "layer_counts": {"L1": 5, "L2": 8, "L3": 12, "L4": 6, "L5": 4}
+    },
+    "execution_time": 3.42,
+    "errors": []
+}
+```
+
+**Task Resolution:**
+
+1. Load task definition from `core/tasks/{task-id}.md`
+2. Validate inputs against task schema
+3. Execute based on `execution_type`:
+   - `Agent`: Delegate to JARVIS
+   - `Script`: Run Python script
+   - `Manual`: Prompt human
+   - `Hook`: Trigger hook
+4. Validate outputs against acceptance criteria
+5. Return result
+
+**Source:** `core/intelligence/task_orchestrator.py:1-xxx`
+
+---
+
+## Utility Modules
+
+### audit_layers.py
+
+Validate Layer 1/2/3 security boundaries.
+
+**Function: `audit_layers()`**
+
+Checks:
+- L1 files don't contain L3 data
+- .env and sensitive files are gitignored
+- No API keys in tracked files
+
+---
+
+### validate_layers.py
+
+Check layer integrity and cross-references.
+
+**Function: `validate_integrity()`**
+
+Validates:
+- Foreign key references
+- File existence
+- Schema compliance
+- Canonical entity usage
+
+---
+
+### autonomous_processor.py
+
+Autonomous decision-making for routine operations.
+
+**Function: `autonomous_process()`**
+
+Capabilities:
+- Auto-resolve entity aliases above 0.95 similarity
+- Auto-create agent when threshold met
+- Auto-organize inbox files
+- Auto-update cross-references
+
+**Safety:**
+- All decisions logged to `DECISIONS-LOG.md`
+- Rollback support via checkpoints
+- Human override available
+
+---
+
+## Configuration
+
+All intelligence modules use:
+
+**Config File:** `scripts/trigger_config.yaml`
+
+```yaml
+thresholds:
+  agent_creation_cargo:
+    established:
+      min_weighted_score: 10
+      min_sources: 2
+    emerging:
+      min_weighted_score: 5
+      min_sources: 1
+      promotion_rules:
+        min_weighted_score: 15
+        min_sources: 2
+  
+  entity_canonicalization:
+    fuzzy_threshold: 0.85
+    auto_merge_threshold: 0.95
+    min_occurrences_to_confirm: 3
+```
+
+---
+
+## Error Handling
+
+All modules follow standard error protocol:
+
+```python
+try:
+    result = process()
+except FileNotFoundError as e:
+    log_error("FILE_NOT_FOUND", str(e))
+    return {"status": "failure", "error": str(e)}
+except Exception as e:
+    log_error("UNEXPECTED", str(e))
+    raise
+```
+
+**Error Logging:**
+- Written to `logs/intelligence.log`
+- Structured JSON format
+- Includes stack trace
+
+---
+
+## See Also
+
+- [Tasks](/api/core/tasks) - Task definitions
+- [Workflows](/api/core/workflows) - Orchestration
+- [Schemas](/api/core/schemas) - Data validation

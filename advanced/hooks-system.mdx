@@ -1,0 +1,518 @@
+---
+title: "Hooks System"
+description: "Comprehensive guide to Mega Brain's event-driven hook system with 20+ Python hooks for automation and intelligence."
+---
+
+# Hooks System
+
+Mega Brain's hooks system provides event-driven automation through 20+ Python hooks that execute at key lifecycle events. All hooks are written in Python 3 using only stdlib + PyYAML for zero-dependency operation.
+
+## Architecture
+
+Hooks are configured in `.claude/settings.json` and execute automatically at specific lifecycle events:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  EVENT LIFECYCLE                                                             │
+│                                                                              │
+│  SessionStart → UserPromptSubmit → PreToolUse → PostToolUse → Stop/SessionEnd│
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Hook Events
+
+Mega Brain supports 6 primary hook events:
+
+<Accordion title="SessionStart - Initialization">
+  Triggered when a new Claude Code session begins.
+
+  **Active Hooks:**
+  - `session_start.py` - Initializes session state and memory
+  - `inbox_age_alert.py` - Checks for stale inbox content (10s timeout)
+  - `skill_indexer.py` - Builds SKILL-INDEX.json from skills/ (5s timeout)
+  - `gsd-check-update.js` - Checks for GSD system updates
+
+  **Configuration:**
+  ```json
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 .claude/hooks/session_start.py",
+          "timeout": 10000
+        }
+      ]
+    }
+  ]
+  ```
+</Accordion>
+
+<Accordion title="UserPromptSubmit - Prompt Intelligence">
+  Triggered when the user submits a prompt, before Claude processes it.
+
+  **Active Hooks:**
+  - `continuous_save.py` - Auto-saves session state (2s timeout)
+  - `user_prompt_submit.py` - Processes user input (5s timeout)
+  - `skill_router.py` - **Auto-routes to skills** based on keywords (5s timeout)
+  - `quality_watchdog.py` - Monitors quality metrics (5s timeout)
+  - `memory_hints_injector.py` - Injects relevant memory context (5s timeout)
+  - `enforce_plan_mode.py` - Enforces plan mode rules (5s timeout)
+  - `memory_updater.py` - Updates agent memory (5s timeout)
+
+  **Key Feature - Skill Routing:**
+  ```python
+  # skill_router.py extracts keywords from prompt and activates skills
+  matches = match_prompt(prompt)
+  if matches:
+      inject_skill_context(matches[0])
+  ```
+</Accordion>
+
+<Accordion title="PreToolUse - Validation Gates">
+  Triggered before a tool executes, allowing validation and blocking.
+
+  **Active Hooks:**
+  - `claude_md_guard.py` - Prevents CLAUDE.md creation in invalid locations (5s)
+  - `creation_validator.py` - Validates new file creation against layer rules (5s)
+
+  **Matcher Pattern:**
+  ```json
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [...]
+    }
+  ]
+  ```
+
+  <Note>
+    Hooks can **block** tool execution by returning `{"continue": false}` in their JSON output.
+  </Note>
+</Accordion>
+
+<Accordion title="PostToolUse - Cascading Actions">
+  Triggered after a tool completes, enabling cascading automation.
+
+  **Active Hooks (9 total):**
+  - `continuous_save.py` - Auto-saves after edits (2s)
+  - `post_tool_use.py` - Generic post-processing (5s)
+  - `post_batch_cascading.py` - **Phase 5 cascade system** (30s timeout)
+  - `enforce_dual_location.py` - Syncs files to dual locations (5s)
+  - `pending_tracker.py` - Tracks pending tasks (5s)
+  - `agent_creation_trigger.py` - Auto-creates agents from templates (10s)
+  - `agent_index_updater.py` - Updates AGENT-INDEX.yaml (5s)
+  - `claude_md_agent_sync.py` - Syncs agent CLAUDE.md files (5s)
+  - `pipeline_checkpoint.py` - Pipeline checkpoint management (5s)
+  - `gsd-context-monitor.js` - Context monitoring
+
+  **Cascading Architecture:**
+  ```python
+  # post_batch_cascading.py orchestrates multi-phase operations
+  # Phase 1-4 → Phase 5 → Agents → Dossiers → Updates
+  ```
+</Accordion>
+
+<Accordion title="Stop - Completeness Checks">
+  Triggered when the user stops Claude's generation.
+
+  **Active Hooks:**
+  - `continuous_save.py` - Final save (2s)
+  - `stop_hook_completeness.py` - Checks for incomplete tasks (10s)
+  - `ralph_wiggum.py` - Quality assurance helper (5s)
+
+  <Tip>
+    The `stop_hook_completeness.py` detects unfinished work and reminds Claude to complete tasks.
+  </Tip>
+</Accordion>
+
+<Accordion title="SessionEnd - Cleanup & Persistence">
+  Triggered when the session ends (clean exit).
+
+  **Active Hooks:**
+  - `session_end.py` - Session cleanup and finalization (10s)
+  - `session_autosave_v2.py` - Saves session to logs/ (10s)
+  - `agent_memory_persister.py` - Persists agent memory to disk (5s)
+
+  **Persistence Flow:**
+  ```bash
+  # session_autosave_v2.py saves to:
+  logs/sessions/YYYY-MM-DD-HH-MM-SS.md
+  ```
+</Accordion>
+
+## Key Hooks Deep Dive
+
+### skill_router.py - Auto-Routing Intelligence
+
+The skill router is the **core intelligence** of the auto-routing system.
+
+<CodeGroup>
+```python skill_router.py
+#!/usr/bin/env python3
+"""
+Skill Router - Sistema de Roteamento Semântico v2.0
+
+Escaneia SKILLS e SUB-AGENTS, extrai metadados e faz matching.
+"""
+
+def match_prompt(prompt: str, index: Dict = None) -> List[Dict]:
+    """Retorna skills que matcham com o prompt."""
+    prompt_lower = prompt.lower()
+    matches = []
+    
+    for keyword, item_list in index.get("keyword_map", {}).items():
+        if keyword in prompt_lower:
+            for item_info in item_list:
+                matches.append({
+                    "name": item_info["name"],
+                    "type": item_info["type"],
+                    "priority": item_info["priority"],
+                    "matched_keyword": keyword
+                })
+    
+    # Sort by priority: ALTA > MÉDIA > BAIXA
+    matches.sort(key=lambda x: priority_order.get(x["priority"], 1))
+    return matches
+```
+
+```json Hook Output
+{
+  "continue": true,
+  "feedback": "[SKILL AUTO-ACTIVATED: knowledge-extraction]\nKeyword: \"extract\"\nPriority: ALTA\n\n=== SKILL INSTRUCTIONS ===\n..."
+}
+```
+</CodeGroup>
+
+**How it works:**
+1. `skill_indexer.py` (SessionStart) scans `.claude/skills/` and builds `SKILL-INDEX.json`
+2. `skill_router.py` (UserPromptSubmit) matches keywords from user prompt
+3. If match found, injects skill instructions into context
+4. Claude automatically follows skill instructions
+
+<Note>
+  See [Skills Routing](/advanced/skills-routing) for complete skill system documentation.
+</Note>
+
+### post_batch_cascading.py - Phase 5 Orchestration
+
+The largest hook (56KB) orchestrates the Phase 5 cascade system:
+
+<Steps>
+  <Step title="Detect Phase Completion">
+    Monitors for Phase 1-4 completion markers in batch logs.
+  </Step>
+  
+  <Step title="Activate Phase 5">
+    Triggers agent activation, dossier creation, and knowledge extraction.
+  </Step>
+  
+  <Step title="Cascade Updates">
+    Updates AGENT-INDEX.yaml, DNA, and knowledge base in sequence.
+  </Step>
+</Steps>
+
+```python
+# Simplified cascade logic
+if phase_4_complete:
+    trigger_phase_5()
+    create_dossiers()
+    update_agent_index()
+    sync_knowledge_base()
+```
+
+### continuous_save.py - Session Persistence
+
+Runs on **3 events** (UserPromptSubmit, PostToolUse, Stop) with 2s timeout:
+
+```python
+# Saves current session state to prevent data loss
+state = {
+    "timestamp": now,
+    "prompt_count": count,
+    "active_agents": agents,
+    "pending_tasks": tasks
+}
+write_json(".claude/mission-control/STATE.json", state)
+```
+
+## Configuration
+
+### settings.json Structure
+
+<CodeGroup>
+```json .claude/settings.json
+{
+  "hooks": {
+    "SessionStart": [...],
+    "UserPromptSubmit": [...],
+    "PreToolUse": [...],
+    "PostToolUse": [...],
+    "Stop": [...],
+    "SessionEnd": [...]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(git push --force *)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node .claude/hooks/gsd-statusline.js"
+  }
+}
+```
+
+```json settings.local.json (optional)
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/my_custom_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+</CodeGroup>
+
+<Warning>
+  `settings.local.json` is gitignored and merges with `settings.json`. Use for local-only hooks.
+</Warning>
+
+### Matcher Patterns
+
+Hooks can filter by tool name using regex matchers:
+
+| Matcher | Matches |
+|---------|--------|
+| `""` | All events |
+| `"Write\|Edit"` | Write or Edit tools |
+| `"Edit\|Write\|MultiEdit"` | Any file modification |
+| `"Bash"` | Bash tool only |
+
+### Timeout Management
+
+```json
+{
+  "type": "command",
+  "command": "python3 .claude/hooks/my_hook.py",
+  "timeout": 5000  // milliseconds
+}
+```
+
+<Tip>
+  - **Fast hooks** (< 2s): continuous_save, guards
+  - **Medium hooks** (5s): skill_router, validators
+  - **Slow hooks** (10-30s): session_start, post_batch_cascading
+</Tip>
+
+## Writing Custom Hooks
+
+### Hook Template
+
+<CodeGroup>
+```python my_hook.py
+#!/usr/bin/env python3
+"""
+My Custom Hook - Description
+
+Event: UserPromptSubmit
+Timeout: 5s
+"""
+
+import sys
+import json
+from pathlib import Path
+
+PROJECT_ROOT = Path(".")
+
+def main():
+    # Read hook input from stdin
+    input_data = sys.stdin.read()
+    hook_input = json.loads(input_data) if input_data else {}
+    
+    # Extract relevant data
+    prompt = hook_input.get('prompt', '')
+    tool_name = hook_input.get('tool', '')
+    
+    # Your hook logic here
+    result = process_hook(prompt)
+    
+    # Return JSON response
+    response = {
+        'continue': True,  # Set to False to block
+        'feedback': f"Hook executed: {result}",  # Optional user feedback
+        'data': {}  # Optional data for other hooks
+    }
+    
+    print(json.dumps(response))
+
+def process_hook(prompt: str) -> str:
+    # Your logic here
+    return "success"
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        # Always return valid JSON, even on error
+        print(json.dumps({'continue': True, 'error': str(e)}))
+```
+
+```json Add to settings.local.json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/my_hook.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+</CodeGroup>
+
+### Hook Response Format
+
+```typescript
+interface HookResponse {
+  continue: boolean;      // true = continue, false = block execution
+  feedback?: string;      // Optional message shown to user
+  data?: Record<string, any>;  // Optional data for context
+  error?: string;         // Optional error message
+}
+```
+
+### Best Practices
+
+<Card title="Hook Development Guidelines" icon="code">
+  1. **Always return valid JSON** - Even on exceptions
+  2. **Use only stdlib + PyYAML** - Zero dependencies policy
+  3. **Respect timeouts** - Keep hooks fast (< 5s ideal)
+  4. **Handle errors gracefully** - Never crash, always continue
+  5. **Log to files, not stdout** - stdout is for JSON only
+  6. **Use pathlib.Path** - Cross-platform path handling
+  7. **Test in isolation** - Run `python3 hooks/my_hook.py --test`
+</Card>
+
+## Complete Hook Reference
+
+<Accordion title="All 20+ Active Hooks">
+  | Hook | Event | Purpose | Timeout |
+  |------|-------|---------|--------|
+  | `session_start.py` | SessionStart | Initialize session | 10s |
+  | `inbox_age_alert.py` | SessionStart | Check stale inbox | 5s |
+  | `skill_indexer.py` | SessionStart | Build skill index | 5s |
+  | `gsd-check-update.js` | SessionStart | Check updates | - |
+  | `continuous_save.py` | UserPromptSubmit, PostToolUse, Stop | Auto-save | 2s |
+  | `user_prompt_submit.py` | UserPromptSubmit | Process prompt | 5s |
+  | `skill_router.py` | UserPromptSubmit | Route to skills | 5s |
+  | `quality_watchdog.py` | UserPromptSubmit | Monitor quality | 5s |
+  | `memory_hints_injector.py` | UserPromptSubmit | Inject memory | 5s |
+  | `enforce_plan_mode.py` | UserPromptSubmit | Plan mode rules | 5s |
+  | `memory_updater.py` | UserPromptSubmit | Update memory | 5s |
+  | `claude_md_guard.py` | PreToolUse (Write/Edit) | Guard CLAUDE.md | 5s |
+  | `creation_validator.py` | PreToolUse (Write/Edit) | Validate layers | 5s |
+  | `post_tool_use.py` | PostToolUse | Post-processing | 5s |
+  | `post_batch_cascading.py` | PostToolUse | Phase 5 cascade | 30s |
+  | `enforce_dual_location.py` | PostToolUse | Dual sync | 5s |
+  | `pending_tracker.py` | PostToolUse | Track pending | 5s |
+  | `agent_creation_trigger.py` | PostToolUse | Create agents | 10s |
+  | `agent_index_updater.py` | PostToolUse | Update index | 5s |
+  | `claude_md_agent_sync.py` | PostToolUse | Sync agents | 5s |
+  | `pipeline_checkpoint.py` | PostToolUse | Checkpoints | 5s |
+  | `gsd-context-monitor.js` | PostToolUse | Monitor context | - |
+  | `stop_hook_completeness.py` | Stop | Check complete | 10s |
+  | `ralph_wiggum.py` | Stop | QA helper | 5s |
+  | `session_end.py` | SessionEnd | Cleanup | 10s |
+  | `session_autosave_v2.py` | SessionEnd | Save session | 10s |
+  | `agent_memory_persister.py` | SessionEnd | Persist memory | 5s |
+</Accordion>
+
+## Debugging Hooks
+
+<Steps>
+  <Step title="Enable Debug Output">
+    Set `CLAUDE_DEBUG=1` environment variable:
+    ```bash
+    export CLAUDE_DEBUG=1
+    ```
+  </Step>
+  
+  <Step title="Test Hook Directly">
+    Run hooks with test data:
+    ```bash
+    echo '{"prompt": "test"}' | python3 .claude/hooks/my_hook.py
+    ```
+  </Step>
+  
+  <Step title="Check Hook Logs">
+    Hooks should log to `.claude/logs/hooks/`:
+    ```bash
+    tail -f .claude/logs/hooks/my_hook.log
+    ```
+  </Step>
+  
+  <Step title="Validate JSON Output">
+    Ensure hooks always return valid JSON:
+    ```bash
+    python3 .claude/hooks/my_hook.py | jq .
+    ```
+  </Step>
+</Steps>
+
+## Security & Permissions
+
+The `permissions` block in `settings.json` blocks dangerous commands:
+
+```json
+"permissions": {
+  "deny": [
+    "Bash(rm -rf *)",
+    "Bash(sudo *)",
+    "Bash(chmod 777 *)",
+    "Bash(git push --force *)",
+    "Bash(git reset --hard *)"
+  ]
+}
+```
+
+<Warning>
+  These blocks are **enforced before execution**. Claude cannot run these commands even if instructed.
+</Warning>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Skills Routing" icon="route" href="/advanced/skills-routing">
+    Learn how skill auto-routing works with keyword detection
+  </Card>
+  
+  <Card title="Agent Creation" icon="robot" href="/advanced/agent-creation">
+    Understand agent lifecycle and hook triggers
+  </Card>
+  
+  <Card title="Validation" icon="check" href="/advanced/validation">
+    Layer validation and quality gates
+  </Card>
+  
+  <Card title="Layer Management" icon="layer-group" href="/advanced/layer-management">
+    L1/L2/L3 classification system
+  </Card>
+</CardGroup>

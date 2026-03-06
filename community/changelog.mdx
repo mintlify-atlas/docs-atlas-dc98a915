@@ -1,0 +1,404 @@
+---
+title: Changelog
+description: Version history and release notes for Mega Brain AI Knowledge Management System.
+---
+
+## Version History
+
+<Note>
+Mega Brain uses [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes and improvements
+</Note>
+
+---
+
+## [1.3.0] - Current Release
+
+<Card title="Latest Version" icon="rocket" color="#10b981">
+  **Status**: Stable
+  
+  **Release Date**: March 2026
+  
+  **Highlights**: Production-ready release with enhanced stability, documentation, and developer experience.
+</Card>
+
+### Features
+
+**Core System**:
+- AI-powered knowledge management system
+- Transform expert materials into structured playbooks and DNA schemas
+- 5-layer DNA extraction (Philosophies, Mental Models, Heuristics, Frameworks, Methodologies)
+- Full source traceability for all extracted knowledge
+
+**Pipeline Processing**:
+- 5-phase pipeline (Chunking, Resolution, Extraction, Synthesis, Compilation)
+- Support for videos, PDFs, transcriptions, podcasts, training courses
+- Batch processing capabilities
+- Automated quality validation
+
+**AI Agents**:
+- Mind clone framework for expert replication
+- Cargo agent system (29 functional role agents)
+- Conclave multi-agent deliberation
+- JARVIS orchestrator system
+
+**Developer Experience**:
+- 20+ hooks for automation and validation
+- Skill system with keyword-based auto-routing
+- Slash commands for common operations
+- Session persistence with auto-save and resume
+- Interactive setup wizard
+
+**CLI Tools**:
+- `npx mega-brain-ai setup` - Environment setup wizard
+- Layer validation tools
+- Pre-publish security gates
+- Package validation utilities
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| `/jarvis-briefing` | System status and health score |
+| `/jarvis-full` | Full pipeline (ingest + process + enrich) |
+| `/process-jarvis` | Run 5-phase processing pipeline |
+| `/conclave` | Multi-agent deliberation session |
+| `/ingest` | Ingest new material |
+| `/save` | Save current session |
+| `/resume` | Resume previous session |
+| `/setup` | Environment setup wizard |
+
+### Architecture
+
+**Layer Distribution**:
+- **L1 (Community)**: Core engine, templates, hooks, skills, CLI
+- **L2 (Pro)**: Populated knowledge base, mind clones, pipeline
+- **L3 (Personal)**: User materials, sessions, environment config
+
+**Directory Structure**:
+```
+mega-brain/
+├── core/           -> Processing engine
+├── agents/         -> AI agent definitions
+├── .claude/        -> Claude Code integration
+├── bin/            -> CLI tools
+├── knowledge/      -> Knowledge base
+├── artifacts/      -> Pipeline stages
+├── inbox/          -> Raw materials
+├── docs/           -> Documentation
+└── logs/           -> Session logs
+```
+
+### Prerequisites
+
+| Requirement | Version | Purpose |
+|-------------|---------|----------|
+| Claude Code | Max or Pro plan | Core runtime |
+| Node.js | >= 18.0.0 | CLI and tooling |
+| Python | >= 3.10 | Intelligence scripts |
+
+### API Keys
+
+| Key | Purpose | Required |
+|-----|---------|----------|
+| `OPENAI_API_KEY` | Whisper transcription | Yes |
+| `VOYAGE_API_KEY` | Semantic embeddings | Recommended |
+| `GOOGLE_CLIENT_ID` | Google Drive import | Optional |
+
+### Package Contents
+
+**Included in npm package**:
+- Core processing engine
+- Task system with HO-TP-001 anatomy
+- Workflow orchestration (YAML)
+- Intelligence scripts (Python)
+- Protocol definitions
+- JSON schemas
+- Agent templates
+- Hook system
+- Skill framework
+- CLI tools
+- Documentation
+
+**Dependencies**:
+```json
+{
+  "chalk": "^5.3.0",
+  "inquirer": "^9.2.0",
+  "ora": "^7.0.0",
+  "boxen": "^7.1.0",
+  "gradient-string": "^2.0.2"
+}
+```
+
+### Known Issues
+
+<Accordion title="Windows Path Handling">
+  Some scripts may have issues with Windows backslash paths. Use forward slashes or `pathlib.Path` for cross-platform compatibility.
+</Accordion>
+
+<Accordion title="Large File Processing">
+  Files over 2GB may need to be split for optimal processing due to API limits.
+</Accordion>
+
+---
+
+## [1.0.0] - Initial Release
+
+<Card title="Foundation Release" icon="flag">
+  **Release Date**: February 2026
+  
+  **Highlights**: First production release with core architecture and task system.
+</Card>
+
+### Added
+
+**Task System**:
+- Task template (HO-TP-001 anatomy)
+- TASK-REGISTRY.md with categories and dependency graph
+- Foundation tasks (detect-role, normalize-entities)
+- Intelligence tasks (analyze-themes, detect-business-model, score-viability)
+- Extraction tasks (extract-dna, extract-knowledge, generate-skill)
+- Pipeline tasks (process-batch, trigger-agent, trigger-dossier)
+- Validation tasks (validate-cascade, verify-completeness)
+
+**Structure**:
+```
+core/tasks/
+├── _templates/
+│   └── task-tmpl.md
+├── TASK-REGISTRY.md
+├── CHANGELOG.md
+├── detect-role.md
+├── normalize-entities.md
+├── analyze-themes.md
+├── extract-dna.md
+├── process-batch.md
+└── validate-cascade.md
+```
+
+### Conventions
+
+**Version Format**:
+- MAJOR: Breaking changes in task anatomy
+- MINOR: New tasks added
+- PATCH: Fixes in existing tasks
+
+**Change Types**:
+- **Added**: New task created
+- **Changed**: Task modified (inputs/outputs/logic)
+- **Deprecated**: Task marked for removal
+- **Removed**: Task removed
+- **Fixed**: Bug fix in task
+- **Security**: Vulnerability corrected
+
+---
+
+## Upgrade Guide
+
+<Accordion title="Upgrading from 1.x to 1.3.0">
+  **Breaking Changes**: None
+  
+  **Steps**:
+  1. Update package:
+     ```bash
+     npm update mega-brain-ai
+     ```
+  
+  2. Review new features in this changelog
+  
+  3. Restart Claude Code to load new hooks and skills
+  
+  4. Run system check:
+     ```bash
+     /jarvis-briefing
+     ```
+  
+  **Data Migration**: Not required - all personal data (L3) remains compatible
+</Accordion>
+
+<Accordion title="Upgrading from Community to Pro">
+  **No breaking changes**:
+  - All L3 (Personal) data preserved
+  - `.env` configuration carries over
+  - Custom hooks and skills remain functional
+  
+  **What you get**:
+  - Pre-built mind clones (5 experts)
+  - Cargo agents (29 roles)
+  - Populated knowledge base
+  - Full pipeline capabilities
+  - Enhanced Conclave
+  
+  **Steps**:
+  1. Contact @thiagofinch for Pro access
+  2. Follow upgrade instructions provided
+  3. No data migration needed
+  
+  <Note>
+  Community customizations remain intact and work alongside Pro features.
+  </Note>
+</Accordion>
+
+---
+
+## Release Notes Format
+
+Each release includes:
+
+<CardGroup cols={2}>
+  <Card title="What's New" icon="plus">
+    - New features and capabilities
+    - New commands or tools
+    - Architecture improvements
+  </Card>
+  
+  <Card title="Improvements" icon="wrench">
+    - Performance enhancements
+    - Developer experience updates
+    - Documentation additions
+  </Card>
+  
+  <Card title="Bug Fixes" icon="bug">
+    - Resolved issues
+    - Stability improvements
+    - Edge case handling
+  </Card>
+  
+  <Card title="Breaking Changes" icon="warning">
+    - API changes
+    - Migration requirements
+    - Deprecated features
+  </Card>
+</CardGroup>
+
+---
+
+## Roadmap
+
+<Accordion title="Upcoming Features">
+  **In Development**:
+  - Enhanced RAG capabilities
+  - Additional pre-built mind clones
+  - Real-time collaboration features
+  - Advanced search and filtering
+  - Performance optimizations
+  
+  **Under Consideration**:
+  - Web interface for non-CLI users
+  - Mobile companion app
+  - Team collaboration features
+  - Cloud sync options
+  - API for third-party integrations
+  
+  <Note>
+  Roadmap is subject to change based on community feedback and priorities.
+  </Note>
+</Accordion>
+
+<Accordion title="How to Request Features">
+  **Feature Request Process**:
+  1. Check existing GitHub issues for similar requests
+  2. Open new issue with:
+     - Clear use case description
+     - Problem you're trying to solve
+     - Proposed solution (optional)
+     - Examples or mockups (if applicable)
+  3. Engage with community discussion
+  4. Maintainer will review and prioritize
+  
+  **Priority Factors**:
+  - User impact and demand
+  - Alignment with project vision
+  - Implementation complexity
+  - Available resources
+</Accordion>
+
+---
+
+## Security Updates
+
+<Warning>
+**Security Policy**:
+- Security issues are addressed with highest priority
+- Patches released as soon as possible
+- Users notified via GitHub security advisories
+- Severity levels: Critical, High, Medium, Low
+</Warning>
+
+### Reporting Security Issues
+
+If you discover a security vulnerability:
+
+1. **Do NOT** open a public issue
+2. Contact @thiagofinch directly
+3. Provide:
+   - Description of vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if any)
+4. Allow time for patch development
+5. Coordinate disclosure timing
+
+---
+
+## Contributing to Releases
+
+<Accordion title="Release Process">
+  **Maintained by**: @thiagofinch (exclusive)
+  
+  **Process**:
+  1. Feature development on branches
+  2. PR review and approval
+  3. Merge to main
+  4. Version bump (semantic versioning)
+  5. Update changelog
+  6. Run validation:
+     ```bash
+     npm run validate:layers
+     node bin/pre-publish-gate.js
+     ```
+  7. Publish to npm
+  8. Create GitHub release
+  9. Announce to community
+  
+  <Note>
+  Only the maintainer can publish official releases.
+  </Note>
+</Accordion>
+
+---
+
+## Version Support
+
+| Version | Status | Support | End of Life |
+|---------|--------|---------|-------------|
+| 1.3.x | Current | ✅ Full support | - |
+| 1.0.x | Maintenance | ⚠️ Security only | Q4 2026 |
+| < 1.0 | Deprecated | ❌ No support | Ended |
+
+<Tip>
+Always use the latest stable version for best performance and security.
+</Tip>
+
+---
+
+## Changelog Policy
+
+This changelog follows [Keep a Changelog](https://keepachangelog.com/) principles:
+
+- Changes are grouped by type (Added, Changed, Deprecated, Removed, Fixed, Security)
+- Versions use semantic versioning
+- Release dates are included
+- Breaking changes are clearly marked
+- Migration guides provided when needed
+
+<Card title="Stay Updated" icon="bell">
+  **Subscribe to updates**:
+  - Watch the GitHub repository
+  - Star for notifications
+  - Follow @thiagofinch
+  - Check this changelog regularly
+</Card>

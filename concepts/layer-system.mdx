@@ -1,0 +1,331 @@
+---
+title: Layer System
+description: L1/L2/L3 distribution layers for packaging and privacy control
+---
+
+Mega Brain organizes content into three distribution layers (L1, L2, L3) that control what is shared publicly, distributed to premium users, or kept private.
+
+## Quick Reference
+
+| Layer | Name | Git Status | Distribution | Who Uses It |
+|-------|------|-----------|-------------|-------------|
+| **L1** | Community | Tracked | npm package (public) | Everyone — open source core |
+| **L2** | Premium | Tracked | Private repo (gated) | Paying users |
+| **L3** | Personal | Gitignored | Local only / personal backup | Individual user only |
+
+## Layer 1: Community (npm package)
+
+<Accordion title="Purpose">
+  The open-source engine that powers Mega Brain. Distributed via npm as `mega-brain-ai`. Anyone can install and use this to build their own knowledge management system.
+</Accordion>
+
+**Git status:** Fully tracked  
+**Distribution:** Public — `npm publish`  
+**Who uses it:** Open source community, all users as the foundation layer
+
+### What Belongs in L1
+
+<CardGroup cols={2}>
+  <Card title="Core Engine" icon="gear">
+    - `core/` - Processing engine
+    - `core/tasks/` - Task definitions
+    - `core/workflows/` - Workflow templates
+    - `core/schemas/` - JSON schemas
+    - `core/intelligence/` - Intelligence scripts
+  </Card>
+  
+  <Card title="CLI & Tooling" icon="terminal">
+    - `bin/` - CLI binaries
+    - Setup wizard
+    - Validation scripts
+    - Pre-publish gates
+  </Card>
+  
+  <Card title="Integration" icon="plug">
+    - `.claude/` - Claude Code integration
+    - `.claude/hooks/` - Lifecycle hooks
+    - `.claude/commands/` - Slash commands
+    - `.claude/skills/` - Skill system
+    - `.claude/rules/` - Operational rules
+  </Card>
+  
+  <Card title="Templates" icon="file-code">
+    - `agents/_templates/` - Agent templates
+    - `agents/conclave/` - Deliberation agents
+    - `docs/` - Documentation
+    - `.gitkeep` files (structure markers)
+  </Card>
+</CardGroup>
+
+### Real Examples
+
+```
+core/                          → L1 (Core engine)
+core/tasks/                    → L1 (Core engine)
+core/intelligence/audit_layers.py → L1 (Core engine)
+bin/                           → L1 (Core engine)
+.claude/                       → L1 (Core engine)
+.claude/rules/RULE-GROUP-1.md  → L1 (Core engine)
+agents/conclave/               → L1 (Core engine)
+docs/                          → L1 (Core engine)
+inbox/.gitkeep                 → L1 (Empty structure marker)
+```
+
+<Note>
+  **Key rule:** `.gitkeep` files are always L1, regardless of directory. They mark where populated content will live but contain no personal data.
+</Note>
+
+## Layer 2: Premium (populated content)
+
+<Accordion title="Purpose">
+  Content generated through the Mega Brain pipeline — actual knowledge, agent personalities, dossiers, playbooks. Requires a paid subscription or private repository access.
+</Accordion>
+
+**Git status:** Tracked in private repo (gitignored in public L1 repo)  
+**Distribution:** Private — premium repository or direct sync  
+**Who uses it:** Paying users who have run the pipeline and built their knowledge base
+
+### What Belongs in L2
+
+<CardGroup cols={2}>
+  <Card title="Agents" icon="users">
+    - `agents/minds/` (populated)
+    - `agents/cargo/` (populated)
+    - Agent personalities and memories
+    - Agent DNA configurations
+  </Card>
+  
+  <Card title="Knowledge" icon="book">
+    - `knowledge/dossiers/`
+    - `knowledge/playbooks/`
+    - `knowledge/dna/`
+    - `knowledge/sources/`
+  </Card>
+  
+  <Card title="Artifacts" icon="box">
+    - `artifacts/insights/`
+    - `artifacts/chunks/`
+    - `artifacts/extractions/`
+    - Populated state files
+  </Card>
+  
+  <Card title="Processed Content" icon="file-check">
+    - Dossiers with expert knowledge
+    - Extracted DNA schemas
+    - Synthesized narratives
+    - Theme compilations
+  </Card>
+</CardGroup>
+
+### Real Examples
+
+```
+agents/minds/                        → L2 (Premium content — when populated)
+agents/cargo/                        → L2 (Premium content — when populated)
+knowledge/dossiers/persons/          → L2 (Premium content)
+knowledge/dossiers/themes/           → L2 (Premium content)
+knowledge/playbooks/                 → L2 (Premium content)
+knowledge/dna/                       → L2 (Premium content)
+knowledge/sources/                   → L2 (Premium content)
+artifacts/insights/                  → L2 (Premium content)
+artifacts/chunks/                    → L2 (Premium content)
+```
+
+<Note>
+  **Key rule:** L2 is a superset of L1. An L2 distribution includes all L1 content plus the populated knowledge content.
+</Note>
+
+## Layer 3: Personal (never distributed)
+
+<Accordion title="Purpose">
+  User-generated content specific to one person's workflow — raw source materials, processing logs, session history, company-specific data. Never leaves the local machine except in personal backups.
+</Accordion>
+
+**Git status:** Gitignored (not committed to any shared repo)  
+**Distribution:** Local backup only — never shared  
+**Who uses it:** The individual user only — this is their private data
+
+### What Belongs in L3
+
+<CardGroup cols={2}>
+  <Card title="Raw Materials" icon="inbox">
+    - `inbox/` - All input materials
+    - Videos, PDFs, transcripts
+    - Course materials
+    - Podcast downloads
+  </Card>
+  
+  <Card title="Logs & History" icon="clock-rotate-left">
+    - `logs/` - Processing logs
+    - `.claude/sessions/` - Session history
+    - Execution reports
+    - Audit trails
+  </Card>
+  
+  <Card title="State & Runtime" icon="database">
+    - `.claude/mission-control/`
+    - Session state files
+    - Runtime configuration
+    - Processing checkpoints
+  </Card>
+  
+  <Card title="Company Data" icon="building">
+    - `agents/sua-empresa/`
+    - Company-specific agents
+    - Internal processes
+    - Proprietary workflows
+  </Card>
+</CardGroup>
+
+### Real Examples
+
+```
+inbox/                         → L3 (Personal data)
+inbox/alex-hormozi/            → L3 (Personal data)
+inbox/my-video-transcript.txt  → L3 (Personal data)
+logs/                          → L3 (Personal data)
+logs/batches/BATCH-001.md      → L3 (Personal data)
+.claude/sessions/              → L3 (Personal data)
+.claude/mission-control/       → L3 (Personal data)
+agents/sua-empresa/            → L3 (Personal data)
+```
+
+<Note>
+  **Key rule:** L3 content is the "input" and "runtime state" of your system. Valuable to you personally but meaningless (or sensitive) to others.
+</Note>
+
+## Special Categories
+
+### NEVER — Secrets and Credentials
+
+**Purpose:** Files that must never be committed to any git repository.
+
+**What belongs:**
+- `.env`, `.env.local` - Environment variables
+- `credentials.json`, `token.json` - API credentials
+- `.mcp.json` - MCP configuration with tokens
+- `*.key`, `*.pem` - Certificate files
+
+```
+.env                           → NEVER (Secrets/sensitive config)
+.env.local                     → NEVER (Secrets/sensitive config)
+.mcp.json                      → NEVER (Secrets/sensitive config)
+credentials.json               → NEVER (Secrets/sensitive config)
+token.json                     → NEVER (Secrets/sensitive config)
+```
+
+### DELETE — Obsolete Content
+
+**Purpose:** Files superseded by newer implementations.
+
+Run `python3 core/intelligence/audit_layers.py` to identify delete candidates.
+
+## Classification Flowchart
+
+<Steps>
+  <Step title="Check NEVER">
+    Does it contain API keys, tokens, or credentials?
+    
+    **YES** → NEVER (add to `.gitignore`)
+  </Step>
+  
+  <Step title="Check L3">
+    Is it user-generated (inbox, logs, sessions, company data)?
+    
+    **YES** → L3 (gitignored)
+  </Step>
+  
+  <Step title="Check L2">
+    Is it populated knowledge (dossiers, playbooks, DNA, artifacts)?
+    
+    **YES** → L2 (private repo)
+  </Step>
+  
+  <Step title="Check .gitkeep">
+    Is it a `.gitkeep` file anywhere?
+    
+    **YES** → L1 (structure marker)
+  </Step>
+  
+  <Step title="Default to L1">
+    Is it core engine, CLI, integration, or templates?
+    
+    **YES** → L1 (public repo)
+  </Step>
+</Steps>
+
+## Distribution Matrix
+
+| Content Type | L1 (Community) | L2 (Premium) | L3 (Personal) |
+|--------------|----------------|--------------|---------------|
+| Core engine | ✅ | ✅ | ✅ |
+| CLI tools | ✅ | ✅ | ✅ |
+| Agent templates | ✅ | ✅ | ✅ |
+| Empty structure | ✅ | ✅ | ✅ |
+| Populated agents | ❌ | ✅ | ✅ |
+| Knowledge base | ❌ | ✅ | ✅ |
+| Processing artifacts | ❌ | ✅ | ✅ |
+| Raw materials | ❌ | ❌ | ✅ |
+| Logs & sessions | ❌ | ❌ | ✅ |
+| Company data | ❌ | ❌ | ✅ |
+| API keys | ❌ | ❌ | ❌ |
+
+## Community vs Pro Features
+
+| Feature | Community (L1) | Pro (L2) |
+|---------|---------------|----------|
+| CLI and setup wizard | ✅ | ✅ |
+| Core engine and templates | ✅ | ✅ |
+| Skills and hooks | ✅ | ✅ |
+| Agent templates and examples | ✅ | ✅ |
+| Populated knowledge base | ❌ | ✅ |
+| Mind clone agents | ❌ | ✅ |
+| Pipeline processing | ❌ | ✅ |
+| Council / Conclave | ❌ | ✅ |
+
+## Validation
+
+Verify layer classification before publishing:
+
+```bash
+# Check that only L1 content is in the package
+npm run validate:layers
+
+# Full pre-publish gate (secrets scan + layer validation)
+node bin/pre-publish-gate.js
+
+# Programmatic audit with Python
+python3 core/intelligence/audit_layers.py
+```
+
+## Layer Management Best Practices
+
+<Steps>
+  <Step title="Separate Concerns">
+    Keep L1 (engine), L2 (content), and L3 (personal) clearly separated
+  </Step>
+  
+  <Step title="Never Mix">
+    Don't commit L3 content to L1/L2 repos. Don't include secrets anywhere.
+  </Step>
+  
+  <Step title="Validate Before Publish">
+    Always run validation before pushing to public or premium repos
+  </Step>
+  
+  <Step title="Document Decisions">
+    When adding new content, document which layer it belongs to and why
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the full system architecture
+  </Card>
+  
+  <Card title="Knowledge Pipeline" icon="arrows-spin" href="/concepts/knowledge-pipeline">
+    Learn how L2 content is generated
+  </Card>
+</CardGroup>

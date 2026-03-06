@@ -1,0 +1,405 @@
+---
+title: /jarvis-briefing Command
+description: Display JARVIS operational status, health score, and system diagnostics for Mega Brain knowledge base
+---
+
+# /jarvis-briefing - System Status Report
+
+Generates a comprehensive operational briefing showing system health, processing statistics, and actionable next steps in the signature JARVIS style.
+
+## Syntax
+
+```bash
+/jarvis-briefing              # Full briefing (default)
+/jarvis-briefing --compact    # Condensed version
+/jarvis-briefing --full       # Explicit full version
+```
+
+<ParamField query="--compact" type="boolean">
+  Show condensed version with key metrics only
+</ParamField>
+
+<ParamField query="--full" type="boolean">
+  Show full detailed version (default behavior)
+</ParamField>
+
+## What It Shows
+
+The briefing answers 4 fundamental questions:
+
+<CardGroup cols={2}>
+  <Card title="Where Are We?" icon="location-dot">
+    Current position in knowledge pipeline
+  </Card>
+  <Card title="What Was Done?" icon="check-double">
+    Cumulative progress and statistics
+  </Card>
+  <Card title="What's Missing?" icon="list-check">
+    Gaps and pending tasks
+  </Card>
+  <Card title="Next Step?" icon="arrow-right">
+    Most important action to take now
+  </Card>
+</CardGroup>
+
+## Health Score Calculation
+
+JARVIS computes a 0-100 health score:
+
+```yaml
+Components:
+  General Progress (30pts):
+    Formula: (files_processed / total_files) * 30
+    
+  Complete Sources (25pts):
+    Formula: (sources_complete / total_sources) * 25
+    
+  Low Pending Issues (20pts):
+    Formula: max(0, 20 - (pending_high * 5) - (pending_medium * 2))
+    
+  Recent State Update (15pts):
+    - 15pts if < 3 days
+    - 10pts if < 7 days
+    -  0pts if > 7 days
+    
+  Clean Pipeline (10pts):
+    - 10pts if errors_pending = 0
+    -  0pts if errors_pending > 0
+
+Total: 100pts
+```
+
+### Health Score Ranges
+
+| Range | Status | Interpretation |
+|-------|--------|----------------|
+| 90-100 | 🟢 Excellent | System operating at peak efficiency |
+| 70-89 | 🟡 Good | Minor issues, generally healthy |
+| 50-69 | 🟠 Fair | Attention needed, some backlogs |
+| 30-49 | 🟠 Poor | Significant issues, immediate action required |
+| 0-29 | 🔴 Critical | System in degraded state |
+
+## Example Output
+
+### Full Briefing
+
+```
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+║                                                                                               ║
+║     ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗                                              ║
+║     ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝                                              ║
+║     ██║███████║██████╔╝██║   ██║██║███████╗                                              ║
+║██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║                                              ║
+║╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║                                              ║
+║ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝                                              ║
+║                                                                                               ║
+║                         OPERATIONAL BRIEFING - 2026-03-06 10:30:00 UTC                        ║
+║                                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+┌─ SYSTEM HEALTH ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  🟢 OVERALL STATUS: EXCELLENT (87/100)                                                        │
+│                                                                                               │
+│  General Progress:    █████████████░░░  81% (24/30 pts)                                      │
+│  Sources Complete:    ██████████████░░  88% (22/25 pts)                                      │
+│  Pending Issues:      ███████████████░  95% (19/20 pts)                                      │
+│  State Freshness:     ████████████████  100% (15/15 pts) [Updated: 2 days ago]               │
+│  Pipeline Clean:      ████████████████  100% (10/10 pts) [0 errors]                          │
+│                                                                                               │
+└───────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ WHERE ARE WE? ──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  📍 Current Position                                                                         │
+│                                                                                               │
+│    Processing Pipeline:    █████████████░░░  81%                                        │
+│    Knowledge Base:         ██████████████░░  88% (24 sources)                            │
+│    Mind Clone Agents:      ████████████░░░░  75% (3/4 active)                            │
+│    RAG Index:              ████████████████  100% (127 files indexed)                    │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ WHAT WAS DONE? ──────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  📊 Cumulative Progress                                                                       │
+│                                                                                               │
+│    Files Processed:        24 / 30                                                           │
+│    Total Chunks:           847                                                               │
+│    Insights Extracted:     1,284 (412 HIGH, 627 MEDIUM, 245 LOW)                             │
+│    Dossiers Created:       7 persons, 12 themes                                              │
+│    Agents Updated:         29 cargo agents, 3 mind clones                                    │
+│                                                                                               │
+│  🎯 Recent Activity (Last 7 Days)                                                              │
+│                                                                                               │
+│    ✓ 2026-03-06: Processed CG003 (Cole Gordon - Masterclass)                                 │
+│    ✓ 2026-03-05: Processed AH024 (Alex Hormozi - VSL)                                         │
+│    ✓ 2026-03-04: Extracted DNA for Cole Gordon (3 sources)                                    │
+│    ✓ 2026-03-03: Conclave session: Commission structure decision                              │
+│    ✓ 2026-03-02: Processed JL010 (Jordan Lee - Podcast)                                       │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ WHAT'S MISSING? ──────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  ⚠️  Pending Items                                                                            │
+│                                                                                               │
+│    🔴 HIGH (1):                                                                                 │
+│      • Sam Ovens: 5 sources ingested, 0 processed                                            │
+│                                                                                               │
+│    🟡 MEDIUM (2):                                                                               │
+│      • Alex Hormozi DNA extraction pending (3+ sources available)                            │
+│      • 2 entity collisions need manual review (CANONICAL-MAP)                                │
+│                                                                                               │
+│  📂 Inbox Status                                                                                │
+│                                                                                               │
+│    • 6 files awaiting processing                                                             │
+│    • Oldest file: 12 days                                                                    │
+│    • Total pending content: ~45k words                                                       │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ NEXT STEP ──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  🎯 Recommended Action                                                                        │
+│                                                                                               │
+│    👉 Process Sam Ovens materials (5 files pending)                                            │
+│                                                                                               │
+│    Command:                                                                                   │
+│    /process-jarvis "inbox/SAM OVENS/COURSES/module-1.txt"                                     │
+│                                                                                               │
+│    Impact:                                                                                    │
+│    - Unlock new expert knowledge                                                             │
+│    - Enable DNA extraction for Sam Ovens                                                     │
+│    - Resolve HIGH priority backlog                                                           │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CAPABILITIES ──────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  🧠 Mind Cloning:         ████████████░░░░  75% (3/4 experts with DNA)                  │
+│  📦 Cargo Agents:         ████████████████  100% (29/29 active)                         │
+│  🏛️  Conclave:            ████████████████  100% (3/3 phases ready)                     │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+
+"Sir, the system is performing admirably. I recommend addressing the Sam Ovens backlog
+at your earliest convenience. The knowledge base will thank you."
+
+— JARVIS, AI Knowledge Management System
+```
+
+### Compact Briefing
+
+```
+┌─ JARVIS BRIEFING (COMPACT) ───────────────────────────────────────────────────────────────────────┐
+│                                                                                               │
+│  🟢 System Health: 87/100 (EXCELLENT)                                                          │
+│                                                                                               │
+│  📊 Progress:                                                                                   │
+│     • 24/30 files processed (81%)                                                            │
+│     • 1,284 insights (412 HIGH)                                                              │
+│     • 19 dossiers (7 persons, 12 themes)                                                     │
+│                                                                                               │
+│  ⚠️  Pending:                                                                                    │
+│     • 1 HIGH: Sam Ovens materials unprocessed                                                │
+│     • 2 MEDIUM: DNA extraction, entity review                                                 │
+│                                                                                               │
+│  🎯 Next: /process-jarvis "inbox/SAM OVENS/COURSES/module-1.txt"                                │
+│                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Data Sources
+
+JARVIS pulls data from:
+
+<Tabs>
+  <Tab title="State Files">
+    ```yaml
+    .claude/jarvis/STATE.json:
+      - Global system state
+      - Last update timestamp
+      - Pending tasks
+    
+    .claude/jarvis/PENDING.md:
+      - High/Medium/Low priority items
+      - Blockers and dependencies
+    
+    .claude/jarvis/JARVIS-MEMORY.md:
+      - Relational memory
+      - Cross-source patterns
+    
+    .claude/jarvis/CURRENT-TASK.md:
+      - Active work context
+      - Session information
+    ```
+  </Tab>
+  
+  <Tab title="Processing State">
+    ```yaml
+    processing/chunks/CHUNKS-STATE.json:
+      - Total chunks
+      - Chunk distribution by source
+    
+    processing/insights/INSIGHTS-STATE.json:
+      - Insight counts by priority
+      - Contradiction flags
+    
+    processing/narratives/NARRATIVES-STATE.json:
+      - Narrative synthesis status
+      - Open loops, tensions
+    ```
+  </Tab>
+  
+  <Tab title="Knowledge Base">
+    ```yaml
+    knowledge/dossiers/:
+      - Person dossiers count
+      - Theme dossiers count
+    
+    knowledge/dna/:
+      - DNA schemas extracted
+      - 5-layer completeness
+    
+    system/REGISTRY/:
+      - File registry (processed files)
+      - INBOX registry (pending files)
+    ```
+  </Tab>
+  
+  <Tab title="Agents">
+    ```yaml
+    agents/cargo/:
+      - 29 cargo agents status
+      - Memory update timestamps
+    
+    agents/persons/:
+      - Mind clone agents
+      - SOUL + MEMORY files
+    
+    agents/conclave/:
+      - Conclave readiness
+      - 3 phases operational
+    ```
+  </Tab>
+</Tabs>
+
+## Signature Quotes
+
+JARVIS ends each briefing with a characteristic quote:
+
+> "Sir, all systems are operational. The knowledge base is at your disposal."
+
+> "Perhaps, sir, it would be wise to address the pending materials before ingesting new ones."
+
+> "I've taken the liberty of prioritizing the most impactful tasks, sir."
+
+> "The system is performing admirably. I recommend addressing the backlog at your earliest convenience."
+
+> "Knowledge without action is merely trivia, sir. Shall we proceed?"
+
+## When to Use
+
+### Daily Check-In
+
+Run at the start of each work session:
+
+```bash
+/jarvis-briefing
+```
+
+### After Major Operations
+
+Check impact after:
+- Processing multiple files
+- Extracting DNA
+- Running conclave sessions
+
+### Before Planning
+
+Use to inform decisions:
+- What to process next
+- Which experts need more sources
+- Where gaps exist
+
+### Troubleshooting
+
+Diagnose issues:
+- Low health score → investigate components
+- High pending count → clear backlog
+- Old state → may need refresh
+
+## Interpreting the Briefing
+
+### Health Score Interpretation
+
+```yaml
+90-100 (Excellent):
+  - Continue current pace
+  - Focus on new content
+  - System is thriving
+
+70-89 (Good):
+  - Minor cleanup needed
+  - Address medium priority items
+  - Generally healthy
+
+50-69 (Fair):
+  - Backlog building up
+  - Focus on pending items
+  - Pause new ingestion
+
+30-49 (Poor):
+  - Significant issues
+  - Stop new work
+  - Fix critical problems
+
+0-29 (Critical):
+  - System degraded
+  - Emergency intervention
+  - Contact support if needed
+```
+
+### Progress Bars
+
+```
+████████████████  100% - Excellent
+████████████░░░░   75% - Good
+████████░░░░░░░░   50% - Fair
+████░░░░░░░░░░░░   25% - Poor
+░░░░░░░░░░░░░░░░    0% - Empty
+```
+
+### Priority Indicators
+
+| Icon | Priority | Urgency |
+|------|----------|----------|
+| 🔴 | HIGH | Address immediately |
+| 🟡 | MEDIUM | Address this week |
+| 🟢 | LOW | Address when convenient |
+
+## Saved Briefing Location
+
+```
+.claude/jarvis/JARVIS-BRIEFING.md
+```
+
+Each briefing is saved for historical reference.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Process Content" icon="gears" href="/commands/process-jarvis">
+    Address pending files
+  </Card>
+  <Card title="Extract DNA" icon="dna" href="/commands/extract-dna">
+    Create mind clones from 3+ sources
+  </Card>
+  <Card title="System Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand what JARVIS monitors
+  </Card>
+  <Card title="Health Monitoring" icon="heart-pulse" href="/commands/jarvis-briefing">
+    Deep dive into health metrics
+  </Card>
+</CardGroup>

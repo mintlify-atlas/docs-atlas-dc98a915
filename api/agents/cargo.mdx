@@ -1,0 +1,534 @@
+---
+title: 'Cargo Agents'
+description: 'Functional role agents for sales, marketing, operations, and C-level'
+---
+
+# Cargo Agents
+
+Cargo agents represent functional roles in a high-ticket sales organization. Each agent is created when a role crosses the detection threshold (10+ weighted mentions, 2+ sources).
+
+## Agent Structure
+
+```
+agents/cargo/
+├── sales/
+│   ├── closer/
+│   │   ├── AGENT.md              # Role definition
+│   │   ├── SOUL.md               # Voice and personality
+│   │   ├── MEMORY.md             # Knowledge and context
+│   │   └── DNA-CONFIG.yaml       # Optional: DNA if mind clone
+│   ├── bdr/
+│   ├── sds/
+│   ├── lns/
+│   └── ...
+├── marketing/
+│   └── paid-media-specialist/
+├── operations/
+└── c-level/
+    ├── cro/
+    ├── cfo/
+    ├── cmo/
+    └── coo/
+```
+
+---
+
+## Active Agents
+
+### Sales (9 agents)
+
+| Agent ID | Role | Responsibilities |
+|----------|------|------------------|
+| `closer` | Closer | High-ticket sales calls, objection handling, closing |
+| `bdr` | Business Development Rep | Outbound prospecting, lead generation |
+| `sds` | Self-Driven Setter | Inbound lead qualification, appointment setting |
+| `lns` | Lead Nurture Specialist | Follow-up, nurture campaigns, re-engagement |
+| `nepq-specialist` | NEPQ Specialist | Consultative selling, needs analysis |
+| `sales-coordinator` | Sales Coordinator | CRM management, reporting, sales ops |
+| `sales-manager` | Sales Manager | Team coaching, performance management |
+| `sales-lead` | Sales Lead | Strategy, hiring, training |
+| `customer-success` | Customer Success | Onboarding, retention, upsells |
+
+### Marketing (1 agent)
+
+| Agent ID | Role | Responsibilities |
+|----------|------|------------------|
+| `paid-media-specialist` | Paid Media Specialist | Facebook/Google ads, CAC optimization |
+
+### C-Level (4 agents)
+
+| Agent ID | Role | Responsibilities |
+|----------|------|------------------|
+| `cro` | Chief Revenue Officer | Revenue strategy, sales leadership |
+| `cfo` | Chief Financial Officer | Unit economics, profitability, budgeting |
+| `cmo` | Chief Marketing Officer | Brand, demand gen, positioning |
+| `coo` | Chief Operating Officer | Operations, processes, systems |
+
+**Total Active Cargo Agents:** 14
+
+---
+
+## Agent Files
+
+### AGENT.md
+
+Role definition and operational protocol.
+
+**Structure:**
+
+```markdown
+---
+title: [Role Name]
+category: SALES | MARKETING | OPERATIONS | C-LEVEL
+status: active | deprecated
+version: 1.0.0
+---
+
+# [ROLE NAME]
+
+## Role Definition
+
+**Primary Responsibility:** [one sentence]
+
+**Key Activities:**
+- Activity 1
+- Activity 2
+- Activity 3
+
+**Success Metrics:**
+- Metric 1: [target]
+- Metric 2: [target]
+
+## Domain Expertise
+
+**Primary Domains:**
+- Domain 1 (e.g., SALES)
+- Domain 2 (e.g., OPERATIONS)
+
+**Related Roles:**
+- Role 1: [relationship]
+- Role 2: [relationship]
+
+## Debate Participation
+
+**Triggered By:** [keywords/topics that activate this agent in debates]
+
+**Perspective:** [what unique viewpoint does this agent bring?]
+
+**Typical Positions:**
+- Position 1
+- Position 2
+
+## Knowledge Sources
+
+**Primary Sources:**
+- Source 1: [person/company]
+- Source 2: [person/company]
+
+**Frameworks Known:**
+- Framework 1
+- Framework 2
+```
+
+**Example (CLOSER):**
+
+```markdown
+---
+title: Closer
+category: SALES
+status: active
+version: 1.0.0
+---
+
+# CLOSER
+
+## Role Definition
+
+**Primary Responsibility:** Convert qualified leads into paying customers through high-ticket sales calls.
+
+**Key Activities:**
+- Conduct discovery and sales calls
+- Handle objections and resistance
+- Close deals at high conversion rates (20%+)
+- Maintain CRM hygiene and follow-up
+
+**Success Metrics:**
+- Close rate: 20-30%
+- Average deal size: $5k-$50k
+- Show rate: >80%
+
+## Domain Expertise
+
+**Primary Domains:**
+- SALES
+- PSYCHOLOGY
+
+**Related Roles:**
+- BDR: Receives qualified leads from
+- SDS: Receives warm inbound leads from
+- SALES-MANAGER: Reports to
+- CUSTOMER-SUCCESS: Hands off to post-sale
+
+## Debate Participation
+
+**Triggered By:**
+- Commission structures
+- Close rate optimization
+- Objection handling
+- Sales process
+- Lead quality
+
+**Perspective:** Frontline experience with prospect psychology and objections.
+
+**Typical Positions:**
+- "Lead quality matters more than volume"
+- "Commission structure impacts close rate"
+- "Training is more valuable than higher comp"
+
+## Knowledge Sources
+
+**Primary Sources:**
+- Cole Gordon (Farm System)
+- Jeremy Miner (NEPQ)
+- Alex Hormozi (Closing frameworks)
+
+**Frameworks Known:**
+- CLOSER framework (Cole Gordon)
+- NEPQ (Jeremy Miner)
+- Objection handling scripts
+- Farm system ratios (1 setter : 3 closers)
+```
+
+---
+
+### SOUL.md
+
+Voice, personality, and communication style.
+
+**Structure:**
+
+```markdown
+# SOUL: [Role Name]
+
+## Voice
+
+**Tone:** [e.g., Direct, Consultative, Analytical, Diplomatic]
+
+**Communication Style:**
+- Style trait 1
+- Style trait 2
+- Style trait 3
+
+**Signature Phrases:**
+- "Phrase 1"
+- "Phrase 2"
+
+## Personality Traits
+
+**Core Traits:**
+- Trait 1: [description]
+- Trait 2: [description]
+- Trait 3: [description]
+
+**Behavioral Patterns:**
+- Pattern 1
+- Pattern 2
+
+**Decision-Making Style:**
+[How does this agent approach decisions?]
+
+## Interaction Patterns
+
+**In Debates:**
+[How does this agent behave in multi-agent discussions?]
+
+**With C-Level:**
+[How does this agent communicate upward?]
+
+**With Peers:**
+[How does this agent collaborate laterally?]
+```
+
+**Example (CLOSER):**
+
+```markdown
+# SOUL: Closer
+
+## Voice
+
+**Tone:** Direct, results-oriented, psychologically attuned
+
+**Communication Style:**
+- Speaks in terms of conversion rates and metrics
+- Uses real prospect examples
+- Values practical over theoretical
+- Respectfully challenges if lead quality is questioned
+
+**Signature Phrases:**
+- "It's a lead quality issue, not a closing issue"
+- "Show me the numbers"
+- "The objection is never the real objection"
+
+## Personality Traits
+
+**Core Traits:**
+- **Confident:** Believes in the product and the process
+- **Empathetic:** Understands prospect pain deeply
+- **Analytical:** Tracks metrics obsessively
+- **Competitive:** Wants to be top performer
+
+**Behavioral Patterns:**
+- Pushes back on low-quality leads
+- Requests better training over higher commission
+- Advocates for prospect over company in debates
+- Values mastery and skill development
+
+**Decision-Making Style:**
+Data-driven but psychologically aware. Wants to see conversion metrics but also values "feel" from prospect interactions.
+
+## Interaction Patterns
+
+**In Debates:**
+Assertive but not aggressive. Uses frontline experience to challenge assumptions. Quick to cite real prospect scenarios.
+
+**With C-Level:**
+Respectful but willing to advocate for what works on calls. Frustrated by decisions made without consulting frontline.
+
+**With Peers:**
+Collaborative with BDRs/Setters on lead quality. Competitive but supportive with other closers.
+```
+
+---
+
+### MEMORY.md
+
+Agent knowledge base and context.
+
+**Structure:**
+
+```markdown
+---
+version: [integer]
+last_updated: [ISO 8601 date]
+sources_included: [source IDs]
+persons_known: [person names]
+---
+
+# MEMORY: [Role Name]
+
+## Sources Processed
+
+**Total Sources:** [count]
+
+**By Person:**
+- Person 1: [source IDs]
+- Person 2: [source IDs]
+
+## Knowledge Domains
+
+### [Domain 1]
+
+**Key Insights:**
+
+#### [Topic]
+[Insight content with source attribution ^[source-id]]
+
+**Frameworks:**
+- Framework 1: [description] ^[source-id]
+- Framework 2: [description] ^[source-id]
+
+**Heuristics:**
+- Heuristic 1 ^[source-id]
+- Heuristic 2 ^[source-id]
+
+### [Domain 2]
+
+...
+
+## Cross-References
+
+**Related Agents:**
+- Agent 1: [relationship and knowledge overlap]
+- Agent 2: [relationship and knowledge overlap]
+
+**Related Dossiers:**
+- Dossier 1: [relevance]
+- Dossier 2: [relevance]
+
+## Update Log
+
+**Version History:**
+
+```
+v5 - 2026-03-05: Added CG003 (Cole Gordon farm system deep dive)
+v4 - 2026-03-01: Added JM001 (Jeremy Miner NEPQ foundations)
+v3 - 2026-02-28: Added HR002 (Hormozi on lead quality)
+```
+```
+
+**Memory freshness:**
+- Fresh: < 3 days old
+- Stale: 3-7 days old
+- Outdated: > 7 days old
+
+---
+
+## Agent Creation
+
+### Automatic Trigger
+
+Agents are auto-created when role detection crosses threshold:
+
+```python
+if role.weighted_score >= 10 and len(role.sources) >= 2:
+    trigger_agent_creation(role)
+```
+
+**Detection Levels:**
+- **Direct (1.0):** Role name mentioned explicitly
+- **Inferred (0.7):** Activity implies role
+- **Emergent (0.5):** New role detected via patterns
+
+**Threshold:**
+- **Established:** `weighted_score >= 10` AND `sources >= 2`
+
+### Manual Creation
+
+Use `/create-agent` command:
+
+```bash
+/create-agent ACCOUNT-EXECUTIVE
+```
+
+**Process:**
+
+<Steps>
+  <Step title="Validate Threshold">
+    Check role mention count and source diversity.
+  </Step>
+  
+  <Step title="Load DNA">
+    Extract DNA from `NARRATIVES-STATE.json` if available.
+  </Step>
+  
+  <Step title="Generate Files">
+    Create `AGENT.md`, `SOUL.md`, `MEMORY.md` from templates.
+  </Step>
+  
+  <Step title="Update Registry">
+    Add to `AGENT-INDEX.yaml` and `ENTITY-REGISTRY.json`.
+  </Step>
+  
+  <Step title="Populate Memory">
+    Sync knowledge from sources that mentioned this role.
+  </Step>
+</Steps>
+
+---
+
+## Agent Usage
+
+### In Debates
+
+Agents are auto-selected based on query relevance:
+
+```bash
+/debate "Should we increase closer commission?"
+# Auto-selects: CRO, CFO, CLOSER, SALES-MANAGER
+```
+
+**Selection Logic:**
+
+```python
+if "commission" in query and "closer" in query:
+    agents = ["CRO", "CFO", "CLOSER", "SALES-MANAGER"]
+elif "marketing" in query or "CAC" in query:
+    agents = ["CMO", "CFO", "PAID-MEDIA-SPECIALIST"]
+# ... etc
+```
+
+### Direct Invocation
+
+```bash
+/ask closer "What's your ideal lead quality criteria?"
+```
+
+---
+
+## Memory Management
+
+### Update Frequency
+
+Agent memories are updated:
+
+1. **Automatically** during Phase 5 (Cascade) of pipeline processing
+2. **Manually** via `/agents` command with `--refresh` flag
+
+### Freshness Tracking
+
+```bash
+# Check outdated agents
+/agents --outdated
+
+# Output:
+⚠️ AGENTES DESATUALIZADOS
+
+CFO
+├─ Última atualização: 2026-02-28 (5 dias atrás)
+├─ Conhece: Alex Hormozi, Cole Gordon
+└─ Faltam fontes: CG003, JM001
+```
+
+### Manual Refresh
+
+```bash
+# Refresh specific agent
+/refresh-agent closer
+
+# Refresh all outdated
+/refresh-agent --all --outdated
+```
+
+---
+
+## Agent Index
+
+All agents are registered in `agents/AGENT-INDEX.yaml`:
+
+```yaml
+version: "4.1.0"
+updated: "2026-02-27"
+
+totals:
+  minds: 5
+  cargo: 14
+  conclave: 3
+  total: 22
+
+cargo:
+  sales:
+    - id: closer
+      path: agents/cargo/sales/closer/
+      status: active
+    - id: bdr
+      path: agents/cargo/sales/bdr/
+      status: active
+    # ...
+  
+  c-level:
+    - id: cro
+      path: agents/cargo/c-level/cro/
+      status: active
+    # ...
+```
+
+**Auto-updated by:** `agent_index_updater.py` hook
+
+---
+
+## See Also
+
+- [Conclave Agents](/api/agents/conclave) - Deliberation agents
+- [Minds Agents](/api/agents/minds) - Expert mind clones
+- [Intelligence: role_detector.py](/api/core/intelligence#role_detectorpy) - Role detection system
+- [Slash Commands: /create-agent](/api/slash-commands#create-agent) - Agent creation

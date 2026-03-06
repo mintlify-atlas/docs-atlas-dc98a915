@@ -1,0 +1,489 @@
+---
+title: 'Core Tasks'
+description: 'Atomic task definitions and execution protocols'
+---
+
+# Core Tasks
+
+Core tasks are atomic, reusable building blocks for workflows. Each task follows the HO-TP anatomy pattern.
+
+## Task Anatomy
+
+Every task includes:
+
+<ResponseField name="task_name" type="string" required>
+  Human-readable task name
+</ResponseField>
+
+<ResponseField name="task_id" type="string" required>
+  Unique task identifier (e.g., `TSK-020`)
+</ResponseField>
+
+<ResponseField name="execution_type" type="string" required>
+  Execution mode: `Agent`, `Script`, `Manual`, `Hook`
+</ResponseField>
+
+<ResponseField name="responsible_executor" type="string" required>
+  Who/what executes: `@jarvis`, `@agent:{id}`, `@human`, `@hook:{name}`
+</ResponseField>
+
+<ResponseField name="input" type="object" required>
+  Required input parameters and types
+</ResponseField>
+
+<ResponseField name="output" type="object" required>
+  Expected output format and location
+</ResponseField>
+
+<ResponseField name="acceptance_criteria" type="array" required>
+  Checklist for task completion validation
+</ResponseField>
+
+---
+
+## Available Tasks
+
+### extract-dna
+
+Extract cognitive DNA from insights and themes.
+
+**Task ID:** `TSK-020`
+
+**Execution:**
+- **Type:** Agent
+- **Executor:** `@jarvis`
+
+**Inputs:**
+
+<ParamField path="insights" type="json" required>
+  Extracted insights from content
+</ParamField>
+
+<ParamField path="themes" type="array" required>
+  Theme classifications
+</ParamField>
+
+<ParamField path="source_id" type="string" required>
+  Source identifier (e.g., "CG", "JM")
+</ParamField>
+
+<ParamField path="chunks" type="array" required>
+  Content chunks for reference
+</ParamField>
+
+**Outputs:**
+
+<ResponseField name="dna_config" type="yaml">
+  5-layer DNA structure saved to `agents/persons/{name}/DNA-CONFIG.yaml`
+</ResponseField>
+
+<ResponseField name="layer_counts" type="json">
+  Count of items per DNA layer (L1-L5)
+</ResponseField>
+
+**Phases:**
+
+<Expandable title="Phase 1: Philosophy Extraction (L1)">
+  **Quality Gate:** QG-DNA-001
+  
+  1. Identify core beliefs and worldview statements
+  2. Extract value system indicators
+  3. Map to PHILOSOPHIES layer
+</Expandable>
+
+<Expandable title="Phase 2: Mental Models (L2)">
+  **Quality Gate:** QG-DNA-002
+  
+  1. Identify thinking frameworks
+  2. Extract decision-making patterns
+  3. Map to MENTAL-MODELS layer
+</Expandable>
+
+<Expandable title="Phase 3: Heuristics (L3)">
+  **Quality Gate:** QG-DNA-003
+  
+  1. Extract practical rules
+  2. Identify decision shortcuts
+  3. Map to HEURISTICS layer
+</Expandable>
+
+<Expandable title="Phase 4: Frameworks (L4)">
+  **Quality Gate:** QG-DNA-004
+  
+  1. Identify structured methodologies
+  2. Extract process definitions
+  3. Map to FRAMEWORKS layer
+</Expandable>
+
+<Expandable title="Phase 5: Methodologies (L5)">
+  **Quality Gate:** QG-DNA-005
+  
+  1. Extract step-by-step implementations
+  2. Identify tactical procedures
+  3. Map to METHODOLOGIES layer
+</Expandable>
+
+**Acceptance Criteria:**
+- All 5 DNA layers populated
+- Minimum 3 items per layer
+- Source citations for each item (`^[chunk_id]`)
+- Valid YAML structure
+
+**Handoff:**
+- **Next Task:** `trigger-agent` when `dna_complete`
+- **Data Passed:** DNA-CONFIG path, layer_counts
+
+**Source:** `core/tasks/extract-dna.md:1-115`
+
+---
+
+### detect-role
+
+Detect job roles and functions mentioned in content.
+
+**Task ID:** `TSK-012`
+
+**Execution:**
+- **Type:** Script
+- **Executor:** `@script:role_detector.py`
+
+**Inputs:**
+
+<ParamField path="text" type="string" required>
+  Content to analyze for role mentions
+</ParamField>
+
+<ParamField path="source_id" type="string" optional>
+  Source identifier for tracking
+</ParamField>
+
+**Detection Levels:**
+
+1. **Direct (weight: 1.0)** - Role name appears explicitly
+2. **Inferred (weight: 0.7)** - Activity implies role (e.g., "writing sales copy" → COPYWRITER)
+3. **Emergent (weight: 0.5)** - Unknown role detected via generic patterns
+
+**Outputs:**
+
+<ResponseField name="roles_detected" type="array">
+  List of detected roles with detection type, weight, and context
+</ResponseField>
+
+<ResponseField name="new_roles" type="array">
+  Emergent roles not in vocabulary (candidates for agent creation)
+</ResponseField>
+
+<ResponseField name="triggers_activated" type="array">
+  Roles that crossed threshold for agent creation
+</ResponseField>
+
+**Registry Update:**
+- Increments `mention_count` in `ENTITY-REGISTRY.json`
+- Updates `mention_breakdown` (direct/inferred/emergent)
+- Calculates `weighted_score`
+- Logs detection in `detection_history`
+
+**Trigger Thresholds:**
+- **Established:** `weighted_score >= 10` AND `sources >= 2`
+- **Emerging:** `weighted_score >= 5` AND `sources >= 1`
+
+**Source:** `core/tasks/detect-role.md:1-17`, `core/intelligence/role_detector.py:1-856`
+
+---
+
+### normalize-entities
+
+Canonicalize entity names (persons, themes, roles, concepts).
+
+**Task ID:** `TSK-008`
+
+**Execution:**
+- **Type:** Script
+- **Executor:** `@script:entity_normalizer.py`
+
+**Inputs:**
+
+<ParamField path="name" type="string" required>
+  Raw entity name to normalize
+</ParamField>
+
+<ParamField path="entity_type" type="string" required>
+  Type: `person`, `theme`, `role`, `concept`
+</ParamField>
+
+<ParamField path="source_id" type="string" optional>
+  Source that mentioned this entity
+</ParamField>
+
+<ParamField path="domain_hint" type="string" optional>
+  Domain context for boost matching (e.g., "SALES")
+</ParamField>
+
+**Resolution Order:**
+
+1. **Exact match** on canonical names (score: 1.0)
+2. **Alias match** on known aliases (score: 1.0)
+3. **Fuzzy match** via difflib (threshold: 0.85)
+4. **Domain boost** for same-domain entities (+0.10 bonus)
+5. **Taxonomy check** against DOMAINS-TAXONOMY.yaml
+6. **New entity creation** if no match found
+
+**Auto-Merge Rules:**
+- Score ≥ 0.95: Auto-merge, add as alias
+- Score 0.85-0.94: Add to review queue
+- Score < 0.85: Create new entity
+
+**Outputs:**
+
+<ResponseField name="canonical" type="string">
+  Canonical entity name
+</ResponseField>
+
+<ResponseField name="match_type" type="string">
+  Match method: `exact`, `alias`, `fuzzy`, `domain_boost`, `taxonomy`, `new`
+</ResponseField>
+
+<ResponseField name="score" type="number">
+  Similarity score (0.0-1.0)
+</ResponseField>
+
+<ResponseField name="created" type="boolean">
+  Whether new entity was created
+</ResponseField>
+
+**Canonical Name Formats:**
+- **Person:** Title Case ("Alex Hormozi")
+- **Role:** UPPER-CASE-WITH-HYPHENS ("SALES-MANAGER")
+- **Theme:** lowercase-with-hyphens ("processo-vendas")
+- **Concept:** Title Case ("Farm System")
+
+**Source:** `core/tasks/normalize-entities.md:1-16`, `core/intelligence/entity_normalizer.py:1-566`
+
+---
+
+### analyze-themes
+
+Detect and classify themes in content.
+
+**Task ID:** `TSK-015`
+
+**Execution:**
+- **Type:** Script
+- **Executor:** `@script:theme_analyzer.py`
+
+**Inputs:**
+
+<ParamField path="text" type="string" required>
+  Content to analyze for themes
+</ParamField>
+
+<ParamField path="source_id" type="string" optional>
+  Source identifier
+</ParamField>
+
+**Theme Categories:**
+
+| Code | Theme | Description |
+|------|-------|-------------|
+| 01 | ESTRUTURA-TIME | Team structure, roles |
+| 02 | PROCESSO-VENDAS | Sales process, techniques |
+| 03 | CONTRATACAO | Hiring, onboarding |
+| 04 | COMISSIONAMENTO | Compensation structures |
+| 05 | METRICAS | Performance metrics |
+| 06 | FUNIL-APLICACAO | Lead qualification |
+| 07 | PRICING | Pricing strategy |
+| 08 | FERRAMENTAS | Tools, tech stack |
+| 09 | GESTAO | Management practices |
+| 10 | CULTURA-GAMIFICACAO | Culture, motivation |
+| 99 | SECUNDARIO | Other insights |
+
+**Detection Logic:**
+
+Uses keyword patterns and context analysis:
+
+```python
+if mentions("roles", "team", "structure"):
+    theme = "01-ESTRUTURA-TIME"
+elif mentions("sales", "closing", "objection"):
+    theme = "02-PROCESSO-VENDAS"
+elif mentions("hire", "onboard", "recruit"):
+    theme = "03-CONTRATACAO"
+# ... etc
+```
+
+**Outputs:**
+
+<ResponseField name="themes_detected" type="array">
+  List of theme IDs with confidence scores
+</ResponseField>
+
+<ResponseField name="cross_references" type="array">
+  Themes with secondary relevance
+</ResponseField>
+
+**Source:** `core/tasks/analyze-themes.md:1-17`
+
+---
+
+### process-batch
+
+Process multiple files in batch with checkpointing.
+
+**Task ID:** `TSK-025`
+
+**Execution:**
+- **Type:** Agent
+- **Executor:** `@jarvis`
+
+**Inputs:**
+
+<ParamField path="file_list" type="array" required>
+  List of file paths to process
+</ParamField>
+
+<ParamField path="workflow_id" type="string" required>
+  Workflow to execute (e.g., "wf-pipeline-full")
+</ParamField>
+
+<ParamField path="checkpoint_interval" type="number" optional>
+  Files per checkpoint (default: 1)
+</ParamField>
+
+**Behavior:**
+- Processes files sequentially
+- Creates checkpoint after each file
+- Auto-resume on interruption
+- Aggregates metrics across batch
+
+**Outputs:**
+
+<ResponseField name="batch_summary" type="object">
+  Total files, success count, errors, processing time
+</ResponseField>
+
+<ResponseField name="checkpoints" type="array">
+  List of checkpoint IDs created
+</ResponseField>
+
+**Source:** `core/tasks/process-batch.md:1-25`
+
+---
+
+### validate-cascade
+
+Validate post-processing cascade completeness.
+
+**Task ID:** `TSK-030`
+
+**Execution:**
+- **Type:** Script
+- **Executor:** `@script:validate_cascade.py`
+
+**Inputs:**
+
+<ParamField path="source_id" type="string" required>
+  Source identifier to validate
+</ParamField>
+
+**Validation Checks:**
+
+1. **Agent Memories Updated** - All relevant agents have source in memory
+2. **Dossiers Created** - Persons/themes have dossiers
+3. **Knowledge Base Populated** - Insights written to correct categories
+4. **Registry Consistency** - ENTITY-REGISTRY matches artifacts
+5. **Cross-References Valid** - All links resolve correctly
+
+**Outputs:**
+
+<ResponseField name="validation_result" type="object">
+  Pass/fail status per check with details
+</ResponseField>
+
+<ResponseField name="issues_found" type="array">
+  List of issues with severity (CRITICAL, WARNING, INFO)
+</ResponseField>
+
+**Source:** `core/tasks/validate-cascade.md:1-21`
+
+---
+
+## Task Registry
+
+All available tasks are indexed in `core/tasks/TASK-REGISTRY.md`:
+
+```markdown
+| Task ID | Name | Executor | Status |
+|---------|------|----------|--------|
+| TSK-020 | extract-dna | @jarvis | active |
+| TSK-012 | detect-role | @script | active |
+| TSK-008 | normalize-entities | @script | active |
+| TSK-015 | analyze-themes | @script | active |
+| TSK-025 | process-batch | @jarvis | active |
+| TSK-030 | validate-cascade | @script | active |
+```
+
+---
+
+## Creating New Tasks
+
+### Task Template
+
+```yaml
+---
+task: TSK-XXX
+execution_type: Agent|Script|Manual|Hook
+responsible: @jarvis|@agent:{id}|@human|@hook:{name}
+---
+
+## Task Anatomy
+
+| Field | Value |
+|-------|-------|
+| task_name | Your Task Name |
+| status | active|deprecated |
+| responsible_executor | See above |
+| execution_type | See above |
+| input | {json object} |
+| output | {json object} |
+| action_items | {list} |
+| acceptance_criteria | {checklist} |
+
+## Inputs
+
+[Document inputs]
+
+## Outputs
+
+[Document outputs]
+
+## Execution
+
+[Step-by-step instructions]
+
+## Acceptance Criteria
+
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+## Handoff
+
+| Next Task | Trigger | Data Passed |
+|-----------|---------|-------------|
+| task-id | condition | data |
+```
+
+### Conventions
+
+1. **IDs:** Use `TSK-###` format (sequential)
+2. **Files:** Use `kebab-case.md` in `core/tasks/`
+3. **Atomicity:** One clear responsibility per task
+4. **Idempotency:** Safe to re-run without side effects
+5. **Testability:** Clear acceptance criteria
+
+---
+
+## See Also
+
+- [Workflows](/api/core/workflows) - Task orchestration
+- [Intelligence Layer](/api/core/intelligence) - Python scripts
+- [Schemas](/api/core/schemas) - Data validation

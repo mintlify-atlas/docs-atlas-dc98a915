@@ -1,0 +1,470 @@
+---
+title: "Using Conclave"
+description: "Run multi-agent deliberation sessions with evidence-based debate and structured decision-making"
+---
+
+Conclave is Mega Brain's multi-agent deliberation system where experts debate strategic decisions with evidence-based reasoning. This guide shows you how to run Conclave sessions and interpret results.
+
+## What is Conclave?
+
+Conclave brings together multiple AI agents to deliberate on strategic decisions:
+
+<Steps>
+
+<Step title="Phase 0: Constitutional Foundation">
+Invokes core principles (Empiricism, Pareto, Inversion, Antifragility)
+</Step>
+
+<Step title="Phase 1: Role Agent Debate">
+C-Level agents (CRO, CFO, CMO, COO) present positions
+</Step>
+
+<Step title="Phase 2: Methodological Critic">
+Evaluates quality of reasoning and evidence
+</Step>
+
+<Step title="Phase 3: Devil's Advocate">
+Identifies fragile premises and risks
+</Step>
+
+<Step title="Phase 4: Synthesizer">
+Integrates perspectives into actionable recommendation
+</Step>
+
+</Steps>
+
+<Note>
+Conclave runs ONCE per query - no loops. If confidence < 60%, it escalates to human decision.
+</Note>
+
+## Basic Conclave Session
+
+### Invoking Conclave
+
+```bash
+/conclave "Should I change closer commission from 10% to 15%?"
+```
+
+<Tabs>
+  <Tab title="High Confidence (>60%)">
+
+```
+═══════════════════════════════════════════════
+           CONCLAVE SESSION
+═══════════════════════════════════════════════
+
+QUERY: "Should I change closer commission 
+        from 10% to 15%?"
+
+DATE: 2026-03-06
+VALUE AT RISK: ~$180K/year
+
+═══════════════════════════════════════════════
+PHASE 0: CONSTITUTIONAL FOUNDATION
+═══════════════════════════════════════════════
+
+┌──────────────────────────────────────────────┐
+│  📜 CONSTITUTION INVOKED                  │
+├──────────────────────────────────────────────┤
+│                                            │
+│  ⚖️ EMPIRICISM                             │
+│  Decisions based on DATA, not intuition  │
+│  → This deliberation must cite numbers   │
+│                                            │
+│  📊 PARETO (80/20)                         │
+│  Focus on highest leverage actions       │
+│  → Which option has most ROI?           │
+│                                            │
+│  🔄 INVERSION                              │
+│  Ask what would make this FAIL           │
+│  → Agents must name failure modes       │
+│                                            │
+│  💪 ANTIFRAGILITY                          │
+│  Prefer options that benefit from chaos  │
+│  → Which option gets stronger under stress?│
+│                                            │
+└──────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════
+PHASE 1: ROLE AGENT DEBATE
+═══════════════════════════════════════════════
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ CRO (Chief Revenue Officer)            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+"I support the increase, BUT with conditions.
+
+CURRENT DATA:
+• Close rate: 58% (below Cole Gordon's 60% benchmark)
+• Avg deal size: $12K
+• Current comp: $1,200/deal (10%)
+• Turnover: 40% annually
+
+INCREASING TO 15% ($1,800/deal) ONLY MAKES SENSE IF:
+
+1. We're losing top performers to competitors
+   [Evidence: Exit interviews show 2 left for higher comp]
+   
+2. Increased retention > cost increase
+   Math: If we retain 2 closers, save $60K in training
+   
+3. We tie it to performance threshold
+   Proposal: 15% only if close rate >= 60%
+   
+RISK: We throw money at symptom (turnover) not 
+      cause (poor script/training)
+
+Sources: [CG001_045] Cole Gordon close rate benchmark
+         [AH002_023] Unit economics framework
+
+CONFIDENCE: 0.72"
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ CFO (Chief Financial Officer)          ┃  
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+"The math says NO, unless structure changes.
+
+UNIT ECONOMICS:
+Current: $12K deal × 58% close = $6,960 per opp
+         Commission: $1,200 (17.2% of expected value)
+         
+Proposed: $12K × 58% = $6,960 per opp
+          Commission: $1,800 (25.8% of expected value)
+          
+IMPACT: +$600/deal = $180K annually (30 deals/closer/year)
+
+BREAK-EVEN: We'd need EITHER:
+  • Close rate to increase to 87% (unrealistic)
+  • Deal size to increase to $18K
+  • Volume to increase 50%
+  
+NONE of these are likely just from raising comp.
+
+ALTERNATIVE:
+Test performance-based tiers:
+  • Base: 10% (<60% close rate)
+  • Tier 1: 12% (60-70% close rate)  
+  • Tier 2: 15% (>70% close rate)
+  
+This creates upside without guaranteed cost increase.
+
+Sources: [AH001_023] LTV:CAC framework
+
+CONFIDENCE: 0.85"
+
+═══════════════════════════════════════════════
+PHASE 2: METHODOLOGICAL CRITIC
+═══════════════════════════════════════════════
+
+QUALITY SCORE: 74/100
+
+Breakdown:
+• Premises declared:      18/20 (both stated assumptions)
+• Evidence traceable:     16/20 (good chunk_id usage)
+• Logic consistent:       15/20 (CFO math has gap)
+• Alternative scenarios:  15/20 (CRO mentioned 1, CFO 1)
+• Conflicts resolved:     10/20 (tension not addressed)
+
+CRITICAL GAPS:
+
+1. MISSING DATA: What's industry benchmark for 
+   closer compensation?
+   
+2. CAUSAL ASSUMPTION: Both assume comp → retention
+   but no evidence turnover is comp-related
+   
+3. OPPORTUNITY COST: Neither addressed what else
+   $180K could buy (training? better leads?)
+
+RECOMMENDATION: REVISE
+Needs: Turnover root cause analysis before deciding
+
+═══════════════════════════════════════════════
+PHASE 3: DEVIL'S ADVOCATE
+═══════════════════════════════════════════════
+
+MOST FRAGILE PREMISE:
+"Turnover is caused by low compensation"
+
+WHY IT'S WEAK:
+Exit interviews are notoriously unreliable. People
+say "money" when real reason is management, culture,
+or lack of growth.
+
+RISK NOT DISCUSSED:
+Entitlement Spiral
+
+12 months from now:
+"We raised commission to 15% but performance didn't 
+improve. Now closers feel ENTITLED to 15% and any 
+reduction would cause mass exodus. We're trapped."
+
+Probability: 60%
+Impact: $180K/year permanently locked in
+
+SCENARIO OF REGRET:
+You raise to 15%. Close rate stays at 58%. Turnover 
+continues because real problem was weak onboarding.
+Now you've spent $180K and gotten nothing.
+
+ALTERNATIVE IGNORED:
+Invest $50K in:
+  • Sales training program
+  • Better lead qualification
+  • Script optimization
+  
+These address ROOT CAUSE (skill) not symptom (comp).
+
+═══════════════════════════════════════════════
+PHASE 4: SYNTHESIS
+═══════════════════════════════════════════════
+
+DECISION RECOMMENDED:
+
+DO NOT raise commission to 15% across the board.
+
+INSTEAD, implement 3-phase approach:
+
+PHASE 1 (30 days): Diagnose turnover root cause
+  • Conduct proper exit interviews (3rd party)
+  • Survey current closers on satisfaction  
+  • Benchmark comp vs. market
+  • Cost: $5K
+  
+PHASE 2 (60 days): Performance tier system
+  • <60% close rate: 10% commission
+  • 60-70% close rate: 12% commission
+  • >70% close rate: 15% commission
+  • Cost: Variable, performance-based
+  
+PHASE 3 (90 days): Training investment
+  • Script optimization workshop
+  • Objection handling bootcamp
+  • Cost: $25K
+  
+TOTAL FIRST-YEAR COST: ~$80K (vs. $180K blanket raise)
+EXPECTED ROI: If close rate ↑ to 65%, generates $360K
+
+MODIFICATIONS FROM DEBATE:
+• Added Phase 1 (Devil's Advocate point)
+• Changed to tiered structure (CFO suggestion)
+• Added training component (Critic gap)
+
+CONFIDENCE: 78%
+
+This is high enough to recommend action, but includes
+built-in checkpoints to course-correct.
+
+RISKS RESIDUAL:
+• Tier system adds complexity: Mitigate with clear docs
+• May not solve cultural issues: Monitor in Phase 1
+• Training may not transfer: Use role-play validation
+
+NEXT STEPS:
+1. Approve Phase 1 diagnostic - Finance: CFO - By: Mar 20
+2. Design tier structure draft - Sales: CRO - By: Mar 27  
+3. RFP for training vendor - Ops: COO - By: Apr 3
+
+REVERSION CRITERIA:
+IF after 90 days turnover ≥ 40% THEN escalate to CEO
+IF tier system causes team conflict THEN simplify
+
+═══════════════════════════════════════════════
+```
+
+  </Tab>
+  
+  <Tab title="Low Confidence (<60%)">
+
+```
+═══════════════════════════════════════════════
+    [CONCLAVE: DECISION INCONCLUSIVE]
+═══════════════════════════════════════════════
+
+⚠️ CONFIDENCE: 48% - BELOW THRESHOLD
+
+TYPE OF UNCERTAINTY:
+[✓] Data insufficient
+[ ] Irresolvable conflict
+[ ] Outside knowledge scope
+
+OPTIONS FOR HUMAN DECISION:
+
+OPTION A: Increase to 15% universally
+  Trade-off: Higher retention vs. $180K cost
+  Defended by: CRO
+  Evidence: Exit interviews (weak)
+  
+OPTION B: Tiered commission structure  
+  Trade-off: Complexity vs. performance incentive
+  Defended by: CFO
+  Evidence: Unit economics (strong)
+  
+OPTION C: Investigate root cause first
+  Trade-off: 30-day delay vs. better decision
+  Defended by: Devil's Advocate
+  Evidence: Turnover causation unclear
+
+WHAT'S MISSING:
+• Actual turnover root cause data
+• Industry compensation benchmarks
+• Exit interview reliability validation
+
+⚠️ This case requires HUMAN DECISION.
+The Council is NOT recommending any option.
+
+RECOMMENDED ACTION:
+Gather missing data (Option C) before deciding.
+
+═══════════════════════════════════════════════
+```
+
+  </Tab>
+</Tabs>
+
+## Constitutional Principles
+
+Every Conclave session starts by invoking core principles:
+
+<Accordion title="The 4 Constitutional Principles">
+
+### 1. Empiricism ⚖️
+
+**Principle:** Decisions based on DATA, not opinions or intuitions.
+
+**Enforcement:** 
+- Agents must cite specific numbers
+- Sources must be traceable (chunk_ids)
+- Anecdotes must be labeled as such
+
+**Violation example:**
+```
+❌ "I think customers prefer higher prices"
+✓ "In 3 surveys (n=240), 67% preferred premium tier [chunk_AH002_034]"
+```
+
+### 2. Pareto (80/20) 📊
+
+**Principle:** Focus on the 20% of actions that generate 80% of results.
+
+**Enforcement:**
+- Agents must identify highest-leverage option
+- Compare ROI across alternatives
+- Avoid "do everything" solutions
+
+**Violation example:**
+```
+❌ "We should improve marketing, sales, ops, and product"
+✓ "Focus on sales (60% of impact) before marketing [CG001_045]"
+```
+
+### 3. Inversion 🔄
+
+**Principle:** Ask "What would make this FAIL?" before deciding.
+
+**Enforcement:**
+- Devil's Advocate MUST list failure modes
+- Each agent names 1 risk
+- Synthesizer addresses top 3 risks
+
+**Example:**
+```
+"What could make the tiered commission system fail?
+• Closers game the system
+• Adds reporting complexity
+• Creates internal competition/resentment"
+```
+
+### 4. Antifragility 💪
+
+**Principle:** Prefer options that BENEFIT from volatility and uncertainty.
+
+**Enforcement:**
+- Identify which option improves under stress
+- Avoid fragile solutions that require perfect conditions
+- Build in optionality
+
+**Example:**
+```
+Option A: Fixed 15% commission
+  Fragile: Locks in cost regardless of performance
+  
+Option B: Performance tiers  
+  Antifragile: Rewards high performance, costs scale with results
+  
+Winner: Option B (benefits from variation in performance)
+```
+
+</Accordion>
+
+## Understanding the Agents
+
+<Tabs>
+  <Tab title="Role Agents (Phase 1)">
+
+### C-Level Executives
+
+Bring functional perspectives:
+
+**CRO (Chief Revenue Officer)**
+- Focus: Growth, sales performance, revenue
+- Bias: Toward actions that increase deals
+- Sources: Sales frameworks, closing techniques
+
+**CFO (Chief Financial Officer)**  
+- Focus: Unit economics, profitability, risk
+- Bias: Toward conservative financial decisions
+- Sources: Financial frameworks, metrics
+
+**CMO (Chief Marketing Officer)**
+- Focus: Positioning, demand generation
+- Bias: Toward brand and marketing investment
+- Sources: Marketing strategies, funnels
+
+**COO (Chief Operations Officer)** - Focus: Scalability, efficiency, execution; Bias: Toward operational improvements; Sources: Process frameworks, systems
+
+</Tab>
+  
+  <Tab title="Conclave Agents (Phases 2-4)">
+
+### Methodological Critic
+
+**Role:** Evaluate QUALITY of reasoning, not merit of decision.
+
+**Scores (0-100):**
+- Premises declared (0-20)
+- Evidence traceable (0-20)
+- Logic consistent (0-20)
+- Alternative scenarios (0-20)
+- Conflicts resolved (0-20)
+
+**Does NOT:**
+- Take a position
+- Recommend an option
+- Inject new data
+
+### Devil's Advocate
+
+**Role:** Identify fragile premises and hidden risks.
+
+**Delivers:**
+- Most fragile premise (with reasoning)
+- Main undiscussed risk
+- Alternative scenario that was ignored
+- Reversal criteria (when to reconsider)
+
+</Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Working with Agents" icon="users" href="/guides/working-with-agents">
+    Learn how to interact with individual agents
+  </Card>
+  <Card title="Session Management" icon="floppy-disk" href="/guides/session-management">
+    Save and resume Conclave sessions
+  </Card>
+</CardGroup>

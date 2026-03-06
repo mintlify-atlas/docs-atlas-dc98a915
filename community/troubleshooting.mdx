@@ -1,0 +1,495 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Mega Brain AI Knowledge Management System, including setup problems, hook failures, and skill activation issues.
+---
+
+## Common Issues
+
+### Environment Setup
+
+<Accordion title="'.env not found' error">
+  **Problem**: The system can't find your environment configuration file.
+  
+  **Solution**:
+  ```bash
+  npx mega-brain-ai setup
+  ```
+  
+  The setup wizard will:
+  - Create a `.env` file in your project root
+  - Prompt for required API keys
+  - Configure optional integrations
+  - Validate your environment
+  
+  <Note>
+  Setup auto-triggers on first use if `.env` is missing, so you may not need to run this manually.
+  </Note>
+</Accordion>
+
+<Accordion title="API key not working">
+  **Problem**: Commands fail with authentication errors.
+  
+  **Check**:
+  1. Verify your `.env` file exists in the project root
+  2. Ensure `OPENAI_API_KEY` is set (required for transcription)
+  3. Check for extra spaces or quotes around keys
+  4. Restart Claude Code after changing `.env`
+  
+  **Format**:
+  ```bash
+  # Correct
+  OPENAI_API_KEY=sk-proj-...
+  
+  # Wrong (extra quotes)
+  OPENAI_API_KEY="sk-proj-..."
+  
+  # Wrong (extra spaces)
+  OPENAI_API_KEY= sk-proj-...
+  ```
+  
+  <Tip>
+  Run `/setup` to reconfigure keys interactively and validate the format.
+  </Tip>
+</Accordion>
+
+### Python & Hooks
+
+<Accordion title="'Hook failed' errors">
+  **Problem**: Hooks fail to execute with Python errors.
+  
+  **Solutions**:
+  
+  1. **Check Python version**:
+     ```bash
+     python --version  # Should be 3.10 or higher
+     ```
+  
+  2. **Verify Python is in PATH**:
+     ```bash
+     which python  # Unix/Mac
+     where python  # Windows
+     ```
+  
+  3. **Install PyYAML** (only external dependency for hooks):
+     ```bash
+     pip install pyyaml
+     ```
+  
+  4. **Check hook permissions** (Unix/Mac):
+     ```bash
+     chmod +x .claude/hooks/*.py
+     ```
+  
+  <Note>
+  Hooks use only stdlib + PyYAML to minimize dependency issues.
+  </Note>
+</Accordion>
+
+<Accordion title="Hook runs but doesn't work as expected">
+  **Problem**: Hook executes without errors but behavior is wrong.
+  
+  **Debug steps**:
+  
+  1. **Check hook configuration** in `settings.json`:
+     ```json
+     {
+       "hooks": {
+         "SessionStart": [".claude/hooks/session_start.py"],
+         "UserPromptSubmit": [".claude/hooks/skill_router.py"]
+       }
+     }
+     ```
+  
+  2. **Add debug output** to your hook:
+     ```python
+     import sys
+     print(f"DEBUG: Hook triggered with {len(sys.argv)} args", file=sys.stderr)
+     ```
+  
+  3. **Check hook event timing**:
+     - `SessionStart` - Runs once when Claude starts
+     - `UserPromptSubmit` - Runs before each user message
+     - `PreToolUse` - Runs before tool execution
+     - `PostToolUse` - Runs after tool execution
+     - `Stop` - Runs when session ends
+</Accordion>
+
+### Skills & Auto-Routing
+
+<Accordion title="Skills not auto-activating">
+  **Problem**: Skills don't activate when you expect them to.
+  
+  **Check**:
+  
+  1. **Verify SKILL-INDEX.json exists**:
+     ```bash
+     ls .claude/SKILL-INDEX.json
+     ```
+     
+     If missing, it should be generated on SessionStart by `skill_indexer.py` hook.
+  
+  2. **Verify skill description is specific**:
+     ```yaml
+     # Too vague (won't trigger)
+     description: Helps with files
+     
+     # Specific (will trigger)
+     description: Extract DNA from expert materials. Use when processing videos, PDFs, or transcriptions.
+     ```
+  
+  3. **Check skill file structure**:
+     ```
+     .claude/skills/skill-name/
+     ├── SKILL.md          # Must be exactly this name
+     └── resources/
+     ```
+  
+  4. **Validate YAML frontmatter**:
+     ```yaml
+     ---
+     name: skill-name      # Must match directory name
+     description: Clear description with trigger words
+     ---
+     ```
+  
+  <Tip>
+  Include "Use when..." context in your skill description with specific trigger words users would say.
+  </Tip>
+</Accordion>
+
+<Accordion title="Skill not found error">
+  **Problem**: Skill doesn't appear in available skills list.
+  
+  **Check**:
+  
+  1. **File location**:
+     ```bash
+     # Project skills
+     ls .claude/skills/skill-name/SKILL.md
+     
+     # Personal skills (if using)
+     ls ~/.claude/skills/skill-name/SKILL.md
+     ```
+  
+  2. **Filename is exact** (case-sensitive):
+     - ✅ Correct: `SKILL.md`
+     - ❌ Wrong: `skill.md`, `Skill.md`, `SKILL.MD`
+  
+  3. **Directory name matches frontmatter**:
+     ```
+     Directory: knowledge-extraction/
+     Frontmatter: name: knowledge-extraction  # Must match
+     ```
+  
+  4. **Restart Claude Code** to reload skills
+</Accordion>
+
+<Accordion title="YAML parsing errors in skills">
+  **Problem**: Skill fails to load with parsing errors.
+  
+  **Common issues**:
+  
+  1. **Tabs in YAML** (use spaces only):
+     ```yaml
+     # Wrong (contains tabs)
+     name:	skill-name
+     
+     # Correct (spaces only)
+     name: skill-name
+     ```
+  
+  2. **Missing frontmatter delimiters**:
+     ```yaml
+     ---              # Line 1 (no blank lines before)
+     name: skill-name
+     description: ...
+     ---              # Required closing delimiter
+     
+     # Content starts here
+     ```
+  
+  3. **Validate your YAML**:
+     ```bash
+     head -n 10 .claude/skills/skill-name/SKILL.md
+     
+     # Check for tabs (should return nothing)
+     grep -P '\t' .claude/skills/skill-name/SKILL.md
+     ```
+</Accordion>
+
+### Git & Version Control
+
+<Accordion title="'Permission denied on git push'">
+  **Problem**: Git push is blocked.
+  
+  **This is by design**:
+  - `git push` is blocked by `settings.json` deny rules
+  - Direct pushes to `main` are prohibited
+  - Use the branch + PR workflow instead
+  
+  **Correct workflow**:
+  ```bash
+  # 1. Create feature branch
+  git checkout -b feat/my-feature
+  
+  # 2. Make changes and commit
+  git add .
+  git commit -m "feat: add new feature"
+  
+  # 3. Push branch (not main)
+  git push origin feat/my-feature
+  
+  # 4. Open PR on GitHub
+  ```
+  
+  <Warning>
+  If you need to push to `main` for a legitimate reason, delegate to @devops or contact the maintainer.
+  </Warning>
+</Accordion>
+
+### Pipeline Processing
+
+<Accordion title="Pipeline fails at Phase 1 (Chunking)">
+  **Problem**: `/process-jarvis` fails during chunking phase.
+  
+  **Common causes**:
+  
+  1. **File not in inbox**:
+     ```bash
+     ls inbox/
+     ```
+     Make sure your file was ingested with `/ingest` first.
+  
+  2. **File format not supported**:
+     - ✅ Supported: `.md`, `.txt`, `.pdf`, `.mp4`, `.mp3`
+     - ❌ Not supported: Binary formats without extractors
+  
+  3. **OpenAI API key missing** (for transcription):
+     ```bash
+     # Check .env
+     grep OPENAI_API_KEY .env
+     ```
+  
+  4. **File too large**:
+     - Check if file exceeded API limits
+     - Consider splitting large files
+</Accordion>
+
+<Accordion title="Pipeline completes but no output">
+  **Problem**: Pipeline runs successfully but doesn't generate expected outputs.
+  
+  **Check**:
+  
+  1. **Artifacts directory**:
+     ```bash
+     ls -la artifacts/chunks/
+     ls -la artifacts/insights/
+     ls -la artifacts/narratives/
+     ```
+  
+  2. **Knowledge directory**:
+     ```bash
+     ls -la knowledge/dossiers/
+     ls -la knowledge/playbooks/
+     ```
+  
+  3. **Session logs**:
+     ```bash
+     ls -la logs/sessions/
+     # Check latest log for errors
+     ```
+  
+  4. **Check /jarvis-briefing** for health score and errors
+</Accordion>
+
+### Agent & Conclave
+
+<Accordion title="Agent commands not working">
+  **Problem**: Slash commands for agents return errors.
+  
+  **Check**:
+  
+  1. **Agent exists in AGENT-INDEX.yaml**:
+     ```bash
+     grep "name: agent-name" agents/AGENT-INDEX.yaml
+     ```
+  
+  2. **Agent files present**:
+     ```bash
+     ls agents/cargo/agent-name/
+     ls agents/persons/agent-name/
+     ```
+  
+  3. **Memory directory exists**:
+     ```bash
+     ls .claude/agent-memory/agent-name/
+     ```
+  
+  4. **Command syntax**:
+     ```bash
+     # Correct
+     /conclave "Should I hire a CMO or outsource marketing?"
+     
+     # Wrong (missing quotes)
+     /conclave Should I hire a CMO?
+     ```
+</Accordion>
+
+<Accordion title="Conclave returns low confidence">
+  **Problem**: Council sessions show low confidence scores.
+  
+  **This is expected when**:
+  - Limited knowledge base (process more materials)
+  - Few relevant experts (add more diverse sources)
+  - Complex question with limited context
+  
+  **Improve confidence by**:
+  1. Processing more expert materials
+  2. Creating DNA extractions from specialists
+  3. Providing more context in your question
+  4. Building up relevant playbooks
+  
+  <Tip>
+  The system is transparent about confidence levels. Low confidence means "I don't have enough data to be certain" - which is honest and valuable feedback.
+  </Tip>
+</Accordion>
+
+## Installation Issues
+
+<Accordion title="npm install fails">
+  **Problem**: Package installation errors.
+  
+  **Solutions**:
+  
+  1. **Check Node version**:
+     ```bash
+     node --version  # Should be >= 18.0.0
+     ```
+  
+  2. **Clear cache and reinstall**:
+     ```bash
+     npm cache clean --force
+     rm -rf node_modules package-lock.json
+     npm install
+     ```
+  
+  3. **Check for permission issues**:
+     ```bash
+     # Unix/Mac (if global install fails)
+     sudo npm install -g mega-brain-ai
+     ```
+</Accordion>
+
+<Accordion title="Python dependencies missing">
+  **Problem**: Intelligence scripts fail with import errors.
+  
+  **Solution**:
+  ```bash
+  # Install all Python dependencies
+  pip install -r requirements.txt
+  
+  # Or install individually
+  pip install pyyaml
+  ```
+  
+  <Note>
+  Python 3.10+ required. Earlier versions may have compatibility issues.
+  </Note>
+</Accordion>
+
+## Performance Issues
+
+<Accordion title="Slow processing times">
+  **Problem**: Pipeline or commands take too long.
+  
+  **Optimize**:
+  
+  1. **Check file sizes**:
+     - Large videos take longer to transcribe
+     - Consider processing audio separately
+  
+  2. **Review API rate limits**:
+     - OpenAI Whisper has rate limits
+     - Space out large batch processing
+  
+  3. **Monitor resource usage**:
+     ```bash
+     # Check system resources
+     top  # Unix/Mac
+     taskmgr  # Windows
+     ```
+  
+  4. **Process in batches**:
+     - Don't ingest 50 files at once
+     - Process 3-5 files, then review
+</Accordion>
+
+## Session Management
+
+<Accordion title="Session won't save">
+  **Problem**: `/save` command fails.
+  
+  **Check**:
+  
+  1. **Logs directory exists**:
+     ```bash
+     mkdir -p logs/sessions
+     ```
+  
+  2. **Permissions**:
+     ```bash
+     # Unix/Mac
+     chmod 755 logs/sessions
+     ```
+  
+  3. **Disk space**:
+     ```bash
+     df -h  # Unix/Mac
+     ```
+</Accordion>
+
+<Accordion title="Can't resume previous session">
+  **Problem**: `/resume` doesn't work.
+  
+  **Check**:
+  
+  1. **Session files exist**:
+     ```bash
+     ls -la logs/sessions/
+     ```
+  
+  2. **Session format is valid**:
+     - Sessions are stored as JSON
+     - Check for corruption
+  
+  3. **Try listing sessions**:
+     ```bash
+     /resume --list  # If supported
+     ```
+</Accordion>
+
+## Getting Help
+
+<Card title="Still Having Issues?" icon="life-ring">
+  1. **Check system status**: Run `/jarvis-briefing` for health score
+  2. **Review logs**: Check `logs/sessions/` for detailed error messages
+  3. **Search existing issues**: Check GitHub issues for similar problems
+  4. **Open an issue**: Provide:
+     - Error message (full text)
+     - Command you ran
+     - System info (OS, Node version, Python version)
+     - Relevant log files
+  5. **Contact maintainer**: Reach out to @thiagofinch
+</Card>
+
+<Tip>
+Before reporting an issue, run these diagnostic commands:
+```bash
+node --version
+python --version
+npm list mega-brain-ai
+ls -la .env
+/jarvis-briefing
+```
+Include the output in your issue report.
+</Tip>

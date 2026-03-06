@@ -1,0 +1,612 @@
+---
+title: /extract-dna Command
+description: Generate cognitive DNA (5-layer knowledge schema) from expert materials after processing 3+ sources
+---
+
+# /extract-dna - Cognitive DNA Extraction
+
+Extracts a person's cognitive DNA across 5 knowledge layers: Philosophies, Mental Models, Heuristics, Frameworks, and Methodologies. Requires 3+ processed sources.
+
+## Syntax
+
+```bash
+/extract-dna [PERSON_NAME]
+```
+
+<ParamField path="PERSON_NAME" type="string" required>
+  Canonical person name (alex-hormozi, cole-gordon, sam-ovens, etc.)
+</ParamField>
+
+## Prerequisites
+
+<Warning>
+DNA extraction requires:
+
+1. **Dossier exists:** `knowledge/dossiers/persons/DOSSIER-{PERSON}.md`
+2. **3+ sources processed:** Minimum 3 files through `/process-jarvis`
+3. **Insights available:** `INSIGHTS-STATE.json` has data for person
+4. **Chunks indexed:** `CHUNKS-STATE.json` has chunks for person
+</Warning>
+
+## The 5-Layer DNA Schema
+
+Mega Brain structures expert knowledge into 5 distinct layers:
+
+<Tabs>
+  <Tab title="Layer 1: Philosophies">
+    **Core beliefs and worldview**
+    
+    ```yaml
+    Characteristics:
+      - Fundamental beliefs
+      - Appear 3+ times in different contexts
+      - NO numeric thresholds
+      - Shape decision-making framework
+    
+    Example:
+      - "Philosophy beats tactics"
+      - "Speed matters more than perfection"
+      - "Test everything, assume nothing"
+    
+    Weight Calculation:
+      Base: 0.50
+      + 0.15 if direct quote with chunk_id
+      + 0.15 if appears in 2+ sources
+      + 0.10 if appears in 3+ sources
+      + 0.05 if in narrative context
+      - 0.20 if inferred
+    ```
+  </Tab>
+  
+  <Tab title="Layer 2: Mental Models">
+    **Thinking frameworks and lenses**
+    
+    ```yaml
+    Characteristics:
+      - Change how you SEE, not what you DO
+      - Generate specific questions
+      - Analytical frameworks
+      - Decision lenses
+    
+    Example:
+      - "Pareto Principle (80/20)"
+      - "Inversion: What would cause failure?"
+      - "Second-order thinking"
+    
+    Weight Calculation:
+      Same as Philosophies
+      + 0.10 if prescriptive language
+    ```
+  </Tab>
+  
+  <Tab title="Layer 3: Heuristics">
+    **Practical decision shortcuts with thresholds**
+    
+    ```yaml
+    Characteristics:
+      - MUST have numeric threshold
+      - "If X then Y" format
+      - Actionable rules
+      - HIGHEST VALUE layer
+    
+    Example:
+      - "If show rate < 60%, email 12x in 48h"
+      - "Close rate drops 40% without qualification"
+      - "10% commission base + 5% accelerator at 80%"
+    
+    Weight Calculation:
+      Same as above
+      + 0.10 if has specific threshold
+      + 0.05 if prescriptive language
+    
+    PRIORITY: Extract ALL heuristics with numbers
+    ```
+  </Tab>
+  
+  <Tab title="Layer 4: Frameworks">
+    **Named structures with components**
+    
+    ```yaml
+    Characteristics:
+      - Named systems
+      - Defined components
+      - NO rigid order
+      - Modular application
+    
+    Example:
+      - "STAR Qualification"
+        - Situation
+        - Timing
+        - Authority
+        - Resources
+      
+      - "3 Audience Buckets"
+        - YES (ready buyers)
+        - NO (not qualified)
+        - MAYBE (nurture needed)
+    
+    Weight Calculation:
+      Same as above
+      + 0.10 if all components defined
+    ```
+  </Tab>
+  
+  <Tab title="Layer 5: Methodologies">
+    **Step-by-step processes with rigid order**
+    
+    ```yaml
+    Characteristics:
+      - RIGID sequence
+      - Step-by-step
+      - Success criteria per step
+      - Can't skip or reorder
+    
+    Example:
+      - "Email Hammer (12 emails, 48h)"
+        Step 1: Email 1-3 (Day 1 morning)
+        Step 2: Email 4-6 (Day 1 afternoon)
+        Step 3: Email 7-9 (Day 2 morning)
+        Step 4: Email 10-12 (Day 2 afternoon)
+        Success: >= 60% show rate
+    
+    Weight Calculation:
+      Same as above
+      + 0.10 if success criteria defined
+    ```
+  </Tab>
+</Tabs>
+
+## Execution Process
+
+### Step 1: Validate Prerequisites
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+DNA EXTRACTION: COLE GORDON
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+STEP 1: PRE-REQUISITE CHECK
+
+[✓] DOSSIER exists: knowledge/dossiers/persons/DOSSIER-COLE-GORDON.md
+[✓] INSIGHTS-STATE.json has insights for Cole Gordon
+[✓] CHUNKS-STATE.json has chunks for Cole Gordon
+[✓] Sources processed: 5 (CG001, CG002, CG003, CG004, CG005)
+
+All prerequisites met. Proceeding...
+```
+
+**If prerequisites missing:**
+
+```
+[✗] EXTRACTION FAILED
+
+Person "Sam Ovens" does not have sufficient data:
+  ✗ DOSSIER: Not found
+  ✗ Sources processed: 0 (minimum: 3)
+  ✗ Insights: 0
+
+Action required:
+  1. Ingest 3+ materials for Sam Ovens
+  2. Process each file with /process-jarvis
+  3. Retry /extract-dna sam-ovens
+```
+
+### Step 2: Load Source Data
+
+```
+STEP 2: LOADING SOURCES
+
+• Insights: 247 found
+• Narratives: 18 found
+• Chunks: 487 indexed
+• DOSSIER: 1,834 lines
+
+Data loaded successfully.
+```
+
+### Step 3: Extract by Layer
+
+<Note>
+Extraction applies classification rules to identify items for each layer
+</Note>
+
+```
+STEP 3: EXTRACTING BY LAYER
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layer 1: PHILOSOPHIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scanning for core beliefs (3+ occurrences, no numbers)...
+
+  ✓ Extracted: 12 philosophies
+  → Output: knowledge/dna/persons/cole-gordon/FILOSOFIAS.yaml
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layer 2: MENTAL MODELS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scanning for analytical lenses...
+
+  ✓ Extracted: 8 mental models
+  → Output: knowledge/dna/persons/cole-gordon/MODELOS-MENTAIS.yaml
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layer 3: HEURISTICS (PRIORITY LAYER)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scanning for rules with numeric thresholds...
+
+  ✓ Extracted: 23 heuristics (18 with thresholds)
+  → Output: knowledge/dna/persons/cole-gordon/HEURISTICAS.yaml
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layer 4: FRAMEWORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scanning for named structures with components...
+
+  ✓ Extracted: 15 frameworks
+  → Output: knowledge/dna/persons/cole-gordon/FRAMEWORKS.yaml
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layer 5: METHODOLOGIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scanning for step-by-step processes...
+
+  ✓ Extracted: 7 methodologies
+  → Output: knowledge/dna/persons/cole-gordon/METODOLOGIAS.yaml
+```
+
+### Step 4: Calculate Weights
+
+Each item gets a confidence weight:
+
+```yaml
+Weight Formula:
+  BASE: 0.50
+  
+  Bonuses:
+    + 0.15  Direct quote with chunk_id
+    + 0.15  Appears in 2+ sources
+    + 0.10  Numeric threshold (heuristics only)
+    + 0.10  Appears in 3+ sources
+    + 0.05  Narrative context
+    + 0.05  Prescriptive language
+  
+  Penalties:
+    - 0.20  Inferred (not direct)
+    - 0.15  Contradicts other item
+    - 0.10  Ambiguous context
+
+Usage Threshold: 0.70
+  Items < 0.70 not used in agent responses
+```
+
+**Example:**
+
+```yaml
+- id: "heuristic_cg_001"
+  content: "If show rate drops below 60%, deploy Email Hammer (12 emails, 48h)"
+  weight: 0.95
+  calculation:
+    base: 0.50
+    + direct_quote: 0.15
+    + two_sources: 0.15
+    + numeric_threshold: 0.10
+    + prescriptive: 0.05
+    = 0.95
+  sources: ["CG001_045", "CG003_089"]
+```
+
+### Step 5: Generate CONFIG.yaml
+
+```yaml
+# knowledge/dna/persons/cole-gordon/CONFIG.yaml
+
+person:
+  canonical_name: "Cole Gordon"
+  company: "Closers.io"
+  expertise: ["Sales", "Closing", "Team Building"]
+
+sources:
+  - CG001: "Masterclass - Scaling Sales Teams"
+  - CG002: "Podcast - 28 Rules of Closing"
+  - CG003: "Blueprint - Sales Process Design"
+  - CG004: "VSL - High Ticket Closing"
+  - CG005: "Course - Closers Academy Module 1"
+
+dna_statistics:
+  philosophies: 12
+  mental_models: 8
+  heuristics: 23
+  frameworks: 15
+  methodologies: 7
+  total_items: 65
+  avg_weight: 0.82
+  items_above_threshold: 58 (89%)
+
+behavioral_patterns:
+  - "Emphasis on systems over talent"
+  - "Data-driven decision making"
+  - "Aggressive testing culture"
+  - "Focus on show rate optimization"
+
+extraction_metadata:
+  extracted_at: "2026-03-06T10:45:00Z"
+  insights_processed: 247
+  chunks_referenced: 487
+  version: "1.0.0"
+```
+
+### Step 6: Completion Report
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+EXTRACTION COMPLETE: COLE GORDON
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+FILES GENERATED:
+  • FILOSOFIAS.yaml      - 12 items
+  • MODELOS-MENTAIS.yaml - 8 items
+  • HEURISTICAS.yaml     - 23 items (18 with numeric thresholds)
+  • FRAMEWORKS.yaml      - 15 items
+  • METODOLOGIAS.yaml    - 7 items
+  • CONFIG.yaml          - 1 file
+
+STATISTICS:
+  • Total items: 65
+  • Items with weight >= 0.70: 58 (89%)
+  • Insights processed: 247
+  • Chunks referenced: 487
+
+AVERAGE WEIGHT: 0.82
+
+NEXT STEPS:
+  1. Review HEURISTICAS.yaml (most valuable layer)
+  2. Verify all items have chunk_ids
+  3. Adjust weights if necessary
+  4. View with: /view-dna cole-gordon
+
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+## DNA File Structure
+
+### HEURISTICAS.yaml (Example)
+
+```yaml
+# knowledge/dna/persons/cole-gordon/HEURISTICAS.yaml
+
+heuristics:
+  - id: "heuristic_cg_001"
+    content: "If show rate drops below 60%, deploy Email Hammer (12 emails in 48h)"
+    weight: 0.95
+    threshold: "60%"
+    action: "Email Hammer deployment"
+    genealogy:
+      insight_origin: "insight_CG003_042"
+      chunks: ["chunk_CG003_089", "chunk_CG001_045"]
+      sources: ["CG003", "CG001"]
+    meta:
+      category: "show-rate"
+      actionable_by: ["LNS", "SALES-COORDINATOR"]
+      priority: "HIGH"
+  
+  - id: "heuristic_cg_002"
+    content: "Close rate drops 40% without proper qualification"
+    weight: 0.88
+    threshold: "40%"
+    impact: "Close rate degradation"
+    genealogy:
+      insight_origin: "insight_CG002_023"
+      chunks: ["chunk_CG002_067"]
+      sources: ["CG002"]
+    meta:
+      category: "qualification"
+      actionable_by: ["SDS", "CLOSER"]
+      priority: "HIGH"
+  
+  # ... 21 more heuristics
+
+metadata:
+  person: "Cole Gordon"
+  total_count: 23
+  with_thresholds: 18
+  avg_weight: 0.84
+  extracted_at: "2026-03-06T10:45:00Z"
+```
+
+## Examples
+
+<CodeGroup>
+```bash Cole Gordon
+/extract-dna cole-gordon
+```
+
+```bash Alex Hormozi
+/extract-dna alex-hormozi
+```
+
+```bash Sam Ovens
+/extract-dna sam-ovens
+```
+</CodeGroup>
+
+## Output Location
+
+```
+knowledge/dna/persons/{person-name}/
+├── FILOSOFIAS.yaml        # Layer 1: Philosophies
+├── MODELOS-MENTAIS.yaml   # Layer 2: Mental Models
+├── HEURISTICAS.yaml       # Layer 3: Heuristics (MOST VALUABLE)
+├── FRAMEWORKS.yaml        # Layer 4: Frameworks
+├── METODOLOGIAS.yaml      # Layer 5: Methodologies
+└── CONFIG.yaml            # Metadata and statistics
+```
+
+## Genealogy Tracking
+
+<Note>
+**Every DNA item MUST trace back to source material**
+</Note>
+
+```yaml
+Genealogy Chain:
+  DNA Item
+  ↓
+  insight_origin (insight ID)
+  ↓
+  chunks[] (chunk IDs)
+  ↓
+  sources[] (SOURCE_IDs)
+  ↓
+  Original file path in inbox/
+
+Example:
+  "Email Hammer" heuristic
+  → insight_CG003_042
+  → chunk_CG003_089
+  → CG003
+  → inbox/COLE GORDON/MASTERMINDS/scaling-masterclass.txt
+```
+
+## Best Practices
+
+### 1. Wait for 3+ Sources
+
+Don't extract DNA prematurely:
+
+```bash
+# Bad: Only 1 source processed
+/extract-dna alex-hormozi
+# Error: Insufficient data
+
+# Good: 3+ sources processed
+/ingest video1.mp4
+/process-jarvis "inbox/ALEX HORMOZI/video1.txt"
+/ingest video2.mp4
+/process-jarvis "inbox/ALEX HORMOZI/video2.txt"
+/ingest video3.mp4
+/process-jarvis "inbox/ALEX HORMOZI/video3.txt"
+/extract-dna alex-hormozi
+# Success!
+```
+
+### 2. Prioritize Heuristics
+
+Layer 3 (Heuristics) is the most valuable:
+
+```yaml
+Why Heuristics Matter:
+  - Actionable thresholds
+  - Specific numbers
+  - Immediate application
+  - Highest ROI
+
+After extraction, review:
+  knowledge/dna/persons/{person}/HEURISTICAS.yaml
+```
+
+### 3. Verify Chunk IDs
+
+All items must have chunk_ids:
+
+```bash
+# Check for missing chunk_ids
+grep -r "chunks: \[\]" knowledge/dna/persons/cole-gordon/
+
+# Should return nothing
+```
+
+### 4. Review Low-Weight Items
+
+Items with weight < 0.70 need attention:
+
+```bash
+# Find low-weight items
+yq '.heuristics[] | select(.weight < 0.70)' knowledge/dna/persons/cole-gordon/HEURISTICAS.yaml
+
+# Either:
+# - Find more evidence to boost weight
+# - Remove if insufficient support
+```
+
+## Troubleshooting
+
+### "Insufficient sources"
+
+**Issue:** Less than 3 sources processed
+
+**Solution:**
+```bash
+# Check processed sources
+cat system/SESSION-STATE.md | grep "Cole Gordon"
+
+# Process more materials
+/ingest video.mp4 --person "Cole Gordon"
+/process-jarvis "inbox/COLE GORDON/video.txt"
+```
+
+### "No heuristics found"
+
+**Issue:** 0 heuristics extracted
+
+**Solution:**
+Heuristics require numeric thresholds. Check:
+
+```bash
+# Review insights for numbers
+cat processing/insights/INSIGHTS-STATE.json | jq '.insights_state.persons["Cole Gordon"] | .[] | select(.content | test("[0-9]+"))'
+
+# If none found, source materials may lack specific metrics
+# Ingest more quantitative content (courses, frameworks)
+```
+
+### "Missing chunk_ids"
+
+**Issue:** DNA items without traceability
+
+**Solution:**
+This indicates a pipeline bug. Report it:
+
+```bash
+# Items without chunk_ids are invalid
+# DO NOT use them in agent responses
+# Re-run extraction after fixing pipeline
+```
+
+## What Gets Created
+
+<CardGroup cols={2}>
+  <Card title="Mind Clone Agent" icon="brain">
+    DNA enables creation of `agents/persons/{name}/` with SOUL + MEMORY
+  </Card>
+  <Card title="Agent Enrichment" icon="arrows-to-circle">
+    Cargo agents get updated with person's frameworks and heuristics
+  </Card>
+  <Card title="RAG Index" icon="magnifying-glass">
+    DNA files indexed for semantic search by Conclave
+  </Card>
+  <Card title="Dossier Updates" icon="file-lines">
+    Person dossier annotated with DNA references
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="View DNA" icon="eye" href="/commands/extract-dna">
+    Visualize extracted DNA schema
+  </Card>
+  <Card title="Conclave" icon="users" href="/commands/conclave">
+    Use DNA in multi-agent deliberations
+  </Card>
+  <Card title="DNA Concepts" icon="dna" href="/concepts/dna-schema">
+    Deep dive into the 5-layer model
+  </Card>
+  <Card title="Mind Clones" icon="brain" href="/guides/creating-mind-clones">
+    Create AI agents from DNA
+  </Card>
+</CardGroup>
