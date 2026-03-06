@@ -1,0 +1,149 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Mega Brain",
+  "projectDescription": "AI Knowledge Management System that transforms expert materials into structured playbooks, DNA schemas, and mind-clone agents",
+  "theme": "aspen",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart",
+              "configuration"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/knowledge-pipeline",
+              "concepts/dna-schema",
+              "concepts/layer-system",
+              "concepts/agents"
+            ]
+          },
+          {
+            "group": "CLI Commands",
+            "pages": [
+              "commands/overview",
+              "commands/setup",
+              "commands/ingest",
+              "commands/process-jarvis",
+              "commands/jarvis-briefing",
+              "commands/extract-dna",
+              "commands/conclave",
+              "commands/save-resume"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/ingesting-materials",
+              "guides/processing-pipeline",
+              "guides/creating-mind-clones",
+              "guides/using-conclave",
+              "guides/working-with-agents",
+              "guides/session-management"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/hooks-system",
+              "advanced/skills-routing",
+              "advanced/agent-creation",
+              "advanced/validation",
+              "advanced/layer-management"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Command Reference",
+            "pages": [
+              "api/cli-commands",
+              "api/slash-commands"
+            ]
+          },
+          {
+            "group": "Core Modules",
+            "pages": [
+              "api/core/tasks",
+              "api/core/workflows",
+              "api/core/intelligence",
+              "api/core/schemas"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "api/agents/conclave",
+              "api/agents/cargo",
+              "api/agents/minds",
+              "api/agents/jarvis"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Community",
+        "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "community/contributing",
+              "community/community-vs-pro",
+              "community/troubleshooting",
+              "community/faq",
+              "community/changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-format knowledge ingestion (videos, PDFs, transcriptions)",
+    "5-layer DNA extraction (Philosophies, Mental Models, Heuristics, Frameworks, Methodologies)",
+    "Mind-clone agent creation from expert materials",
+    "Multi-agent Conclave deliberation system",
+    "20+ automation hooks for validation and quality control",
+    "CLI-first workflow with slash commands",
+    "Session persistence with auto-save/resume",
+    "JARVIS orchestrator for pipeline management"
+  ],
+  "publicApiSurface": [
+    "mega-brain-ai setup",
+    "mega-brain-ai install",
+    "mega-brain-ai validate",
+    "/jarvis-briefing",
+    "/jarvis-full",
+    "/ingest",
+    "/process-jarvis",
+    "/extract-dna",
+    "/conclave",
+    "/create-agent",
+    "/ask",
+    "/save",
+    "/resume",
+    "/setup",
+    "core/tasks/",
+    "core/workflows/",
+    "core/intelligence/",
+    "agents/conclave/",
+    "agents/minds/",
+    ".claude/hooks/",
+    ".claude/skills/"
+  ]
+}
